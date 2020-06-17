@@ -10,11 +10,15 @@ layout: cme195
 
 ## [](#logistics) Logistics
 
-* Location: 
+* Location: Zoom
 * Time: 
 * Dates:
 
-**Instructor:** Susan Holmes (susan at stat dot stanford dot edu)
+**Instructor:** Claire Donnat, PhD (cdonnat at stanford dot edu)
+
+**Instructional Advisor:** Susan Holmes (susan at stat dot stanford dot edu)
+
+**Participant Advisor:** Zelin (James) Li (jameszli at stanford dot edu)
 
 **Office hours:** 
 
