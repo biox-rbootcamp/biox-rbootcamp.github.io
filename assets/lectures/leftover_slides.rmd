@@ -1,0 +1,165 @@
+---
+title: "Left over slides"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## When should you use R?
+
+- R can be used for **data analysis and visualization**. 
+
+> - It provides efficient **exploration and prototyping** tools, 
+but also offers powerful frameworks for **building and fitting statistical models**.
+
+> - R is very good when working with **data that fits in the computer’s memory**.
+
+> - It’s NOT as good for working with massive datasets whose elements 
+need to be continuously accessed.
+
+
+
+## Data import 
+
+- **Excel files**. To read the excel files you need
+to first install a package "xlsx". Simply run 
+`install.packages("xlsx")`.
+
+```{r eval = FALSE}
+# first row contains variable names
+library(xlsx)
+# read the 1st worksheet
+mydata <- read.xlsx("/path/to/filename.xlsx", 1)  
+
+# read in the worksheet named mysheet
+mydata <- read.xlsx("/path/to/filename.xlsx", sheetName = "mysheet")
+```
+
+- **SAS files**. You need to install the `Hmisc` or `foreign` 
+packages first.
+
+```{r eval = FALSE}
+# First, save your SAS dataset in trasport (xport) format
+libname out xport 'path/to/filename.xpt';
+data out.mydata;
+set sasuser.mydata;
+run;
+
+# Then, in R 
+library(Hmisc)
+mydata <- sasxport.get("path/to/filename.xpt")
+# character variables are converted to R factors
+# or
+library(foreign)
+mydata <- read.xport("path/to/filename.xpt")
+```
+
+
+
+## Exporting Data
+
+- **Text files**:
+```{r eval = FALSE}
+write.table(mydata, "path/to/filename.txt", sep="\t")  # tab-delimited
+write.table(mydata, "path/to/filename.csv", sep=",")   # comma-delimited
+write.csv(mydata, "path/to/filename.csv")              # comma-delimited
+```
+
+- **Excel spreadsheet**:
+
+```{r eval = FALSE}
+library(xlsx)
+write.xlsx(mydata, "path/to/filename.xlsx")
+```
+
+- **SAS** files:
+```{r eval = FALSE}
+# write out text datafile and an SAS program to read it
+library(foreign)
+write.foreign(mydata, datafile = "path/to/filename.txt", 
+              codefile = "path/to/filename.sas",  package="SAS")
+```
+
+Here are links to more details on data 
+[import](http://www.statmethods.net/input/importingdata.html)
+and [export](http://www.statmethods.net/input/exportingdata.html). 
+
+
+
+## Identifiers 
+
+**Google Convention:** 
+  
+  * No underscores ( _ ) or hyphens ( - ) in identifiers. 
+* **Variable names** all with lower case letters; words separated with dots 
+('variable.name'), but 'variableName' is also accepte
+* **Function names** have initial capital letters and no dots 
+('FunctionName'). Function names should be verbs. Constants are named like 
+functions but with an initial k.
+
+```{r, eval = FALSE}
+# Good
+avg.clicks            # variable name
+CalculateAvgClicks    # function name
+# Bad
+avg_Clicks                                 # variable name
+calculate_avg_clicks , calculateAvgClicks  # function name
+```
+
+## Identifiers 
+
+**Hadley Convention:**
+  
+  - Variable and function names should be lowercase. 
+- Use an underscore (_) to separate words within a name. 
+- Generally, variable names should be nouns and function names should be verbs. 
+- Use names that are concise and meaningful. 
+
+```{r eval = FALSE}
+# Good
+day_one
+day_1
+
+# Bad
+first_day_of_the_month
+DayOne
+dayone
+djm1
+```
+
+
+## Spacing
+
+- Place spaces around all infix operators (=, +, -, <-, etc.). 
+
+- Always put a space after a comma, and never before (just like in regular English).
+
+- Place a space before left parentheses, except in a function call.
+
+```{r eval = FALSE}
+# Good
+average <- mean(feet / 12 + inches, na.rm = TRUE)
+if (debug) do(x)
+plot(x, y)
+if (debug) do(x)
+diamonds[5, ]
+
+# Bad
+average<-mean(feet/12+inches,na.rm=TRUE)
+if(debug)do(x)
+plot (x, y)
+if ( debug ) do(x)  # No spaces around debug
+x[1,]               # Needs a space after the comma
+x[1 ,]              # Space goes after comma not before
+```
+
+
+
+
+
+```{r}
+sessionInfo()
+```
+

@@ -1,0 +1,189 @@
+---
+title: "Lecture 2: Exercise Answers"
+date: October 2nd, 2018
+output: 
+  html_notebook:
+    toc: true
+    toc_float: true
+---
+
+# Execise 1: Control Flow 
+
+## Part 1.1
+
+Use a for loop to:
+a. Print all the letters of the Latin alphabet:
+
+```{r}
+for (letter in letters) {
+  print(letter)
+}
+```
+
+b. Print the numbers 10 to 100 that are divisible by 7
+```{r}
+for (i in 10:100) {
+  if (i %% 7 == 0) {
+    print(i)
+  }
+}
+```
+
+c. Print the numbers 1 to 100 that are divisible by 5 but not by 3.
+```{r}
+for (i in 1:100) {
+  if (i %% 5 == 0 & i %% 3 != 0) {
+    print(i)
+  }
+}
+```
+
+
+
+## Part 1.2
+
+a. Find all numbers not greater than 10,000 that are divisible by 
+5, 7 and 11 and print them.
+
+```{r}
+x <- 1
+while (x <= 10000) {
+  if(all(x %% 5 == 0, x %% 7 == 0, x %% 11 == 0)) {
+    print(x)
+  }
+  x <- x + 1
+}
+```
+
+
+b. Print for each of the numbers x = 2, . . . 20, all numbers that divide x
+(all factors) excluding 1 and x. Hence, for 18, it should print 2 3 6 9.
+
+```{r}
+for (x in 2:20) {
+  vec <- rep(NA, x-2)
+  for (i in 2:(x-1)) {
+    if (x == 2) next
+    if (x %% i == 0 ) {
+      vec[i-1] <- i 
+    }
+  }
+  cat("Factors of", x, "are:", vec[which(!is.na(vec))], "\n")
+}
+```
+
+```{r}
+# A faster version (inner loop only checks sqrt(x) numbers)
+for (x in 2:20) {
+  vec <- rep(NA, x-2)
+  for (i in 2:ceiling(sqrt(x))) {
+    if (x == 2) next
+    if (x %% i == 0 ) {
+        vec[i - 1] <- i 
+        vec[x/i - 1] <- x/i
+    }
+  }
+  cat("Numbers that divide", x, "are:", vec[which(!is.na(vec))], "\n")
+}
+```
+
+
+# Execise 2: Functions
+
+## Part 2.1
+
+a.Create a function what will return the number
+of times a given integer is contained a given vector of integers.
+The function should have two arguments one for a vector
+and the other for a scalar. 
+
+```{r}
+# function returns the number of times a given integer, k, 
+# occurs in a given vector of integers, vec.
+no_of_integers <- function(vec, k) {
+  return(sum(vec == k))
+}
+```
+
+
+b. Then, generate a random vector of 100 
+integers (in a range 1-20) use the function to count the number
+of times the number 12 is in that vector. 
+
+```{r}
+(vec <- sample(1:20, 100, replace = TRUE))
+cat("Number of times 12 occurs in the vec is:", no_of_integers(vec, 12))
+```
+
+## Part 2.2 
+
+Write a function that takes in a data.frame as an input, 
+prints out the column names, and returns its dimensions.
+
+```{r}
+my_function <- function(df) {
+  print(colnames(df))
+  return(dim(df))
+}
+```
+
+```{r}
+x <- my_function(mtcars)
+```
+```{r}
+x
+```
+
+# Execise 3: Apply family functions
+
+## Part 1
+Below we print six first rows of the built-in dataset, `mtcars`, 
+from the 1974 Motor Trend US magazine, which comprises information
+on the fuel consumption and 10 aspects of automobile design 
+and performance for 32 selected car models. 
+
+```{r}
+head(mtcars)
+```
+
+Use `apply()` function to find the standard deviation and the 0.8-quantile  
+of each of the automobile characteristic.
+
+```{r}
+apply(mtcars, 2, function(x) sd(x))
+```
+
+
+```{r}
+apply(mtcars, 2, function(x) { quantile(x, 0.8)})
+```
+
+## Part 2
+
+Below is a vector of dates in year 2018.
+
+```{r}
+set.seed(1234)
+y2018 <- seq(as.Date("2018-01-01", format = "%Y-%m-%d"), 
+             as.Date("2018-12-31", format = "%Y-%m-%d"), 
+             "days")
+length(y2018)
+# A random sample of 10 dates from 2018
+y2018_sample <- sample(y2018, size = 10)
+y2018_sample
+```
+
+Use an `apply` family function to return the number of weeks
+left from each day in `y2018_sample` to the New Year, 2019/01/01.
+
+```{r}
+ny2019 <- as.Date("2019-01-01", format = "%Y-%m-%d")
+weeks.to.2019 <- sapply(y2018_sample, function(d) ceiling((ny2019 - d)/7))
+names(weeks.to.2019) <- y2018_sample
+weeks.to.2019
+```
+
+```{r}
+sessionInfo()
+```
+

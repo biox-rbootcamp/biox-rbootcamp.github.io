@@ -1,0 +1,1137 @@
+--- 
+title: 'Lecture 2: Communicating and Programming in R'
+subtitle: 'CME/STATS 195'
+date: "October 2, 2018" 
+author: "Lan Huong Nguyen"
+output: 
+  revealjs::revealjs_presentation:
+    self_contained: false
+    lib_dir: libs
+    theme: simple
+    hightlights: haddock
+    smart: true
+    center: true
+    transition: slide
+    css: cme195.css
+    fig_width: 10
+    fig_height: 6
+    reveal_options:
+      slideNumber: true
+---
+
+```{r global_options, echo = FALSE, include = FALSE}
+options(width = 999)
+knitr::opts_chunk$set(warning = FALSE, message = FALSE,
+                      cache = FALSE, tidy = FALSE, size = "small")
+```
+
+## Contents
+
+
+<div class="left", style="width: 50%">
+
+- Data science workflow
+
+- Communicating with R Markdown
+
+- Programming 
+    
+    + Style
+    
+    + Control flow statements
+
+    + Functions
+</div>
+
+<div class="right", style="width: 50%">
+![](./Lecture2-figure/data-science.png)\
+![](./Lecture2-figure/data-science-program.png)
+</div>
+
+
+
+# Data Science
+
+## Data Science Workflow
+
+> Data science is an exciting discipline that allows you to turn raw data into 
+understanding, insight, and knowledge.  [^1]
+
+[^1]: [R for Data Science](http://r4ds.had.co.nz/introduction.html)
+
+<div class="left", style="width: 50%;"> 
+1. Import
+1. Wrangle (tidy & transform)
+1. Visualize
+1. Model
+1. Communicate
+</div>
+
+<right>
+![](./Lecture2-figure/data-science.png)
+</right>
+
+
+## `tidyverse` 
+
+<div class="left", style="width: 70%;"> 
+  
+>The `tidyverse` is an opinionated collection of R packages designed for data 
+science. All packages share an underlying design philosophy, grammar, and data 
+structures. [^2] 
+
+[^2]: [Tidyverse website](https://www.tidyverse.org/)
+
+`tidyverse` includes packages for **importing, wrangling, exploring
+and modeling data**.
+
+The system is intended to make data scientists more productive. To use
+`tidyverse` do the following:
+
+```{r, eval = FALSE}
+# Install the package
+install.packages("tidyverse")
+# Load it into memory
+library("tidyverse")
+```
+
+</div>
+
+<div class="right", style="width: 30%;"> 
+  <img src="./Lecture2-figure/tidyverse.jpeg", height="250"></img> 
+  <img src="./Lecture2-figure/tidyverse.png", height="550"></img> 
+</div>
+
+## The `tibble` package
+
+The `tibble` package is part of the core `tidyverse`.
+
+<div class="left", style="width: 70%;"> 
+
+> Tibbles are a modern take on data frames. They keep the features that have 
+stood the test of time, and drop the features that used to be convenient 
+but are now frustrating.
+
+</div>
+
+<div class="right", style="width: 30%;"> 
+  <img src="./Lecture2-figure/tibble.jpg", height="250"></img> 
+</div>
+
+<div class="left", style="width: 100%;"> 
+
+`tibbles` are data frames, tweaked to make life a little easier. Unlike
+regular `data.frames` they:
+
+- never change the type of the inputs (e.g. do not convert strings to factors!)
+- never changes the names of variables
+- never creates row.names()
+- only recycles inputs of length 1
+</div>
+
+
+## Using `tibbles`
+
+To use functions from `tibble` and other `tidyverse` packages:
+```{r, warning = FALSE, message = FALSE}
+# load it into memory
+library(tidyverse)
+```
+
+Printing `tibble` is much nicer, and always fits into your window:
+```{r}
+# e.g. a built-in dataset 'diamonds' is a tibble:
+class(diamonds)
+diamonds
+```
+
+## Using `tibbles`
+
+**Creating `tibbles`** is similar to `data.frame`s, but no strict rules on column names:
+
+```{r}
+(tb <- tibble(x = 1:5, y = 1,z = x ^ 2 + y, `:)` =  "smile"))
+```
+
+
+
+**Subsetting `tibbles` is stricter** than subsetting `data.frames`,
+and ALWAYS returns objects with expected class: a single
+`[` returns a `tibble`, a double`[[` returns a vector.
+
+<div class="left", style="width: 50%">
+```{r}
+class(diamonds$carat)
+class(diamonds[["carat"]])
+```
+</div>
+
+<div class="right", style="width: 50%">
+```{r}
+class(diamonds[, "carat"])
+```
+
+</div>
+
+
+
+
+## More on `tibbles`
+
+You can read more about other `tibble` features by calling on your R console:
+
+```{r, eval = FALSE}
+vignette("tibble")
+```
+
+# Communicating with R Markdown
+
+## R Markdown
+
+<div class="left", style="width: 70%">
+  R Markdown provides an unified authoring framework for data science, combining 
+  your code, its results, and your prose commentary.
+</div>
+  
+<div class="right", style="width: 30%">
+  ![](./Lecture2-figure/rmarkdown.png)
+</div>
+
+
+R Markdown was designed to be used:
+
+- for communicating your conclusions with people who do not want to focus on 
+the code behind the analysis.
+
+- for collaborating with other data scientists, interested in both conclusions,
+and the code.
+
+- as a modern day lab notebook for data science, where you can capture 
+both your work and your thought process.
+
+
+
+## R Markdown sourse files
+
+R Markdown files are a plain text files with ".Rmd" extension. 
+
+```
+    ---
+    title: "Title of my first document"
+    date: "2018-09-27"
+    output: html_document
+    ---
+    
+    # Section title
+    
+    ```{r chunk-name, include = FALSE}`r ''`
+    library(tidyverse)
+    summary(cars)
+    ```
+    
+    ## Subsection title
+    
+    ```{r pressure, echo=FALSE}`r ''`
+    plot(pressure)
+    ```
+    
+    Note that the `echo = FALSE` parameter was added to the code chunk to 
+    prevent printing of the R code that generated the plot.
+
+```
+
+The documents must contain **YAML header** marked with dashes.
+You can ass both **code chunks** and **plain text**. Sections and subsections 
+are marked with hashtags.
+
+
+## Compiling R Markdown files
+
+To produce a complete report containing all text, code, and results:
+
+- In RStudio, click on "Knit" or press `Cmd/Ctrl` `+` `Shift + K`.
+
+- From the R command line, type rmarkdown::render("filename.Rmd")
+
+This will display the report in the viewer pane, and create a self-contained
+HTML file that you can share with others.
+
+After compiling the R Markdown document from the previous slide,
+you get [this html](https://cme195.github.io/assets/lectures/test_rmd.html).
+
+## Viewing the report in RStudio
+
+<img src="./Lecture2-figure/rmarkdown-viewer.png", width="1000"></img> 
+
+## YAML header 
+
+A YAML header is a set of `key: value` pairs at the start of your file. 
+Begin and end the header with a line of three dashes (- - -), e.g.
+
+```
+---
+title: "Untitled"
+author: "Anonymous"
+output: html_document
+---
+```
+
+You can tell R Markdown what type of document you want to render: 
+`html_document` (default), `pdf_document`, `word_document`, 
+`beamer_presentation` etc. 
+
+You can print a table of contents (toc) with the following:
+
+```
+---
+title: "Untitled"
+author: "Anonymous"
+output: 
+  html_document:
+    toc: true
+---
+```
+
+
+## Text in R Markdown
+
+In ".Rmd" files, prose is written in Markdown, a lightweight markup language
+with plain text files formating syntax.
+
+Section headers/titles:
+
+```
+# 1st Level Header
+
+## 2nd Level Header
+
+### 3rd Level Header
+```
+
+Text formatting:
+
+```
+*italic* or _italic_
+**bold** __bold__
+
+`code`
+superscript^2^ and subscript~2~
+```
+
+## Text in R Markdown
+
+Lists:
+
+```
+* unordered list
+* item 2
+    + sub-item 1
+    + sub-item 2 
+    
+1. ordered list 
+1. item 2. The numbers are incremented automatically in the output.
+```
+
+Links and images:
+
+```
+<http://example.com> 
+
+[linked phrase](http://example.com)
+
+![optional caption text](path/to/img.png)
+```
+
+## Text in R Markdown
+
+Tables:
+
+```
+Table Header | Second Header
+-------------| -------------
+Cell 1       | Cell 2
+Cell 3       | Cell 4 
+
+```
+
+Math formulae
+
+```
+$\alpha$ is the first letter of the Greek alphabet.
+
+Using $$ prints a centered equation in the new line.
+
+$$\sqrt{\alpha^2 + \beta^2} = \frac{\gamma}{2}$$
+```
+
+
+
+## Code chunks
+
+In R Markdown R code must go inside code chunks, e.g.:
+
+```
+  ```{r chunk-name}`r ''`
+      x <- runif(10)
+      y <- 10 * x + 4
+      plot(x, y)
+  ```
+```
+
+<br/>
+
+Keyboard shortcuts:
+
+- Insert a new code chunk: **`Ctrl/Cmd + Alt + I`**
+
+- Run current chunk: **`Ctrl/Cmd + Shift + Enter`** 
+
+- Run current line (where the cursor is): **`Ctrl/Cmd + Enter`** 
+
+
+## Chunk Options:
+
+Chunk output can be customized with options supplied to chunk header.
+Some non-default options are:
+
+- `eval = FALSE` : prevents code from being evaluated
+- `include = FALSE` : runs the code, but hides code and its output in the final
+document
+- `echo = FALSE` : hides the code, but not the results, in the final document
+- `message = FALSE` : hides messages
+- `warning = FALSE` : hides warnings
+- `results = ‘hide’` : hides printed output
+- `fig.show = ‘hide’` : hides plots
+- `error = TRUE` : does not stop rendering if error occurs
+
+## Inline code
+
+You can evealuate R code in a middle of your text:
+
+```
+  There are `r length(letters)` in the alphabet, and `r length(month.abb)` months in each year. 
+  Today, there are `as.Date("2019-08-23") - Sys.Date()` days left till my next birthday.
+```
+
+There are `r length(letters)` in the alphabet, and `r length(month.abb)`
+months in a year. Today, there are `r as.Date("2019-08-23") - Sys.Date()`
+days left till my next birthday.
+
+## More on R Markdown
+
+R Markdown is relatively young, and growing rapidly.
+
+Official R Markdown website: (http://rmarkdown.rstudio.com)
+
+Further reading and references:
+
+- https://bookdown.org/yihui/rmarkdown/
+- http://www.stat.cmu.edu/~cshalizi/rmarkdown
+- https://www.rstudio.com/resources/cheatsheets/
+
+## Some R Markdown advice
+
+>- See your future self as a collaborator.
+>- Ensure each notebook has a descriptive title and name. 
+>- Use the header date to record start time
+>- Keep track of failed attempts
+>- If you discover an error in a data file, write code to fix it.
+>- Regularly knit the notebook 
+>- Use random seeds before sampling.
+>- Keep track the versions of the packages you use, e.g.
+by including `sessionInfo()` command at the end of your document.
+
+All the above will help you increase the reproduciblity of your work.
+
+# Programming: style guide
+
+## Naming conventions
+
+The first step of programming is naming things.\
+In the “Hadley Wickam” [R style convention](http://adv-r.had.co.nz/Style.html):
+
+**File names** are meaningful. Script files end with “.R”, and R Markdown
+with ".Rmd"
+
+<div class="left", style="width: 50%">
+```{r, eval = FALSE}
+# Good
+fit-models.R
+utility-functions.R
+```
+</div>
+
+<div class="right", style="width: 50%">
+```{r eval = FALSE}
+# Bad (works but does not follow style convention)
+foo.r
+stuff.r
+```
+</div>
+
+<div class="left", style="width: 100%">
+**Variable and function** names are lowercase.
+</div>
+
+<div class="left", style="width: 50%">
+```{r eval = FALSE}
+# Good
+day_one
+day_1
+```
+</div>
+
+<div class="right", style="width: 50%">
+```{r eval = FALSE}
+# Bad (works but does not follow style convention)
+first_day_of_the_month
+DayOne
+```
+</div>
+
+## Spacing
+
+Spacing around all infix operators (=, +, -, <-, etc.):
+
+```{r, eval = FALSE}
+average <- mean(feet / 12 + inches, na.rm = TRUE)     # Good
+average<-mean(feet/12+inches,na.rm=TRUE)              # Bad
+```
+
+Spacing before left parentheses, except in a function call
+
+```{r, eval = FALSE}
+# Good
+if (debug) do(x)
+plot(x, y)
+
+# Bad
+if(debug)do(x)
+plot (x, y)
+```
+
+Assignment use '<-' not '=':
+<div class="left", style="width: 50%">
+```{r eval = FALSE}
+# Good
+x <- 1 + 2
+```
+</div>
+
+<div class="right", style="width: 50%">
+```{r eval = FALSE}
+# Bad (works but does not follow style convention)
+x = 1 + 2
+```
+</div>
+
+
+## Curly braces
+
+<div class="left", style="width: 50%">
+- An opening curly brace "`{`" should not go on its own line and 
+be followed by a new line. 
+- A closing curly "`}`" brace can go on its own line.
+- Indent the code inside curly braces.
+- It’s ok to leave very short statements on the same line
+
+</div>
+
+<div class="right", style="width: 50%">
+
+```{r eval = FALSE}
+# Good
+if (y < 0 && debug) {
+  message("Y is negative")
+}
+if (y == 0) {
+  log(x)
+} else {
+  y ^ x
+}
+
+# Bad
+if (y < 0 && debug)
+message("Y is negative")
+
+if (y == 0) {
+  log(x)
+} 
+else {
+  y ^ x
+}
+```
+
+```{r eval = FALSE}
+if (y < 0 && debug) message("Y is negative")
+```
+
+</div>
+
+## Comments and documentation 
+
+**Comment your code!** 
+
+```{r}
+# 'get_answer' returns the answer to life, the universe and everything else.
+get_answer <- function(){ return(42)}    # This is a comment
+```
+
+Comments are not subtitles, i.e. don't repeat the code in the comments.
+
+```{r, eval = FALSE}
+# Bad comments:
+# Loop through all bananas in the bunch
+for(banana in bunch) {
+  # make the monkey eat one banana
+  MonkeyEat(b)  
+}
+```
+
+Use dashes to separate blocks of code:
+
+```{r, eval = FALSE}
+# Generate Data ---------------------------
+x <- rnorm(100)
+y <- 12 * x + 5
+
+# Plot Data -------------------------------
+plot(x, y)
+```
+
+
+# Programming: control flow
+
+## Booleans/logicals
+
+<div class="left", style="width: 50%">
+
+
+**Booleans** are logical data types (TRUE/FALSE) associated
+with conditional statements, which allow different actions 
+and change control flow.
+
+```{r}
+# equal "==""
+5 == 5
+# not equal: "!="" 
+5 != 5 
+# greater than: ">""
+5 > 4 
+# greater than or equal: ">="" (# similarly < and <=)
+5 >= 5
+```
+
+</div>
+
+<div class="right", style="width: 50%">
+
+```{r}
+
+# You can combine multiple boolean expressions
+TRUE & TRUE
+TRUE & FALSE 
+TRUE | FALSE
+!(TRUE)
+```
+</div>
+
+
+## Booleans/logicals
+
+In R if you combine 2 vectors of booleans,
+by each element then use `&`. Rember the **recycling property** for vectors.
+
+```{r}
+c(TRUE, TRUE) & c(FALSE, TRUE)
+c(5 < 4, 7 == 0, 1< 2) | c(5==5, 6> 2, !FALSE)
+c(TRUE, TRUE) & c(TRUE, FALSE, TRUE, FALSE)  # recycling
+```
+
+## Booleans/logicals
+
+
+If we use double operators `&&` or `||` is used only the first 
+elements are compared:
+
+```{r}
+c(TRUE, TRUE) && c(FALSE, TRUE)
+c(5 < 4, 7 == 0, 1< 2) || c(5==5, 6> 2, !FALSE)
+c(TRUE, TRUE) && c(TRUE, FALSE, TRUE, FALSE)
+```
+
+
+
+## Booleans/logicals
+
+- Another possibility to combine booleans is to use
+`all()` or `any()` functions:
+
+```{r}
+all(c(TRUE, FALSE, TRUE))
+any(c(TRUE, FALSE, TRUE))
+all(c(5 > -1, 3 >= 1, 1 < 1))
+any(c(5 > -1, 3 >= 1, 1 < 1))
+```
+
+
+
+## Control statements
+
+* **Control flow** is the order in which individual statements, 
+instructions or function calls of a program are evaluated.
+
+* Control statements allow you to do more complicated tasks.
+
+* Their execution results in a choice between which of 
+two or more paths should be followed.
+    + `If` / `else`
+    + `For`
+    + `While`
+
+
+## If statements
+
+<div class="left", style="width: 50%">
+
+- Decide on whether a block of code should be executed
+based on the associated boolean expression.
+
+- **Syntax**. The if statements are followed by
+a boolean expression wrapped in parenthesis. 
+The conditional block of code is inside curly
+braces `{}`.
+
+```{r eval = FALSE}
+if (traffic_light == "green") {
+  print("Go.")
+}
+```
+
+</div>
+
+<div class="right", style="width: 50%">
+
+- 'if-else' statements let you introduce more options
+
+```{r eval = FALSE}
+if (traffic_light == "green") {
+   print("Go.")
+} else {
+   print("Stay.")
+}
+```
+
+- You can also use `else if()`
+
+```{r eval = FALSE}
+if (traffic_light == "green") {
+  print("Go.")
+} else if (traffic_light == "yellow") {
+  print("Get ready.")
+} else {
+  print("Stay.")
+}
+```
+
+</div>
+
+## Switch statements
+
+For very long sequence of if statements, use the `switch()` function
+
+```{r}
+operator <- function(x, y, op) {
+  switch(as.character(op),
+    '+' = x + y,
+    '-' = x - y,
+    '*' = x * y,
+    '/' = x / y,
+  stop("Unknown op!")
+  )
+}
+```
+
+<div class="left", style="width: 50%">
+```{r}
+operator(2, 7, '+')
+operator(2, 7, '-')
+```
+</div>
+
+<div class="right", style="width: 50%">
+```{r, error=TRUE}
+operator(2, 7, '/')
+operator(2, 7, "a")
+```
+</div>
+
+
+
+## For loops
+
+</br>
+
+- A for loop is a statement which **repeats the execution a block of code** 
+a given number of iterations.
+
+```{r}
+for (i in 1:5){
+  print(i^2)
+}
+```
+
+
+
+## While loops
+
+</br>
+
+- Similar to for loops, but repeat the execution 
+as long **as the boolean condition supplied is TRUE**.
+
+```{r}
+i = 1
+while(i <= 5) {
+  cat("i =", i, "\n")
+  i = i + 1
+}
+```
+
+
+
+## Next
+
+
+<div class="left", style="width: 50%">
+
+- `next` halts the processing of the current iteration 
+and advances the looping index. 
+
+```{r}
+for (i in 1:10) {
+  if (i <= 5) {
+    print("skip")
+    next
+  }
+  cat(i, "is greater than 5.\n")
+}
+```
+</div>
+
+<div class="right", style="width: 50%">
+
+- `next` applies only to the innermost of nested loops.
+
+```{r}
+for (i in 1:3) {
+  cat("Outer-loop i: ", i, ".\n")
+  for (j in 1:4) {
+    if(j > i) {
+      print("skip")
+      next
+    }
+    cat("Inner-loop j:", j, ".\n")
+  }
+}
+```
+
+</div>
+
+
+## Break
+
+- The `break` statement allows us to break out out of a for, 
+while loop (of the smallest enclosing).
+- The control is transferred to the first statement outside 
+the inner-most loop. 
+
+```{r}
+for (i in 1:10)  {
+  if (i == 6)  {
+    print(paste("Coming out from for loop Where i = ", i))
+    break
+  }
+  print(paste("i is now: ", i))
+}
+```
+
+
+## Exercise 1
+
+</br>
+
+- Go to "Lec2_Exercises.Rmd" in RStudio.
+
+- Do Exercise 1.
+
+
+# Programming: functions
+
+## What is a function in R?
+
+- A **function** is a procedure/routine that performs a specific task.
+
+- Functions are used to **abstract** components of larger program.
+
+- Similarly to mathematical functions, they **take some input 
+and then do something to find the result**.
+
+- Functions allow you to **automate common tasks** in a more powerful 
+and general way than copy-and-pasting. 
+
+- **If you’ve copied and pasted a block of code more than twice, you should use 
+a function instead**.
+
+## Why should you use functions?
+
+Functions become very useful as soon as your code becomes long enough.
+
+- Functions will make your **code easier to understand**.
+- Errors are less likely to occure and easier to fix. 
+- For repeated taskes, **changes can be made once** by editing a function and 
+not many distant chunks of code. Example:
+
+```{r}
+set.seed(1)
+a <- rnorm(10); b <- rnorm(10); c <- rnorm(10); d <- rnorm(10)
+# Bad
+a <- (a - min(a, na.rm = TRUE)) /
+  (max(a, na.rm = TRUE) - min(a, na.rm = TRUE))
+b <- (b - min(b, na.rm = TRUE)) /
+  (max(b, na.rm = TRUE) - min(b, na.rm = TRUE))
+c <- (c - min(c, na.rm = TRUE)) /
+  (max(b, na.rm = TRUE) - min(c, na.rm = TRUE))
+d <- (d - min(d, na.rm = TRUE)) /
+  (max(d, na.rm = TRUE) - min(d, na.rm = TRUE))
+```
+
+
+```{r}
+# Good
+rescale_data <- function(x) {
+  rng <- range(x, na.rm = TRUE)
+  return((x - rng[1]) / (rng[2] - rng[1]))
+}
+a <- rescale_data(a)
+b <- rescale_data(b)
+c <- rescale_data(c)
+d <- rescale_data(d)
+```
+
+
+## Function Definition
+
+- To define a function you assign a variable name to a `function` object.
+
+- Functions take **arguments, mandatory and optional**.
+
+- Provide the brief **description of your function in comments**
+before the function definition.
+
+```{r}
+# Computes mean and standard deviation of a vector,
+# and optionally prints the results.
+summarize_data <- function(x, print=FALSE) {
+  center <- mean(x)
+  spread <- sd(x) 
+  if (print) {
+    cat("Mean =", center, "\n", 
+        "SD   =", spread, "\n")
+  }
+  list(mean=center, sd=spread)
+}
+```
+
+## Calling functions
+
+```{r}
+# without printing
+x <- rnorm(n = 500, mean = 4, sd = 1) 
+y <- summarize_data(x)
+```
+
+```{r}
+# with printing
+y <- summarize_data(x, print = TRUE)
+```
+
+```{r}
+# Results are stored in list "y"
+y$mean
+y$sd
+```
+
+```{r}
+# The order of arguments does not matter if the names are specified
+y <- summarize_data(print=FALSE, x = x)
+```
+
+## Explicit return statements
+
+The value returned by the function is usually the last statement it evaluates.
+You can choose to return early by using `return()`; this makes you code
+easier to read.
+
+```{r}
+# Complicated function simplified by the use of early return statements
+complicated_function <- function(x, y, z) {
+  # Check some condition
+  if (length(x) == 0 || length(y) == 0) {
+    return(0)
+  }
+  # Complicated code here
+}
+```
+
+**Returning invisible objects** can be done with `invisible()`
+
+```{r}
+show_missings <- function(df) {
+  cat("Missing values:", sum(is.na(df)), "\n")
+  invisible(df)       # this result doesn’t get printed out
+}
+```
+
+
+<div class="left", style="width: 50%">
+```{r}
+show_missings(mtcars)
+```
+</div>
+
+<div class="right", style="width: 50%">
+```{r}
+dim(show_missings(mtcars))
+```
+</div>
+
+
+## Environment
+
+The environment of a function controls how R finds an object associated
+with a name.
+
+```{r}
+f <- function(x) {
+  x + y
+}
+```
+
+R uses rules called lexical scoping to find the value associated with a name.
+Here, R will look for `y` in the environment where the function was defined
+
+```{r}
+y <- 100
+f(10)
+```
+
+
+This behaviour attracts bugs. You should try to **avoid using global variables**.
+
+
+
+## apply, lapply, sapply functions
+
+- The `apply` family functions, are **functions which manipulate slices of data**
+stored as matrices, arrays, lists and data-frames **in a repetitive way**. 
+
+- These functions **avoid the explicit use of loops**, and might 
+be **more computationally efficient**, depending on how big a dataset is. 
+For more details on runtimes see this [link](https://www.r-bloggers.com/gnu-r-loop-speed-comparison/).
+
+- `apply` allow you to perform operations with 
+**very few lines of code.**
+
+- The family comprises: **apply, lapply , sapply, vapply, 
+mapply, rapply, and tapply**. The difference lies in the structure
+of input data and the desired format of the output).
+
+
+## apply function
+
+`apply` operates on arrays/matrices. 
+
+In the example below we obtain column sums of matrix `X`.
+
+```{r}
+(X <- matrix(sample(30), nrow = 5, ncol = 6))
+apply(X, MARGIN = 2 , FUN = sum)
+```
+
+**Note:** that in a matrix `MARGIN = 1` indicates rows and `MARGIN = 2`
+indicates columns.
+
+
+## apply function
+
+
+- `apply` can be used with **user-defined functions**:
+
+```{r}
+# number entries < 15
+apply(X, 2, function(x) 10*x + 2) 
+```
+
+- a function can be defined outside `apply()`,
+
+```{r}
+logColMeans <- function(x, eps = NULL) {
+  if (!is.null(eps)) x <- x + eps
+  return(mean(x))
+}
+apply(X, 2, logColMeans) 
+apply(X, 2, logColMeans, eps = 0.1) 
+```
+
+
+## lapply/sapply functions
+
+- `lapply()` is used to **repeatedly apply a function to 
+elements of a sequential object** such as a vector, list, 
+or data-frame (applies to columns).
+
+- The **output is a list** with the same number of 
+elements as the input object.
+
+```{r}
+# lapply returns a list
+lapply(1:3, function(x) x^2)
+```
+
+- `sapply` is the same as `lapply` but **returns a "simplified" output**.
+
+```{r}
+sapply(1:3, function(x) x^2)
+```
+
+- like with `apply()`, user-defined functions can be used with `sapply/lapply`.
+
+
+## Functional Programming 
+
+> The idea of **passing a function to another function** is extremely powerful 
+idea, and it’s one of the behaviours that makes R **a functional programming**
+(FP) language.
+
+The **apply family** of functions in base R are basically tools to extract 
+out this duplicated code, so each common for loop pattern gets its own function.
+
+The package `purrr` in `tidyverse` framework solves similar problems,
+more in line with the 'tidyverse-philosophy'. We will learn in in following
+lectures.
+
+
+
+
+## Exercise 2 and 3
+
+</br>
+
+- Go back to "Lec2_Exercises.Rmd" in RStudio.
+
+- Do Exercise 2 and 3.
+
+
+
+

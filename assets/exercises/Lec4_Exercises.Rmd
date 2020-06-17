@@ -1,0 +1,64 @@
+---
+title: "Lecture 4: Exercises"
+date: October 9th, 2018
+output: 
+  html_notebook:
+    toc: true
+    toc_float: true
+    df_print: kable
+---
+
+```{r, message=FALSE, warning=FALSE}
+library(tidyverse)
+```
+
+
+# Exercise 1: Customized scatter plot 
+
+You will try to recreate a [plot](https://www.economist.com/sites/default/files/imagecache/1280-width/images/2016/07/blogs/graphic-detail/20160723_woc155_1.png) from an Economist article
+showing the relationship between well-being and financial inclusion.
+
+You can find the accompanying article at this [link](http://www.economist.com/blogs/graphicdetail/2016/07/daily-chart-13)
+
+The data for the exercises `EconomistData.csv` can be downloaded from 
+the class github repository.
+
+```{r}
+url <- paste0("https://raw.githubusercontent.com/cme195/cme195.github.io/",
+              "master/assets/data/EconomistData.csv")
+dat <- read_csv(url)
+```
+
+```{r}
+head(dat)
+```
+
+
+1. Create a scatter plot similar to the one in the article, where 
+the x axis corresponds to percent of people over the age of 15 with a 
+bank account (the `Percent.of.15plus.with.bank.account` column)
+and the y axis corresponds to the current SEDA score `SEDA.Current.level`.
+1. Color all points blue.
+1. Color points according to the `Region` variable.
+1. Overlay a fitted smoothing trend on top of the scatter plot. Try to
+change the span argument in `geom_smooth` to a low value and see what happens.
+1. Overlay a regression line on top of the scatter plot 
+Hint: use `geom_smooth` with an appropriate method argument. 
+1. Facet the previous plot by `Region`.
+
+# Exercise 2: Distribution of categorical variables
+
+1. Generate a bar plot showing the number of countries included in the
+dataset from each `Region`.
+1. Rotate the plot so the bars are horizontal
+
+
+# Exercise 3: Distribution of continuous variables
+
+1. Create boxplots of SEDA scores, `SEDA.Current.level` separately 
+for each `Region`.
+1. Overlay points on top of the box plots
+1. The points you added are on top of each other, in order to distinguish 
+them jitter each point by a little bit in the horizontal direction.
+1. Now substitute your boxplot with a violin plot.
+

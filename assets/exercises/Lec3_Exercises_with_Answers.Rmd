@@ -1,0 +1,172 @@
+---
+title: "Lecture 3: Exercises with Answers"
+date: October 4th, 2018
+output: 
+  html_notebook:
+    toc: true
+    toc_float: true
+---
+
+```{r global_options, echo = FALSE, include = FALSE}
+options(width = 80)
+knitr::opts_chunk$set(warning = FALSE, message = FALSE,
+                      cache = FALSE, tidy = FALSE, size = "small")
+```
+
+```{r}
+library(tidyverse)
+```
+
+
+
+# Exercise 1: Parsing data
+ 
+## Part 1: Parsing dates
+ 
+
+Generate the correct format string to parse each of the following dates and times:
+```{r}
+d1 <- "January 1, 2010"
+d2 <- "2015-Mar-07"
+d3 <- "06-Jun-2017"
+d4 <- c("August 19 (2015) - 3:04PM", "July 1 (2015) - 4:04PM")
+d5 <- "12/30/14" # Dec 30, 2014
+t1 <- "1705"     # 5:05PM
+```
+
+```{r}
+parse_date(d1, format = "%B %d, %Y")
+parse_date(d2, format = "%Y-%b-%d")
+parse_date(d3, format = "%d-%b-%Y")
+parse_datetime(d4, format = "%B %d (%Y) - %I:%M%p")
+parse_time(t1, format = "%H%M")
+```
+
+
+## Part 2: Read a CSV file
+
+Download this NCHS dataset on leading Causes of death in the United States, from 1999 to 2015: https://data.cdc.gov/api/views/bi63-dtpu/rows.csv.
+
+Then, import it into R. Are some of the colums the wrong type?
+If not is there any column that could be a factor instead of character
+type?
+
+```{r}
+df <- read_csv("https://data.cdc.gov/api/views/bi63-dtpu/rows.csv")
+df
+```
+
+
+# Execise 2: Data manipulation
+
+## Part 1: `dplyr` verbs
+
+Load in the dataset `movies.csv` used in the lecture:
+
+```{r}
+url <- "https://raw.githubusercontent.com/Juanets/movie-stats/master/movies.csv"
+movies <- read_csv(url)
+movies
+```
+
+
+a. Find a subset of the movies produced after 2010. 
+Save the subset in 'movies.sub' variable.
+
+```{r}
+movies.sub <- filter(movies, year > 2010)
+movies.sub
+```
+
+b. Keep columns 'name', 'director', 'year', 'country', 'genre', 'budget', 'gross', 'score'
+in the 'movies.sub'.
+
+```{r}
+movies.sub <- select(movies.sub, name, director, year, country, genre, budget, gross, score)
+movies.sub
+```
+
+c. Find the profit for each movie in 'movies.sub' as a fraction of its budget.
+Convert 'budget' and 'gross' columns million dollar units founded to the first decimal point.
+Use `round()` to round numbers.
+
+```{r}
+movies.sub <- mutate(movies.sub, 
+                     frac_profit = (gross - budget)/budget,
+                     budget = round(budget/10^6, digits = 1),
+                     gross = round(gross/10^6, digits = 1))
+movies.sub
+```
+
+
+d. Count the number of movies in 'movies.sub' produced by each genre,
+and order them in the descending count order.
+
+```{r}
+by_genre <- group_by(movies.sub, genre)
+arrange(summarise(by_genre, count = n()), desc(count))
+```
+
+e. Now group movies in 'movies.sub' by countries and genre.
+Then, count the number of movies in each group and the corresponding 
+median fractional profit, the mean and standard deviation of 
+the movie score for each group.
+
+```{r}
+movies.summary <- movies.sub %>%
+  group_by(genre, country) %>%
+  summarise(count = n(), 
+            median_profit = median(frac_profit),
+            mean_score = mean(score), 
+            sd_score = sd(score)) %>%
+  filter(count > 10) %>%
+  arrange(desc(mean_score))
+movies.summary
+```
+
+
+## Part 2: Chaining
+
+Using chaining and pipes, for each genre find the three directors with the
+top mean movie scores received for the movies produced after 2000, but
+do not include the directors with fewer than 3 movies in total.
+Hint: Use `top_n()` function to select top n from each group.
+
+```{r}
+top5_dir <- movies %>% 
+  filter(year > 2000) %>%
+  group_by(genre, director) %>%
+  summarise(
+    mean_score = mean(score),
+    count = n()) %>%
+  filter(count >= 3) %>%
+  group_by(genre) %>%
+  top_n(5, wt = mean_score)
+top5_dir
+```
+
+Pick your favourite genre and the top 3 directors to find movie recommendations
+for your next movie night!
+
+```{r}
+class(top5_dir)
+```
+
+See that `top5_dir` has a class 'grouped_df', so we convert it to 
+a data frame first.
+```{r}
+topDramaDir <- top5_dir %>% 
+  as_data_frame() %>%
+  filter(genre == "Drama") %>% 
+  select(director)
+
+```
+
+```{r}
+movies %>% 
+  filter(genre == "Drama", 
+         director %in% topDramaDir[["director"]]) %>%
+  select(name, director, year, score, genre, gross, budget) %>%
+  arrange(desc(score))
+```
+
