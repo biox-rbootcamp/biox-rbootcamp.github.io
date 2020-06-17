@@ -28,11 +28,17 @@ assignments to:
 ## [](#course) Syllabus (tentative)
 
 **Week 1 & Week 2:** Introduction to R
+
 **Week 3:** Simulation & Graphics
+
 **Week 4:** Mixture Models
+
 **Week 5:** Clustering
+
 **Week 6:** Testing 
+
 **Week 7:** Multivariate Analysis
+
 **Week 8:** Network & Trees
 
 
