@@ -5,13 +5,15 @@ layout: cme195
 # [](#welcome) Welcome to Bio-X R Bootcamp!
 
 
-## [](#announcements) Announcements
 
 This introductory 8-week R-bootcamp is aimed at providing the basics of data analysis in R. After a brief introduction to coding in R, using bioconductor and tidyverse, we will cover the basics of data analysis and inference, including (and not restricted to, time allowing): data visualization, the basics of statistical modeling, mixtures, clustering, testing (including permutation tests) with R.  The objective of this bootcamp is to provide you with the tools necessary to perform data analysis on your own datasets. 
 
 
 No prior knowledge of R or of statistics is required. This is not a graded class, and the estimated workload is roughly 15h per week. The course will run using a flipped classroom format: the students will watch the lecture videos and work on the data analysis labs in their own time. The class will meet three times a week via Zoom (MWTh from 10am to 11am, starting June 29th) to discuss the material and go over the labs. Additional office hours will be held in the afternoon to provide extra individual support to the students if needed.
 
+## [](#announcements) Announcements
+
+**TO DO for session 1 (Monday, June 29th):** Not applicable. We will install R and get familiar with the Rstudio interface.
 
 ## [](#logistics) Logistics
 
@@ -33,7 +35,7 @@ assignments to Claire: (cdonnat at stanford dot edu)
 ## [](#course) Syllabus (tentative)
 
 **Week 1 & Week 2:** Introduction to R
-__ Objectives:__ getting familiar with R, Rstudio, R markdown, and basic statistics.
+_Objectives:_ getting familiar with R, Rstudio, R markdown, and basic statistics.
 
 **Week 3:** Simulation & Graphics
 
