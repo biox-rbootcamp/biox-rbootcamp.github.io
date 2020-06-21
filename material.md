@@ -7,9 +7,9 @@ layout: cme195
 | Session | Day | Topic | Material | Lab | Video | Further Material for the discussion |
 |-|-|-|-|-|-|-|
 | 1 | M | Getting Started | R installation + Course introduction |  |  |  |
-| 2 | W |  | Introduction to the R syntax: vectors, matrices, function, concatenation, etc |  |  |  |
-| 3 | Th |  | Introduction to importing data with R and loading packages: Importing and transforming data |  |  |  |
-| 4 | M | Basic Probability modeling | Introduction to basic probability models: probabilities, distributions and the CLT |  |  |  |
+| 2 | W |  | Introduction to the R syntax: vectors, matrices, functions, concatenation, etc |  |  |  |
+| 3 | Th |  | Introduction to data handling: Importing and transforming data, loading packages|  |  |  |
+| 4 | M | Basic Probability| Introduction to basic probability models: probabilities, distributions and the CLT |  |  |  |
 | 5 | W |  | Introduction to basic probability models: probabilities, distributions and the CLT (II) |  |  |  |
 | 6 | Th |  | Cleaning up the data and Missing values |  |  |  |
 | 7 | M | Simulations and ggplot | Introduction to tidyverse and dplyr + traditional plots for data analysis |  |  |  |
