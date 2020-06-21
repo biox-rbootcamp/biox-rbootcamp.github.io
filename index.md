@@ -13,7 +13,21 @@ No prior knowledge of R or of statistics is required. This is not a graded class
 
 ## [](#announcements) Announcements
 
-**TO DO for session 1 (Monday, June 29th):** Not applicable. We will install R and get familiar with the Rstudio interface.
+**TO DO for session 1 (Monday, June 29th):** Not applicable. We will install R and get familiar with the Rstudio interface during the discussion.
+
+**TO DO for session 2 (Wednesday, July 1st):** 
+
+- Watch the video lectures for the session 
+
+- Complete the swirl exercises 
+
+- Complete Lab 2 **prior to the discussion.**
+
+**TO DO for session 3 (Thursday, July 2nd):** 
+
+- Watch the video lectures for the session 
+
+- Complete Lab 3 **prior to the discussion.**
 
 ## [](#logistics) Logistics
 

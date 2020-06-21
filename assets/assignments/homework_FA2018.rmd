@@ -1,7 +1,7 @@
 ---
-title: "Homework"
-author: 'Assigned: October 6, 2018'
-date: 'Due: October 19, 2018 at 11:59pm'
+title: "Lab 3"
+author: ''
+date: ''
 output:
   pdf_document:
     number_sections: no
@@ -9,7 +9,7 @@ output:
     df_print: paged
     toc: yes
     toc_float: yes
-subtitle: CME/STAT 195, Fall 2018
+subtitle: Bio-X R-bootcamp, Summer 2020
 ---
 
 ```{r setup, include=FALSE}
