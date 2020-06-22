@@ -410,3 +410,29 @@ installed.packages()[1:5, 1:3]
 search() 
 ``` 
 
+## Getting you ready for Lab 2
+
+The swirl R package allows to learn R programming and data science very easily. You will use it in Lab 2, so here we are going to install it together. The workflow is the same as for any other R package.  
+
+__Step 1__: Open RStudio and type the following into the console:
+```{r, eval=FALSE}
+install.packages("swirl")
+```
+That is just for this time!!! Once swirl is installed on your machine, you can skip directly to step 2.
+
+__Step 2__: Start swirl
+
+This is the only step that you will repeat every time you want to run swirl. First, you will load the package using the library() function. Then you will call the function that starts the magic! Type the following, pressing Enter after each line:
+
+```{r, eval=FALSE}
+library("swirl")
+
+swirl()
+```
+
+## Getting you ready for Lab 2
+
+The first time you start swirl, you'll be prompted to install a course. For Lab 2, we'll ask you to go through a couple of recommended courses. See website for more information. 
+
+
+
