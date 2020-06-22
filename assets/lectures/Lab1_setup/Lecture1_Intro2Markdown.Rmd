@@ -366,12 +366,13 @@ Note that for R notebooks, the output field in the front-matter will be
 
 More on R Notebooks can be found [here](https://rmarkdown.rstudio.com/r_notebooks.html).
 
+
 # Exercises: To Complete before the discussion on Thursday!!!
 
 We will now put all the pieces of what we've seen during the week together.
 Generate an R-markdown document to complete the following exercise:
 
-1. Download the template from the website
+1. Download the template from the website (supplementary material associated to Lab 3: Week 1 session 3)
 2. Name the Markdown document (in the title section) "Lab 2" and check that the output is a pdf document.
 3. Complete the exercises in the template.
 4. When you're done, "knit" your pdf and send it to the course instructor with "Bootcamp: Lab2" in the email object.

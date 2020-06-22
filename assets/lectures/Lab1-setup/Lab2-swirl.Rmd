@@ -1,0 +1,31 @@
+---
+title: "Lab2: Swirl"
+author: "Claire Donnat"
+date: "7/1/2020"
+output: html_document
+---
+
+
+
+## Swirl course
+
+The purpose of this first lab is to familiarize yourself with the R language. 
+To this end, we will use one of the Swirl courses (which we installed during the discussion session).
+
+Installation:
+
+```{r cars, eval=FALSE}
+library(swirl)
+install_course_github("swirldev", "R_Programming_E")
+swirl()
+```
+
+This will initiate a series of promts:
+
+- Type 1 for "1: R Programming: The basics of programming in R" when prompted to install a course.
+- Type 1 for "1: R Programming" when prompted to choose a course.
+
+Go through lessons 1 through 11.
+
+
+
