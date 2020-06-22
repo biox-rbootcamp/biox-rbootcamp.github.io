@@ -1,7 +1,7 @@
 ---
-title: "Lab 3: Graphics"
-author: "Bios 221: Modern Statistics for Modern Biology"
-date: "10/3/2019"
+title: "Graphics and visualization"
+author: "Week 3"
+date: "07/13/2030"
 output: 
   html_document:
     toc: true
@@ -15,13 +15,12 @@ The goal of this lab is to become familiar with the grammar of graphics
 philosophy implemented in the `R` package `ggplot2`.
 
 Work through this lab by running all the R code to your computer and making sure 
-that you understand the input and the output. We encourage you to work through 
-this lab with a partner. Once you get to the end of this lab, go to 
-[Canvas](https://canvas.stanford.edu) to answer some questions that require you 
-to use `ggplot2`. 
+that you understand the input and the output. 
 
-You may NOT work with other students to answer the questions on Canvas. 
-You will need a Stanford ID to log in to Canvas.
+Begin by watching the lecture on vizualization (link on the website): this will provide you with an introduction to the importance of plotting and give you an overview of the different plotting functions with ggplot2.
+
+Once you're done, go through the following lab which we will discuss on Monday.
+
 
 ## Getting Started
 

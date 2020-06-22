@@ -12,9 +12,9 @@ layout: cme195
 | 4 | M | Tidyverse and Data Pre-processing| [Using the tidyverse syntax and cleaning up the data]() | [Lab: idyverse](./assets/lectures/Labs-Week2/session4_Exercises.nb.html)| [Slides: Tidyverse](./assets/lectures/Lecture_tidyverse.html) |  |
 | 5 | W | Basic Probability | Introduction to basic probability models: probabilities, distributions and the CLT (I) |  |  |  |
 | 6 | Th |  | Introduction to basic probability models: probabilities, distributions and the CLT (II)|  |  |  |
-| 7 | M | Simulations and ggplot | Introduction to tidyverse and dplyr + traditional plots for data analysis |  |  |  |
-| 8 | W |  | Visualization I |  |  |  |
-| 9 | Th |  | Visualization II |  |  |  |
+| 7 | M | Simulations | [Video]() | [Lab 7: Simulations](./biox-rbootcamp.github.io/assets/lectures/Lab2_simulations/Lab2_simulations.html)  |  |  |
+| 8 | W |  | Visualization I | [Basic R plots]()  |  |  |
+| 9 | Th |  | Visualization II | [Plotting with ggplot](link) | [Lab 9: Ggplot2](./biox-rbootcamp.github.io/assets/lectures/Lab3_graphics/Lab3_graphics.html)  |  |
 | 10 | M | Mixtures | Mixtures |  |  |  |
 | 11 | W |  | Permutation tests |  |  |  |
 | 12 | Th |  | Bootstrap |  |  |  |

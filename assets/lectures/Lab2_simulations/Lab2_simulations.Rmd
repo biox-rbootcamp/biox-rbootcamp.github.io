@@ -1,7 +1,7 @@
 ---
-title: "Lab 2: Simulations"
-author: "Bios 221: Modern Statistics for Modern Biology"
-date: "10/2/2019"
+title: "Simulations"
+author: "Week 3 Session 7"
+date: "07/13/2020"
 output: 
   html_document:
     toc: true
@@ -17,16 +17,12 @@ knitr::opts_chunk$set(echo = TRUE)
 
 In this lab, we'll learn how to simulate data with R using random number generators and we will also use Bioconductor for the first time. 
 
-The goal is to work through this lab by running all the R code, as explained in Lab0. Then you will execute all code chunks sequentially. We encourage you to take advantage of the interactivity by modifying commands and seeing how the output changes.
-Once you get to the end of this lab, go to [Canvas](https://canvas.stanford.edu)  to answer some questions related to its material (Quiz 1, due Wednesday midnight).
-
-You may NOT work with other students to answer the questions on Canvas.  You will need a Stanford ID to log in to Canvas.
-
+The goal is to work through this lab by running all the R code/ Then you will execute all code chunks sequentially. We encourage you to take advantage of the interactivity by modifying commands and seeing how the output changes.
 
 
 ## Getting Started
 
-In class you learned about many distributions, for example you learned about the Binomial distribution (which has the Bernoulli distribution as a special case), as well as the Poisson distribution.
+In the previous classes you learned about many distributions, for example you learned about the Binomial distribution (which has the Bernoulli distribution as a special case), as well as the Poisson distribution.
 
 
 R can generate numbers from all known distributions. In particular, we know how to generate random discrete data using the specialized R functions tailored for each type of distribution. We use the functions that start with an r as in ``rXXXX``, where ``XXXX`` could be ``pois`` or ``binom``. If we need a theoretical computation of a probability under one of these models, we use the functions ``dXXXX``, such as ``dbinom``, which computes the probabilities of events in the discrete binomial distribution, and ``dnorm``, which computes the probability density function for the continuous normal distribution. When computing tail probabilities such as $\Pr(X \leq a)$ it is convenient to use the cumulative distribution functions, which are called ``pXXXX``.
