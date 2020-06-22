@@ -1,0 +1,770 @@
+---
+title: "Lab 3: Graphics"
+author: "Bios 221: Modern Statistics for Modern Biology"
+date: "10/3/2019"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+
+## Goal
+
+The goal of this lab is to become familiar with the grammar of graphics 
+philosophy implemented in the `R` package `ggplot2`.
+
+Work through this lab by running all the R code to your computer and making sure 
+that you understand the input and the output. We encourage you to work through 
+this lab with a partner. Once you get to the end of this lab, go to 
+[Canvas](https://canvas.stanford.edu) to answer some questions that require you 
+to use `ggplot2`. 
+
+You may NOT work with other students to answer the questions on Canvas. 
+You will need a Stanford ID to log in to Canvas.
+
+## Getting Started
+
+We will be going through some of the topics from the `ggplot2` documentation
+website, [docs.ggplot2.org](http://docs.ggplot2.org). You should keep that website open as 
+a reference throughout this tutorial.
+
+Another useful resource, the complete guide to the Grammar of Graphics 
+philosophy, is available through [Springer website](https://link.springer.com/book/10.1007%2F978-3-319-24277-4) 
+(to which you have a free legal access with your Stanford ID).
+
+### Required Packages 
+
+In order to learn how to use `ggplot2`, we will use a few datasets 
+available through the `nutshell`, `parathyroidSE`, `EnsDb.Hsapiens.v86` packages.
+
+The code below checks if all packages required for today's lab are available,
+and installs any missing ones. Note that (in the 'Lab2_graphics.Rmd' file) 
+the chunk declaration includes the following options: 
+`message = FALSE, warning = FALSE, results = "hide"`. 
+These R Markdown settings let you suppress messages and warnings which would 
+otherwise appear below the chunk. Another way to avoid the lengthy messages
+during package loading, is to wrap R commands 
+inside `suppressMessages()` function, e.g. `suppressMessages(library("foo"))`.
+
+```{r setup, message = FALSE, warning = FALSE, results = 'hide'}
+pkgs_needed <- c("tidyverse", "Biostrings", 
+                 "parathyroidSE", "EnsDb.Hsapiens.v86", "nutshell")
+letsinstall = setdiff(pkgs_needed, installed.packages()) 
+if (length(letsinstall) > 0) {
+  BiocManager::install(letsinstall)
+}
+library("dplyr")
+library("ggplot2")
+library("Biostrings")
+```
+
+
+### Load Data
+
+First, we will use a data set about births in the USA in 2006. You can read more 
+about this in the *"R in a Nutshell, 2nd edition"* book which is freely available 
+as a PDF file online.  This is convenient since you can follow the same methods 
+in that book (except translating into the grammar of graphics to make plots).
+
+First, we load the dataset and add two new variables: 
+one to encode whether the day falls on a weekend or whether it is a weekday,
+and a three-level, discretized health score based on the APGAR 5 score.
+
+We also fix an ideosyncratic encoding of not available values by 99 with proper
+`NA`s. 
+
+Finally, we define a subsampled version of the dataset `births_small` to
+speed up some of the plotting (feel free to try out the computations and plots
+we see subsequently with the full dataset `births`.)
+
+```{r births}
+data("births2006.smpl", package = "nutshell")
+
+births <- mutate(births2006.smpl,
+  WEEKEND = ifelse(DOB_WK %in% c(1, 7), "Weekend", "Weekday"),
+  HEALTH  = c("CritLow", "Low", "Normal")[ 1 +
+    findInterval(APGAR5, c(3.5, 6.5)) ],
+  ESTGEST = replace(ESTGEST, ESTGEST==99, NA))
+
+set.seed(1)
+births_small <- births[ sample(nrow(births), 40000), ]
+head(births_small)
+```
+
+To find out about what data each column of `births2006.smpl` dataset, 
+holds, you can run the line below in your console:
+
+```{r findout, eval = FALSE}
+help("births2006.smpl", package = "nutshell")
+```
+
+## Plot initialization & `geom`'s
+
+> ggplot2 is a plotting system for R, based on the grammar of graphics. 
+It takes care of many of the fiddly details that make plotting a hassle 
+(like drawing legends) as well as providing a powerful model of graphics 
+that makes it easy to produce complex multi-layered graphics [^1]
+
+[^1]: http://ggplot2.org/
+
+You can think of plots generated with `ggplot2` as sentences.
+The function **`ggplot()` starts a sentence (initializes a plot)** which usually 
+contains a noun/subject (a dataset with information to be plotted). 
+
+The `+` operator is used to add further clauses/fragments containing "verbs", 
+"adjectives", "adverbs" etc. to the sentence. This allows you to construct 
+sophisticated plots from a few elementary building blocks, just like
+forming compound sentences from simple phrases. 
+
+In `ggplot` world, verbs are **geometric objects, or `geom`'s**.
+For example, `geom_bar()` draws bars, `geom_point()` draws points. 
+There can be multiple `geom`s in a sentence, and these are then also called 
+layers. 
+
+For each `geom`, you need to define required **aesthetics** 
+using the function `aes()`. The aesthetics of a `geom` determine
+how the attributes of the geometric object (e.g. the x- and y- coordinates of 
+the points, their colors and shapes, etc.) are mapped to the columns of the
+supplied data.frame. The aesthetics mapping can be defined when initializing
+a plot (with `ggplot(data = dataframe_name, aes(...))`), which makes it apply 
+to all `geom`'s. Otherwise, one can specify `aes()` mapping for each `geom` 
+separately (e.g. ` geom_bar(aes(...))`), in which case it applies to that 
+particular `geom` only.
+
+It is also possible to use a different dataset for `geom` than the one supplied
+to `ggplot()`. To do this you simply supply a new data.frame as a `data` 
+argument of `geom` (e.g. `geom_point(data = new_dataframe_name, aes(...))`)
+which would overwrite the dataset used to this `geom`.
+
+
+For example, let's look at the number of births on each day of the week in 
+our sample data. First set up our plot with the data `births`.
+
+```{r birth_init_ggplot}
+ppp <- ggplot(births_small) 
+```
+
+Note that this doesn't actually plot anything (just like if you wrote 
+`junk <- 7` doesn't output anything until you run `junk`.
+What happens here when you run `ppp`? 
+
+The number ofbirths per day of the week can be shown easily in a barplot,
+so let's use that. To create a geometric object layer for a **barplot we use the 
+function `geom_bar()`**. In order for it to know what part of the data we want
+to actually plot, we need to give an aesthetic. We can do this by declaring 
+that **the aesthetic for the x-axis is the day of the week of the birth**.
+
+The column `DOB_WK` gives the day of the week that each birth happened as 
+a numeric value 1 (Sunday) through 7 (Saturday). We can tell R that this is 
+actually a factor variable by putting the variable name in the function 
+`factor`. Putting this all together, we get `geom_bar(aes(x = factor(DOB_WK))`. 
+Finally, to add this layer to the initialized graph, we add the `geom` to `ppp` 
+with the `+` operator. 
+
+```{r birth_wk_hist}
+ppp <- ggplot(births_small) 
+ppp + geom_bar(aes(x = factor(DOB_WK)))
+```
+
+Doctors are able to delay birth with anti-contraction medications or labor
+suppressants called *tocolytics*. That might be one reason we see fewer births 
+on day 1 of the week (Sunday) and day 7 (Saturday).
+
+We can get further information from this plot if we add more aesthetics. 
+For example, maybe we can fill each bar with different colors corresponding 
+to what type of birth it was ("C-section", "Vaginal", or "Unknown"). We can do 
+this by just including another `aes` in the geometric object. Start with the 
+same initialization, but add a geometric object with the x-axis and also fill 
+color defined.
+
+```{r birth_wk_hist_color}
+ppp <- ggplot(births_small) 
+ppp + geom_bar(aes(x = factor(DOB_WK), fill = DMETH_REC))
+```
+
+When we made that plot, we used the default value for the `position` 
+argument of the `geom_bar` function. We could have equivalently written the 
+code as follows.
+
+```{r birth_wk_hist_stack}
+ppp <- ggplot(births_small) 
+ppp + geom_bar(aes(x = factor(DOB_WK), fill = DMETH_REC), position = "stack")
+```
+
+Another option is to use `position = "dodge"`. Note that this is an 
+argument to `geom_bar` and not to `aes`.
+
+```{r birth_wk_hist_dodge}
+ppp <- ggplot(births_small) 
+ppp + geom_bar(aes(x = factor(DOB_WK), fill = DMETH_REC), position = "dodge")
+```
+
+Now we see that about 1/2 as many C-sections were on weekends as there were on 
+a typical weekday, whereas there were about 3/4 as many vaginal births on 
+weekends as there were on weekdays.
+
+## Facets
+
+Let's continue looking at the birth data on a day to day basis.  We might 
+conjecture that older women are less likely to take a *tocolytic* since they 
+are more likely to have had other complications already. One way we can 
+do this is to "facet" the graph and display day of the week versus women's age.
+
+First, let's make a histogram of the women's ages to get an idea of what the 
+distribution looks like.
+
+```{r birth_age_hist}
+ppp <- ggplot(births_small) 
+ppp + geom_histogram(aes(x = MAGER), binwidth = 1)
+```
+
+We used the argument `binwidth` to set the width of the bins in 
+this histogram (here `binwidth = 1` corresponds to 1 year).
+
+Using the grammar of graphics, it is easy to facet this single graph to make 
+multiple graphs along another dimension of the data. In this case, we're 
+interested in breaking this up along the dimension of day of birth ``DOB_WK``. 
+We will add this facet with the command  `facet_grid` or `facet_wrap`.
+In `facet_grid`, the argument we use is a formula with the rows (of the 
+tabular display) on the left hand side and the columns (of the tabular display) 
+on the right hand side (RHS). 
+
+A formula is created in R with the tilde operator `~`.  A dot in the formula 
+is used to indicate there should be no faceting on this dimension (either row 
+or column). The formula can also be provided as a string instead of a classical 
+formula object. In `facet_wrap`, we have the same sort of argument, but we 
+only include a RHS of the formula. We'll use both of them in an example so you
+can see the difference.
+
+Now let's look at this faceting on that variable. Again, we will use the `+`
+operator. Here, we also see that we can save the geometric objects in the plot
+and just add facets at the end.
+
+```{r birth_age_facet_wrap}
+ppph <- ggplot(births_small) + 
+   geom_histogram(aes(x = MAGER, fill = DMETH_REC), binwidth = 1)
+ppph + facet_wrap( ~ DOB_WK)
+```
+
+
+```{r birth_age_facet_grid, fig.height=7, fig.width=7}
+ppph + facet_grid(DOB_WK ~ SEX)
+```
+
+
+What is the difference between ``facet_wrap`` and ``facet_grid``?
+
+Here is an interesting perspective of the data 
+(we use ``dplyr::filter`` to exclude the record where the delivery method 
+is Unknown).
+
+```{r birth_age_facet_color}
+ggplot(dplyr::filter(births, !(DMETH_REC %in% "Unknown"))) +
+  geom_histogram(aes(x = MAGER, fill = factor(TBO_REC)), binwidth = 1) +
+  facet_grid(WEEKEND ~ DMETH_REC, scale="free_y", drop = TRUE) +
+  geom_vline(xintercept = seq(15, 45, by=5), alpha=0.2, color="white") +
+  labs(title = "Births in USA 2006", fill="Birth\nOrder")
+```
+
+## Statistics
+
+It's often useful to transform your data before plotting, and that's what 
+statistical transformations do.
+
+Here we look at the histogram of mother's ages as before, but we also **add 
+a density estimate to it**.
+
+```{r birth_age_dens}
+ggplot(births_small, aes(x = MAGER)) + 
+  geom_histogram(aes(y = ..density..), binwidth = 1, fill = "grey", col = "black") +
+  stat_density(col = "red", fill = NA)
+```
+
+Maybe we want to compare this to a lognormal distribution's density.
+
+```{r birth_age_dens_normal}
+ggplot(births_small, aes(x = MAGER)) + 
+  geom_histogram(aes(y = ..density..), binwidth = 1, fill="grey", col="black") +
+  stat_density(col="red", fill=NA) +
+  stat_function(fun = dlnorm, col = "blue", 
+                args = list(mean = mean(log(births_small$MAGER)),
+                             sd =    sd(log(births_small$MAGER))))
+```
+
+You can add any function using the `stat_function`.
+
+In this example, we will plot the birth weight in grams (DBWT) versus weight
+gain (WTGAIN) by mother (which seems to be in pounds). Unfortunately, we need 
+to be a little more careful about this when there are NAs in the data.
+
+```{r birth_weight_scatter}
+ppp2 <- ggplot(dplyr::filter(births_small, !is.na(WTGAIN) & !is.na(DBWT)), 
+               aes(x = WTGAIN, y = DBWT)) +
+  labs(x = "Weight Gain by Mother", y = "Birth Weight in Grams")
+ppp2 + geom_point()
+```
+
+When we plot this data by itself, it is not clear what is going on 
+-- there are many points plotted on top of each other and it just looks messy.
+
+One way to transform this data with a ``stat_bin2d()`` in ``ggplot2`` 
+is by **binning the points** as below.
+
+```{r birth_weight_bin2d}
+ppp2 + stat_bin2d()
+```
+
+See that the color axis reports counts. That means we count the total number 
+of observations to fall within a box, i.e. we are effectively **generating
+a 2D density plot**. This plot seems to indicate that the joint distribution 
+of weight gain by mother and birth weight in grams is unimodal.
+
+Instead of just making counts though, we can compute other quantities
+(evaluate functions other than count) within each of the 2d bins on other two 
+columns of `births_small`. For example, let's look at the median number of 
+weeks of gestation for each of the bins.
+
+```{r birth_weight_bin2d_median}
+ppp2 + stat_summary_2d(aes(z = ESTGEST), fun = median) + 
+  labs(title = "median number of weeks of gestation")
+```
+
+If we want to do a regression, we can include this automatically. By default, 
+`ggplot2` uses "locally weighted scatterplot smoothing" (loess) regression 
+for data sets with < 1000 points and "generalized additive models" 
+(GAM) for >= 1000 points.
+
+```{r birth_weight_lm}
+# here we force a linear model fit
+ppp2 + geom_point() + stat_smooth(method = lm) 
+```
+
+By changing the color aesthetics of the modelled line, we can fit separate 
+models to the corresponding subsets of the data and compare them. 
+For example, let's look at a smoothed fit (GAM) of birthweight versus 
+weight gain by mother separated out by baby boys and girls.
+
+```{r birth_weight_gams}
+ppp2 + geom_point() + stat_smooth(aes(col = SEX))
+```
+
+
+Finally, let's look at hexagonal bins as a visually more attractive alternative 
+to the rectangular bins used so far
+
+```{r birth_weight_hex}
+ppp2 + geom_hex(bins = 30) + stat_smooth(aes(col = SEX))
+```
+
+## Scales
+
+Scales control the mapping between data and aesthetics. Going back to the 2d 
+distribution of birthweight versus weight gain by mothers, it is difficult to 
+see what is going on except that there is a dense region and a less dense 
+region. If we take the square root of the number of births per region, then 
+we can see that there is a smooth transition between the high density area and 
+the low density area.
+
+```{r birth_weight_bin2d_scale}
+# we repeat again the code above so you don't gave to scroll to look at it.
+ppp2 <- ggplot(dplyr::filter(births_small, !is.na(WTGAIN) & !is.na(DBWT)), 
+               aes(x = WTGAIN, y = DBWT)) +
+  labs(x = "Weight Gain by Mother", y = "Birth Weight in Grams")
+
+ppp2 + stat_bin2d() + scale_fill_gradient(trans = "sqrt")
+```
+
+See what happens when you change the trans to ``log10``.
+
+Sometimes, we might want to change the scale of the vertical axis.
+According to Wikipedia's page on "Fetal Viability", there is a 50% chance 
+of viability at 24 weeks of gestation. We will repeat the plot above
+with birth weight on a log scale, so we get better separation of the mean 
+weeks of gestation.
+
+```{r birth_weight_bin2d_trans_estgest}
+ppp2 + stat_summary_2d(aes(z = ESTGEST), fun = mean) + 
+  scale_y_log10(limits = 10^c(2, 4)) +
+  scale_fill_gradient2(midpoint = 24) +
+  labs(title="mean number of weeks of gestation")
+```
+
+Now let's look at only the quadruplets in the full dataset (there are 39 such 
+ observations). We want to include lots of variables such as number of
+prenatal visits (UPREVIS), the mother's age (MAGER), the estimated weeks of 
+gestation (ESTGEST), the delivery method (DMETH_REC), and the mother's education
+level (DMEDUC).
+
+```{r birth_weight_quads}
+ppp3 <- ggplot(dplyr::filter(births, DPLURAL == "4 Quadruplet"), 
+               aes(x = UPREVIS, y = MAGER)) + 
+  geom_point(aes(size = ESTGEST, shape = DMETH_REC, col = DMEDUC)) +
+  stat_smooth(aes(col = DMETH_REC), method = "lm")
+ppp3
+ppp3 + scale_size(range=c(3, 6)) + scale_color_brewer(palette = "Set1") +
+  scale_shape(solid = FALSE)
+```
+
+Note that, while shapes are discrete, colors and sizes can both be scaled 
+continuously.
+
+## Quantile-quantile plot
+
+Remember that in the the power calculations section from the last lab,
+we defined a statistic estimating the deviation of the
+observed to expected frequencies of nucleotides. The code for generating
+the statistics assuming it came from the null distribution (i.e.
+when all 4 nucleotides are evenly likely).
+
+
+```{r}
+oestat = function(o, e){
+  sum( (e-o)^2/e )
+}
+
+set.seed(1)
+B = 10000
+# here we pick an arbitrary length / not the same as for Celegans
+n = 2847
+expected = rep(n/4 ,4)
+oenull = replicate(
+  B, oestat(e=expected, o=rmultinom(1,size = n, prob = rep(1/4,4))))
+
+```
+
+Now, we can estimate the null distribution of this statistics, by
+plotting a histogram of the generated values:
+
+```{r}
+ggplot(data.frame(null_stats = oenull)) +
+  geom_histogram(aes(x = null_stats), bins = 100, boundary=0)
+```
+
+We compare the distribution of this statistic to
+$Chi^2_3$ (df = 1 * (4-1) = 3) using a q-q plot:
+
+
+```{r}
+ ggplot(data.frame(stat = oenull), aes(sample = stat)) +
+   stat_qq(distribution = stats::qchisq, dparams = list(df = 3)) +
+   stat_qq_line(distribution = stats::qchisq, dparams = list(df = 3)) 
+```
+
+
+
+## Parathyroid Example
+
+We will use the ``parathyroidGenesSE`` package in ``R``.  Load the data and 
+read the experimental information and the abstract.
+
+```{r para_data, message=FALSE, warning=FALSE}
+library("parathyroidSE")
+library("EnsDb.Hsapiens.v86")
+
+data("parathyroidGenesSE", package = "parathyroidSE")
+metadata(parathyroidGenesSE)$MIAME 
+abstract(metadata(parathyroidGenesSE)$MIAME)
+```
+
+Parathyroid adenoma (http://en.wikipedia.org/wiki/Parathyroid_adenoma) is 
+a benign tumor of the parathyroid gland. The abstract tells us that some 
+interesting genes to look at are the following:
+
+* Estrogen related genes: ESR1, ESR2.
+* Parathyroid related genes: CASR, VDR, JUN, CALR, ORAI2.
+
+Let's put them in a table.
+
+```{r genes}
+genes <- read.csv(textConnection(
+  "name, group
+   ESR1,  estrogen
+   ESR2,  estrogen
+   CASR,  parathyroid
+   VDR,   parathyroid
+   JUN,   parathyroid
+   CALR,  parathyroid
+   ORAI2, parathyroid"), 
+  stringsAsFactors = FALSE, strip.white = TRUE)
+```
+
+In the ``parathyroidGenesSE`` object, the features are labeled
+with Ensembl gene identifiers, so let's use a Bioconductor package
+to find the corresponding IDs.
+
+```{r EnsDb}
+ens <- ensembldb::select(EnsDb.Hsapiens.v86,
+  keys = list(GenenameFilter(genes$name), 
+              TxBiotypeFilter("protein_coding")),
+  columns = c("GENEID", "GENENAME"))
+ens <- 
+  dplyr::filter(ens, GENEID %in% rownames(parathyroidGenesSE)) %>%
+  mutate(group = genes$group[match(GENENAME, genes$name)])
+
+ens
+```
+
+Make the table of gene counts, add the patient info:
+
+```{r para_cut}
+countData <- assay( parathyroidGenesSE ) 
+gene.counts <- t(countData[ens$GENEID, ])
+colnames(gene.counts) <- ens$GENENAME
+dat <- cbind(data.frame(colData( parathyroidGenesSE)), data.frame(gene.counts))
+head(dat)
+```
+
+Plot one of the estrogen related gene's counts (ESR1) with 
+plot aesthetics and faceting to separate patients, treatments and times.
+
+```{r para_plot, tidy=FALSE}
+ggplot(dat, aes(col = patient, x = treatment, y = ESR1)) +
+  geom_point(size = 3) + 
+  facet_grid( . ~ time)
+```
+
+## Questions
+
+Answer the following questions on [Canvas](https://canvas.stanford.edu) 
+in quiz "Quiz 2: Graphics". You may NOT work with other students to answer 
+the questions on Canvas. You will need a Stanford ID to log in to Canvas.
+The questions will be in random order on Canvas.
+
+From the plot of the parathyroid data, answer the following. 
+
+**Quiz question 1** : How many patients are there?
+
+**Quiz question 2** : How many time points are there?
+  
+**Quiz question 3** : There were 3 treatments: "Control", "DPN", and "OHT". 
+How many measurements were taken from patient 2 under the DPN treatment?
+  
+Make your own plot of VDR versus CASR.  (That is CASR, not CALR).
+
+**Quiz question 4** : Which patient has the highest recorded level of CASR?
+
+**Quiz question 5** : Which of the following pairs of patients seem to be well
+separated in this plot (i.e., for which two patients you can draw a line on 
+the plot that perfectly separates them)?
+
+**Quiz question 6** : You need to know which pairs of patients are well 
+separated with respect to the genes VDR and CASR (i.e., you can draw a 
+line on the plot that perfectly separates the patients). Which of the 
+following methods can help you visualize this?
+  
+**Quiz question 7** : Which patient looks different from the other three when 
+you plot VDR versus ORAI2?
+
+**Quiz question 8** : Plot ORAI2 versus JUN. Which can you separate best?
+
+**Quiz question 9** : Plot CASR versus (ESR1 + ESR2). Fit a separate 
+linear model for each treatment (Control, DPN, OHT). Which linear models 
+are increasing?
+
+**Quiz question 10** : What is the maximum number of shapes that you are 
+allowed to use in ggplot2 by default?
+  
+**Quiz question 11** : Write the name of the function that you could use to 
+make more than the maximum number of default shapes allowed. Hint: this function 
+has "values" as one of the arguments ____(..., values = (...)).
+
+**Quiz question 12** : What do Themes do in ggplot2?
+  
+## CpG Islands
+
+
+
+```{r setup2, message = FALSE, warning = FALSE, results = 'hide'}
+pkgs_needed <- c("BSgenome.Hsapiens.UCSC.hg19", "Gviz")
+letsinstall = setdiff(pkgs_needed, installed.packages()) 
+if (length(letsinstall) > 0) {
+  BiocManager::install(letsinstall)
+}
+```
+
+This is additional material, which wasn't covered in class but is 
+included in the textbook. You will benefit from completing this part.
+
+GC content is the percentage of the genome (or DNA fragment) that is "G" or "C".
+To compute the GC content, we count the occurrences of the "G" and "C" alphabets,
+and divide by the length of the string in question.
+
+We will be using data from chr8 of the human genome version 19 from the UCSC 
+genome repository. 
+
+A genomic window is defined as a CpG island if its GC content>50% and 
+observed-to-expected CG ratio>0.6. CpG islands are said to mark important 
+regions in the genome because over 65% of gene promoter regions can be found 
+in with CpG islands.
+
+We want to look at this for the Human Chromosome 8. We can use Bioconductor 
+to get the data with the command `BiocManager::install("BSgenome.Hsapiens.UCSC.hg19")`.
+
+```{r}
+library(BSgenome.Hsapiens.UCSC.hg19)
+chr8  =  Hsapiens$chr8
+cpg_url <- url("http://web.stanford.edu/class/bios221/data/model-based-cpg-islands-hg19.txt")
+CpGtab <- read.table(cpg_url, header=T)
+nrow(CpGtab)
+```
+
+Then we retain only the start and stop positions for chromosome 8 and 
+convert into an IRanges object:
+
+
+
+```{r}
+irCpG = with(dplyr::filter(CpGtab, chr == "chr8"),
+         IRanges(start = start, end = end))
+```
+
+We create the biological context with the next line. 
+The “I” in IRanges stands for “interval”; the “G” in GRanges for “genomic”.
+
+```{r}
+grCpG = GRanges(ranges = irCpG, seqnames = "chr8", strand = "+")
+genome(grCpG) = "hg19"
+```
+
+```{r}
+library("Gviz") # you might need to install this from Bioconductor
+ideo = IdeogramTrack(genome = "hg19", chromosome = "chr8")
+plotTracks(
+  list(GenomeAxisTrack(),
+    AnnotationTrack(grCpG, name = "CpG"), ideo),
+    from = 2200000, to = 5800000,
+    shape = "box", fill = "#006400", stacking = "dense")
+```
+
+
+Views on the chromosome sequence correspond to the CpG islands, irCpG, and to
+the regions in between (gaps(irCpG)). 
+
+```{r}
+CGIview    = Views(unmasked(Hsapiens$chr8), irCpG)
+NonCGIview = Views(unmasked(Hsapiens$chr8), gaps(irCpG))
+```
+
+We compute transition counts in CpG islands and non-islands using the data.
+
+
+```{r}
+seqCGI      = as(CGIview, "DNAStringSet")
+seqNonCGI   = as(NonCGIview, "DNAStringSet")
+dinucCpG    = sapply(seqCGI, dinucleotideFrequency)
+dinucNonCpG = sapply(seqNonCGI, dinucleotideFrequency)
+dinucNonCpG[, 1]
+```
+
+
+```{r}
+NonICounts = rowSums(dinucNonCpG)
+IslCounts  = rowSums(dinucCpG)
+```
+
+
+For a four state Markov chain as we have, we define the transition matrix as 
+a matrix where the rows are the from state and the columns are the to state.
+
+
+```{r}
+TI  = matrix( IslCounts, ncol = 4, byrow = TRUE)
+TnI = matrix(NonICounts, ncol = 4, byrow = TRUE)
+dimnames(TI) = dimnames(TnI) =
+  list(c("A", "C", "G", "T"), c("A", "C", "G", "T"))
+```
+
+We use the counts of numbers of transitions of each type to compute frequencies 
+and put them into two matrices.
+
+```{r}
+MI = TI /rowSums(TI)
+MI
+```
+
+
+```{r}
+MN = TnI / rowSums(TnI)
+MN
+```
+
+Are the relative frequencies of the different nucleotides different in
+CpG islands compared to elsewhere ?
+
+```{r}
+freqIsl=alphabetFrequency(seqCGI,baseOnly=TRUE,collapse=TRUE)[1:4]
+freqIsl / sum(freqIsl)
+```
+
+
+```{r}
+freqNon=alphabetFrequency(seqNonCGI,baseOnly=TRUE,collapse=TRUE)[1:4]
+freqNon / sum(freqNon)
+```
+
+This shows an inverse pattern: in the CpG islands, C and G have frequencies
+around 0.32, whereas in the non-CpG islands, we have A and T that have 
+frequencies around 0.30.
+
+But how can we decide if a new sequence comes from a CpG island?
+What is the probability it belongs to a CpG island compared to somewhere else?
+We compute a score based on what is called the odds ratio, i.e
+$\log( $P(sequence | island)/P(sequence| nonisland) $)$. See the textbook
+for details as to how this is evaluated.
+
+```{r}
+alpha = log((freqIsl/sum(freqIsl)) / (freqNon/sum(freqNon)))
+beta  = log(MI / MN)
+
+scorefun = function(x) {
+  s = unlist(strsplit(x, ""))
+  score = alpha[s[1]]
+  if (length(s) >= 2)
+    for (j in 2:length(s))
+      score = score + beta[s[j-1], s[j]]
+  score
+}
+
+x = "ACGTTATACTACG"
+scorefun(x)
+```
+
+
+In the code below, we pick sequences of length len = 100 out of the 2855 sequences in the seqCGI object, and then out of the 2854 sequences in the seqNonCGI object (each of them is a DNAStringSet). In the first three lines of the generateRandomScores function, we drop sequences that contain any letters other than A, C, T, G; such as “.” (a character used for undefined nucleotides). Among the remaining sequences, we sample with probabilities proportional to their length minus len and then pick subsequences of length len out of them. The start points of the subsequences are sampled uniformly, with the constraint that the subsequences have to fit in.
+
+```{r}
+generateRandomScores = function(s, len = 100, B = 1000) {
+  alphFreq = alphabetFrequency(s)
+  isGoodSeq = rowSums(alphFreq[, 5:ncol(alphFreq)]) == 0
+  s = s[isGoodSeq]
+  slen = sapply(s, length)
+  prob = pmax(slen - len, 0)
+  prob = prob / sum(prob)
+  idx  = sample(length(s), B, replace = TRUE, prob = prob)
+  ssmp = s[idx]
+  start = sapply(ssmp, function(x) sample(length(x) - len, 1))
+  scores = sapply(seq_len(B), function(i)
+    scorefun(as.character(ssmp[[i]][start[i]+(1:len)]))
+  )
+  scores / len
+}
+scoresCGI    = generateRandomScores(seqCGI)
+scoresNonCGI = generateRandomScores(seqNonCGI)
+```
+
+
+Now, we can use `ggplot()` to view the distribution of computed scores
+for the two distributions:
+
+
+```{r}
+df <- rbind(
+  data.frame(region = "cgi", score = scoresCGI),
+  data.frame(region = "ncgi", score = scoresNonCGI)
+)
+
+ggplot(df, aes(x = score, fill = region)) +
+  geom_histogram(alpha = 0.5, color = "black", position = "identity")
+```
+

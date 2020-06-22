@@ -1,0 +1,602 @@
+---
+title: "Lab 6: Testing and RNA-Seq"
+author: "Bios 221: Modern Statistics for Modern Biology"
+date: "10/10/2019"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Goal
+
+In this lab, we will become more familiar with count data in RNA-Seq high-throughput
+sequencing. We will see how tools developed during the lecture on hypothesis
+testing can be applied to data from RNA-Seq experiments. We will model counts
+data and evaluate model fits to detect and quantify systematic changes between 
+conditions, compared to within-condition variability (which we consider noise).
+
+Work through this lab by running all the R code to your computer and making sure 
+that you understand the input and the output. We encourage you to work through 
+this lab with a partner. Once you get to the end of this lab, go to 
+[Canvas](https://canvas.stanford.edu) to submit your answers to quiz questions.
+
+You may NOT work with other students to answer the questions on Canvas. 
+You will need a Stanford ID to log in to Canvas.
+
+## Load Packages
+
+Install packages.
+
+```{r warning=FALSE, message=FALSE, eval=FALSE}
+pkgs_needed = c("dplyr","ggplot2", "DESeq2","pasilla","genefilter",
+                "pheatmap","readr","tibble","apeglm",
+                 "TENxPBMCData", "MASS")
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+
+BiocManager::install(setdiff(pkgs_needed, installed.packages()))
+```
+
+Load packages.
+
+```{r warning=FALSE, message=FALSE}
+library("tidyverse")
+library("ggplot2")
+library("DESeq2")
+library("pasilla")
+library("genefilter")
+library("pheatmap")
+library("MASS")
+library("TENxPBMCData")
+```
+
+## Example dataset: the pasilla data
+
+The ``pasilla`` data are from an experiment on Drosophila melanogaster cell
+cultures that investigated the effect of RNAi knock-down of the splicing factor 
+on the cells' transcriptome. We already quickly explored this dataset 
+in our lab on Mixtures and variance stabilizing transformations.
+
+```{r loadpas, results="hide", error=FALSE}
+fn = system.file("extdata", "pasilla_gene_counts.tsv",
+                  package = "pasilla", mustWork = TRUE)
+counts = as.matrix(read.csv(fn, sep = "\t", row.names = "gene_id"))
+```
+
+The data are stored as a rectangular table in a tab-delimited file, which
+we've read into the matrix ``counts``. 
+
+```{r counts}
+dim(counts)
+counts[ 2000+(0:3), ]
+```
+
+When loading data from a file, a good plausibility check is to print out some of 
+the data, and maybe not only at the very beginning, but also at some random 
+point in the middle, as we have done above. The table is a matrix of integer 
+values: the value in the $i$th row and the $j$th column of the matrix indicates 
+how many reads have been mapped to gene $i$ in sample $j$.  
+
+There were two experimental conditions, termed **untreated** and **treated** in 
+the header of the count table that we loaded. They correspond to negative
+control and to siRNA against ``pasilla``.  The experimental metadata of the 
+`r ncol(counts)` samples in this dataset are provided in a spreadsheet-like 
+table. Here, we use the function ``system.file`` to locate a file that is 
+shipped together with the ``pasilla`` package. When you work with your own data, 
+simply prepare and load the corresponding file, or use some other way to 
+generate a dataframe like ``pasillaSampleAnno``.
+
+```{r annotationFile}
+annotationFile = system.file("extdata", "pasilla_sample_annotation.csv",
+                             package = "pasilla", mustWork = TRUE)
+pasillaSampleAnno = readr::read_csv(annotationFile)
+pasillaSampleAnno
+```
+
+As we see here, the overall dataset was produced in two batches, the first one 
+consisting of three sequencing libraries that were subjected to single-read 
+sequencing, the second batch consisting of four libraries for which paired-end 
+sequencing was used.  Let's convert the relevant columns of
+``pasillaSampleAnno`` into factors, overriding the default level ordering 
+(which is alphabetical) by one that makes more sense to us.
+
+```{r factors}
+pasillaSampleAnno = mutate(
+  pasillaSampleAnno,
+  condition = factor(condition, levels = c("untreated", "treated")),
+  type      = factor(type, levels = c("single-read", "paired-end")))
+```
+
+The design is approximately balanced between the factor of interest, 
+``condition``, and the nuisance factor ``type``. How can you check that? 
+Use the ``table`` function.
+
+```{r condvstype}
+# TODO
+```
+
+We use the constructor function ``DESeqDataSetFromMatrix`` to create a
+``DESeqDataSet`` from the matrix ``counts`` and the sample annotation dataframe
+``pasillaSampleAnno``.
+
+Note how in the code below, we have to put in extra work to match the column 
+names of the ``counts`` object with the ``file`` column of the 
+``pasillaSampleAnno`` dataframe, in particular, we need to remove the ``fb`` 
+that happens to be used in the ``file`` column for some reason. Such data 
+wrangling is very common. One of the reasons for storing the data in a 
+``DESeqDataSet`` object is that we then no longer have to worry about such 
+things.
+
+```{r DESeq2, message = FALSE, warning = FALSE}
+mt = match(colnames(counts), sub("fb$", "", pasillaSampleAnno$file))
+pasilla = DESeqDataSetFromMatrix(
+  countData = counts,
+  colData   = pasillaSampleAnno[mt, ],
+  design    = ~ condition)
+class(pasilla)
+is(pasilla, "SummarizedExperiment")
+```
+
+The ``SummarizedExperiment`` class --and therefore ``DESeqDataSet``-- also
+contains facilities for storing annotation of the rows of the count matrix. 
+For now, we are content with the gene identifiers from the row names of 
+the ``counts`` table.
+
+
+**Quiz Question 1**: When we constructed our `SummarizedExperiment` object, we 
+also saved some column metadata which we had initially stored in 
+`pasillaSampleAnno`. With which function can we extract this information again?
+(Hint:`?SummarizedExperiment`)
+
+
+
+It will be instructive to quickly redo the analysis we did in a previous lab 
+on the mean-variance relationship for the biological replicates in the pasilla 
+dataset using the ``log`` scale on both axes:
+
+
+```{r countsvarmean, warning = FALSE}
+library("ggplot2")
+library("matrixStats")
+sf = estimateSizeFactorsForMatrix(counts)
+ncounts  = counts / matrix(sf, 
+   byrow = TRUE, ncol = ncol(counts), nrow = nrow(counts))
+uncounts = ncounts[, grep("^untreated", colnames(ncounts)), drop = FALSE]
+
+# TODO: fill in ... with row means and row variances of the uncounts matrix
+p = ggplot(
+  tibble(mean = apply(uncounts, 1, mean), var = apply(uncounts, 1, var)), 
+         aes(x = log(mean), y = log(var))) +
+  geom_hex() +
+  coord_fixed() +
+  geom_abline(slope = 1:2, color = c("forestgreen", "red"))
+p
+```
+
+
+The green line (slope 1) is what we expect if the variance ($v$) equals the mean
+($m$), as is the case for a Poisson-distributed random variable: $v=m$. We see 
+that this approximately fits the data in the lower range.  The red line 
+(slope 2) corresponds to the quadratic mean-variance relationship $v=m^2$; 
+lines parallel to it (not shown) would represent $v = cm^2$ for various values
+of $c$. We can see that in the upper range of the data, the quadratic 
+relationship approximately fits the data, for some value of $c<1$.
+
+## Size factors
+
+In class we showed a plot comparing the slightly more refined method employed 
+by DESeq2 for estimating size factors, compared to just summing the total number 
+of counts in a sample across all genes. Let us directly do this:
+
+```{r}
+ggplot(tibble(
+  `size factor` = estimateSizeFactorsForMatrix(counts),
+  `sum` = colSums(counts)), aes(x = `size factor`, y = `sum`)) +
+  geom_point()
+```
+
+## The DESeq2 method
+
+After these preparations, we are now ready to jump straight into differential 
+expression analysis. A choice of standard analysis steps are wrapped into a
+single function, ``DESeq``.
+
+```{r deseq}
+pasilla = DESeq(pasilla)
+```
+
+The DESeq function is simply a wrapper that calls, in order, the functions 
+``estimateSizeFactors``, ``estimateDispersions`` (dispersion estimation) and 
+``nbinomWaldTest`` (hypothesis tests for differential abundance). You can
+always call these functions individually if you want to modify their behavior
+or interject custom steps. Let us look at the results.
+
+```{r theresults}
+res = results(pasilla)
+res[order(res$padj), ] %>% head
+```
+
+The first step after a differential expression analysis is visualization of the
+results.
+
+### Histogram of p-values
+
+```{r hist1, fig.width = 4.5, fig.height = 4.5}
+ggplot(as(res, "data.frame"), aes(x = pvalue)) +
+  geom_histogram(binwidth = 0.01, fill = "Royalblue", boundary = 0)
+```
+
+The distribution displays two main components: a uniform background with values 
+between 0 and 1, and a peak of small p-values at the left.  The uniform 
+background corresponds to the non-differentially expressed genes. Usually this 
+is the majority of genes. The left hand peak corresponds to differentially 
+bioexpressed genes.
+
+The ratio of the level of the background to the height of the peak gives us 
+a rough indication of the false discovery rate (FDR) that would be associated 
+with calling the genes in the leftmost bin differentially expressed.
+
+**Quiz Question 2**: What is the FDR (in %) for the leftmost bin (i.e. when
+rejecting hypotheses smaller than 0.01)? The code snippet below might be a good 
+starting point. Estimate the background level with the median bin count in the 
+histogram object.
+
+```{r hist2}
+pv_hist <- hist(res$pvalue, breaks=seq(0,1, length=100), plot=FALSE)
+```
+
+Recall from class the we can use `p.adjust` function to conduct multiple testing 
+directly on the p-values (and we reject the adjusted p-values $\leq \alpha$). 
+Let us quickly extract the p-values and remove the NAs:
+
+```{r}
+pvals <- na.omit(res$pvalue)
+```
+
+**Quiz Question 3**: How many p-values are <= 0.1?
+
+**Quiz Question 4**: How many hypotheses do you reject with Benjamini-Hochberg 
+at a FDR of 0.1?
+
+**Quiz Question 5**: How many hypotheses do you reject with Bonferroni at a 
+FWER of 0.1?
+
+You might notice that your answer to 4 is different than what the adjusted
+p-values in `res$padj` might imply; the reason is that internally DESeq2 
+uses a more advanced method to do the FDR correction compared to 
+Benjamini-Hochberg (a simplified variant of IHW in which low counts genes get 
+filtered out). 
+
+As mentioned in the testing class, we can use the p-value histogram plot for
+diagnostic purposes. Let's look at a simulation to understand this point. 
+First, we simulate four samples under the null (same mean and variance) and 
+apply t-tests:
+
+```{r uniform_hist}
+set.seed(0xdada2)
+y = cbind(rnorm(10000, 0, 1),
+          rnorm(10000, 0, 1),
+          rnorm(10000, 0, 1),
+          rnorm(10000, 0, 1))
+library(genefilter)
+pvalue = rowttests(y, factor(c("C","C","T","T")))$p.value
+ggplot(tibble(pvalue), aes(x = pvalue)) +
+  geom_histogram(binwidth = 0.01, fill = "Royalblue", boundary = 0)
+```
+
+Looks good. But now assume that two samples were processed on the same day 
+separately from the others. That day, something happened and the means in both 
+samples were shifted. In that case, the histogram is skewed to the right. 
+
+Now try to modify the following code by shifting the mean of the second and 
+fourth sample by two?
+
+```{r skewed_hist, fig.width = 4.5, fig.height = 4.5}
+# TODO
+#set.seed(0xdada2)
+#y = cbind(rnorm(10000, ?, 1),
+#          rnorm(10000, ?, 1),
+#          rnorm(10000, ?, 1),
+#          rnorm(10000, ?, 1))
+#pvalue = rowttests(y, factor(c("C","C","T","T")))$p.value
+#ggplot(tibble(pvalue), aes(x = pvalue)) +
+#  geom_histogram(binwidth = 0.01, fill = "Royalblue", boundary = 0)
+```
+
+One way to take such batch effects into account is by adding the batch factor 
+(e.g. the run day) in our model. 
+
+What can you do if you suspect there are ``hidden'' factors that affect your 
+data, but they are not documented? (Sometimes, such unknown/undocumented 
+covariates are also called batch effects.) There are methods that try to 
+identify blocking factors in an unsupervised fashion, see e.\,g., 
+[Leek and Storey 2007](http://journals.plos.org/plosgenetics/article?id=10.1371/journal.pgen.0030161) 
+or [Stegle et al 2010](http://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1000770).
+
+### MA plot
+
+Read the Wikipedia description for [MA plots](https://en.wikipedia.org/wiki/MA_plot). 
+Fold change versus mean of size-factor normalized counts. Logarithmic scaling
+is used for both axes. By default, points are colored red if the adjusted 
+p-value is less than 0.1. Points which fall out of the y -axis range are 
+plotted as triangles.
+
+To produce the MA plot, we can use the function ``plotMA`` in the ``DESeq2`` 
+package.
+
+```{r MA}
+plotMA(pasilla, ylim = c( -2, 2))
+```
+
+But as mentioned in class, we can often do better with Empirical Bayes shrinkage 
+of the counts. We can achieve this with a newer method, called "apeglm", as 
+follows:
+  
+```{r}
+lfc_shrink_res <- lfcShrink(pasilla, coef="condition_treated_vs_untreated", type="apeglm")
+```
+
+```{r MA shrink, fig.width = 3, fig.height = 3}
+plotMA(lfc_shrink_res, ylim = c( -2, 2))
+```
+
+
+### PCA plot
+
+To produce an ordination plot, we can use the ``DESeq2`` function ``plotPCA`` 
+after first transforming the data with the rlog transformation.
+
+```{r PCArlog}
+pas_rlog = rlogTransformation(pasilla)
+```
+
+```{r PCAplot, fig.width = 4, fig.height = 3.2}
+plotPCA(pas_rlog, intgroup=c("condition", "type")) + coord_fixed()
+```
+
+This type of plot is useful for visualizing the overall effect of experimental 
+covariates and/or to detect batch effects. Here, the first principal axis,
+PC1, is mostly aligned with the experimental covariate of interest 
+(untreated / treated), while the second axis is roughly aligned with 
+the sequencing protocol (single-read / paired-end). We used a data
+transformation, the regularized logarithm or ``rlog``. Instead of PCA, other 
+ordination methods, for instance multi-dimensional scaling, can also be useful.
+
+
+
+### Heatmaps
+
+Heatmaps can be a powerful way of quickly getting an overview over a matrix-like 
+dataset, count tables included. Below you see how to make a heatmap from the 
+rlog- transformed data. For a matrix as large as counts(pasilla), it is not 
+practical to plot all of it, so we plot the subset of the 30 most variable 
+genes.
+
+```{r figHeatmap, fig.width = 4, fig.height = 6}
+library("pheatmap")
+select = order(rowMeans(assay(pas_rlog)), decreasing = TRUE)[1:30]
+pheatmap(
+  assay(pas_rlog)[select, ],
+  scale = "row",
+  annotation_col = as.data.frame(colData(pas_rlog)[, c("condition", "type")]))
+```
+
+
+If you want, you can try a different heatmap package (for example "ComplexHeatmap")
+and explore a more enriched heatmap plot.
+
+```{r}
+# BiocManager::install("ComplexHeatmap")
+# library("ComplexHeatmap")
+# TODO
+```
+
+
+## Two-factor analysis of the pasilla data
+
+Besides the treatment with siRNA, the ``pasilla`` data have another covariate,
+``type``, which indicates the type of sequencing that was performed.
+We saw in the PCA plot that the sequencing ``type`` had a considerable 
+systematic effect on the data. Our basic analysis did not take this account, 
+but we will do so now. This should help us get a more correct picture of which
+differences in the data are attributable to the treatment, and which are
+confounded --or masked-- by the sequencing type.
+
+```{r replaceDesign}
+pasillaTwoFactor = pasilla
+design(pasillaTwoFactor) = formula(~ type + condition)
+pasillaTwoFactor = DESeq(pasillaTwoFactor)
+```
+
+Of the two variables ``type`` and ``condition``, the one of primary interest
+is the latter, and in ``DESeq2``, the convention is to put it at the end of the
+formula. This convention has no effect on the model fitting, but it helps 
+simplify some of the subsequent results reporting. Again, we access the results 
+using the
+``results`` function.
+
+```{r multiResults}
+res2 = results(pasillaTwoFactor)
+head(res2, n = 3)
+```
+
+
+It is also possible to retrieve the $\log_2$ fold changes, p-values and adjusted
+p-values associated with the ``type`` variable.  The function ``results`` takes an
+argument ``contrast`` that lets users specify the name of the variable, the level
+that corresponds to the numerator of the fold change and the level that corresponds
+to the denominator of the fold change.
+
+```{r multiTypeResults}
+resType = results(pasillaTwoFactor, 
+                  contrast = c("type", "single-read", "paired-end"))
+head(resType, n = 3)
+```
+
+So what did we gain from this analysis that took into account ``type`` as a 
+nuisance factor (sometimes also called, more politely, a ``blocking factor``), 
+compared to the simple comparison between two groups? Let us plot the
+p-values from both analyses against each other.
+
+```{r scpres1res2,  warning = FALSE}
+trsf = function(x) ifelse(is.na(x), 0, (-log10(x)) ^ (1/6))
+ggplot(tibble(pOne = res$pvalue,
+              pTwo = res2$pvalue),
+    aes(x = trsf(pOne), y = trsf(pTwo))) +
+    geom_hex(bins = 75) + coord_fixed() +
+    xlab("Single factor analysis (condition)") +
+    ylab("Two factor analysis (type + condition)") +
+    geom_abline(col = "orange")
+```
+
+Comparison of p-values from the models with a single factor (condition) and with
+two factors (type + condition). The axes correspond to 
+$(-\log_{10}p)^{\frac{1}{6}}$, an arbitrarily chosen monotonically decreasing 
+transformation that compresses the dynamic range of the p-values for the purpose 
+of visualization. We can see a trend for the joint distribution to lie above the
+bisector, indicating that the p-values in the two-factor analysis are generally 
+smaller than those in the one-factor analysis.
+
+As we can see, the p-values in the two-factor analysis are similar to those 
+from the one-factor analysis, but are generally smaller. The more sophisticated 
+analysis has led to an, albeit modest, increase in power. We can also see this 
+by counting the number of genes that pass a certain significance threshold in 
+each case:
+
+```{r compareRes}
+compareRes = table(
+   `simple analysis` = res$padj < 0.1,
+   `two factor` = res2$padj < 0.1 )
+addmargins( compareRes )
+```
+
+The two-factor analysis found `r sum(compareRes[,2])` genes differentially 
+expressed at an FDR threshold of 10\%, while the one-factor analysis found 
+`r sum(compareRes[2,])`. The two-factor analysis has increased detection power. 
+In general, the gain can be even much larger, or also smaller, depending on the 
+data. The proper choice of the model requires informed adaptation to the
+experimental design and data quality.
+
+ Why do we detect fewer significant genes when we do not take into account the
+``type`` variable?  More generally, what does this mean about the benefit of 
+taking into account (or not) blocking factors?
+
+Without modeling the blocking factor, the variability in the data that is due 
+to it has to be absorbed by the $\varepsilon$s. This means that they are 
+generally larger than in the model with the blocking factor. The higher level
+of noise leads to higher uncertainty in the $\beta$-estimates.  On the other 
+hand, the model with the blocking factor has more parameters that need to be 
+estimated. In statistical parlance, the fit has fewer ``degrees of freedom''.  
+Both of these effects are counteracting, and which of them prevails, and which 
+of the modeling choices yields more or fewer significant results depends 
+on the data.
+  
+As a note of caution: The two p-values calculated above (one with ~condition
+and one with ~type+condition) correspond to different null hypotheses. This 
+can be a problem when the blocking factor and condition are correlated.
+
+## Single cell analysis
+
+In this section, we get a glimpse of single cell RNA-Seq data and check that the Negative Binomial model used for bulk RNA-Seq can often work well also for single cell data.
+
+Our starting point is a dataset from 10X Genomics of peripheral blood mononuclear cells (PBMC).
+
+```{r}
+sce = TENxPBMCData::TENxPBMCData("frozen_pbmc_donor_a")
+sce
+```
+
+Note that the `sce` object is of class `SingleCellExperiment`, which is the Bioconductor class for working with single cell data.  It contains measurements for 32738 genes across 2900 cells. The scale of the datasets is a key difference compared to bulk RNA-Seq, were typically we only have a handful of samples that have been measured.
+
+As we did for the Pasilla bulk RNA-Seq dataset previously, we now seek to explore the mean-variance relationship. To this end, we calculate the variance and mean of each gene. Note that a more refined analysis would first normalize the counts across cells.
+
+```{r}
+sce_counts <- as.matrix(counts(sce))
+sce_vars <- rowVars(sce_counts)
+sce_means <- rowMeans(sce_counts)
+sce_df <- data.frame(mean = sce_means, var=sce_vars)
+```
+
+We filter out genes that had either no counts at all (i.e., were never measured) and some with a high count (notice that the actual counts in single cell RNA-Seq are typically a lot smaller than in bulk RNA-Seq):
+
+```{r}
+filt_idx <-  (sce_means == 0) | (sce_means > 20)
+sce_filt <- sce[!filt_idx,]
+sce_filt_df <- sce_df[!filt_idx,]
+sce_count_filt <- sce_counts[!filt_idx, ]
+```
+
+Let us plot the mean-variance relationship:
+```{r fig.width = 4, fig.height = 4}
+ggplot(sce_df, aes(x=mean,y=var)) + 
+                          geom_point(alpha=0.2) +
+                          xlab("Mean") + 
+                          ylab("Variance")
+```
+
+We see that most of the genes indeed follows the relationship we would expect from Negative Binomial data, i.e.,
+
+$$V(\mu) = \mu + \alpha \mu^2$$
+
+For single cell RNA-Seq, we have enough data, that we could fit the two parameters $\alpha, \mu$ of the Negative Binomial model individually for each gene. For example we could use the `fitdistr` function of the `MASS` package and apply it to each row of the count matrix. This is to be contrasted with bulk RNA-Seq, where Empirical Bayes methods are necessary to stabilize estimates for individual genes by sharing information across genes.
+
+Instead, here, we do a simpler analysis (similar to an analysis by [Svensson](https://www.biorxiv.org/content/biorxiv/early/2019/03/19/582064.full.pdf). First, for each gene $i$, we estimate the parameter $\mu_i$ of the Negative Binomial just by the mean of the counts for that gene. Second, we use the same $\alpha$ across all genes (for the sake of illustration; this should typically not be done for a real analysis!). Then, we can directly estimate $\alpha$ by fitting the curve $V(\mu) = \mu + \alpha \mu^2$. We do this using the `rlm` function in the `MASS` package. This is a robust version of `lm` that is not as influenced by outlying points. We do this because in the mean-variance plot we saw some genes that did not seem to follow the curve of most genes.
+
+
+```{r}
+rlm_fit <- rlm(var-mean ~ 0  + I(mean^2), data=sce_filt_df, maxit=100)
+```
+We use the syntax above to force the model to only fit the parameter `alpha`, rather than also fitting an intercept. The `I()` protects the input, that is we inform the model that we want a coefficient for `mean^2`. Without `I()`, operators such as `*, +, ^` have a different meaning within a formula and so the output would be different.
+
+Let us extract the estimated $\alpha$:
+```{r}
+alpha_dispersion <- coef(rlm_fit)
+alpha_dispersion
+```
+
+We now compute the variance predicted from the Negative Binomial model, and overlay it on our original plot of the mean-variance relationship:
+
+```{r fig.width = 4, fig.height = 4}
+sce_filt_df <- dplyr::mutate(sce_filt_df, fitted_var = mean + alpha_dispersion*mean^2)
+ggplot(sce_filt_df, aes(x=mean,y=var)) + 
+                 geom_point(alpha=0.1) + 
+                 geom_line(aes(y=fitted_var), col="red")
+```
+
+We see a decent fit for most genes. Next we explore another aspect of single cell RNA-Seq data and see if the Negative Binomial model can also explain it: The large number of zeros. For each gene, let us compute the proportion of cells for which the gene was not measured at all (i.e., the count is 0).
+
+
+
+```{r}
+zero_prop <- rowMeans( sce_count_filt == 0 )
+```
+
+```{r fig.width = 4, fig.height = 4}
+ggplot(data.frame(zero_prop = zero_prop), aes(x=zero_prop)) +
+                                    geom_histogram(binwidth = 0.05, fill = "Royalblue", boundary = 0) + 
+                                    xlab("Proportion of zeros")
+```
+
+Is such a large number of zeros consistent with the Negative Binomial model? We can check this by comparing the observed proportion of zeros to the one predicted by the Negative Binomial model! We can get the latter prediction by the `dnbinom` function. We need to be slightly careful, since `dnbinom` uses a different parametrization of the Negative Binomial distribution (read the documentation!). 
+
+```{r}
+sce_filt_df <- dplyr::mutate(sce_filt_df, zero_prop = zero_prop,
+                      theoretical_zero_prop = dnbinom(0, mu=mean, size=1/alpha_dispersion))
+```
+
+
+```{r fig.width = 4, fig.height = 4}
+ggplot(sce_filt_df, aes(x=mean, y=zero_prop))  +
+                         geom_point(alpha=0.1) +
+                         geom_line(aes(y=theoretical_zero_prop), col="red") +
+                         scale_x_log10() + ylab("proportion of zeros")
+```
+
+
+As for the mean-variance relationship, we see that for most genes indeed the Negative Binomial provides a great fit. The deviating genes might correspond to genes that show heterogeneous biological activity across PBMCs. This is why [Svensson (2019)](https://www.biorxiv.org/content/biorxiv/early/2019/03/19/582064.full.pdf) conducts an analysis analogous to the one above on negative control data, i.e., datasets where no biological heterogeneity is expected. His goal is to demonstrate that the Negative Binomial distribution often provides an almost perfect fit for (UMI) single cell data, for both the number of zeros and the mean-variance relationship.
+

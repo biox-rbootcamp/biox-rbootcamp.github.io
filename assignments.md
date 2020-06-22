@@ -6,7 +6,7 @@ layout: cme195
 
 - Lab 1: Installing R and using R-studio [link]()
 - Lab 2: Basic R syntax [link]()
-- [Lab 3](assignment/homework_FA2018.nb.html): Using Rmarkdown and review of the material
+- [Lab 3](assignments/homework_FA2018.nb.html): Using Rmarkdown and review of the material
 - [Lab 4](): 
 - Lab 5:
 - Lab 6: 

@@ -1,0 +1,371 @@
+---
+title: "Lab 2: Simulations"
+author: "Bios 221: Modern Statistics for Modern Biology"
+date: "10/2/2019"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## Goal
+
+In this lab, we'll learn how to simulate data with R using random number generators and we will also use Bioconductor for the first time. 
+
+The goal is to work through this lab by running all the R code, as explained in Lab0. Then you will execute all code chunks sequentially. We encourage you to take advantage of the interactivity by modifying commands and seeing how the output changes.
+Once you get to the end of this lab, go to [Canvas](https://canvas.stanford.edu)  to answer some questions related to its material (Quiz 1, due Wednesday midnight).
+
+You may NOT work with other students to answer the questions on Canvas.  You will need a Stanford ID to log in to Canvas.
+
+
+
+## Getting Started
+
+In class you learned about many distributions, for example you learned about the Binomial distribution (which has the Bernoulli distribution as a special case), as well as the Poisson distribution.
+
+
+R can generate numbers from all known distributions. In particular, we know how to generate random discrete data using the specialized R functions tailored for each type of distribution. We use the functions that start with an r as in ``rXXXX``, where ``XXXX`` could be ``pois`` or ``binom``. If we need a theoretical computation of a probability under one of these models, we use the functions ``dXXXX``, such as ``dbinom``, which computes the probabilities of events in the discrete binomial distribution, and ``dnorm``, which computes the probability density function for the continuous normal distribution. When computing tail probabilities such as $\Pr(X \leq a)$ it is convenient to use the cumulative distribution functions, which are called ``pXXXX``.
+
+When you want to use random numbers in a project, a potential complication is that each time you run it you get a different result. Alas, there is help. The random numbers that your computer produces are not really random, they only look like they were random, but in fact depend on a setting in your computer's random number generator which is called the __seed__ (for this reason they are also sometimes called __pseudorandom numbers__). That way you can exactly reproduce the results of a simulation or algorithm, even if it uses "random" numbers.
+
+Compare for instance the following output:
+
+```{r rpois}
+sample_from_poisson = rpois(n = 10, lambda = 5)
+sample_from_poisson[1:3]
+mean(sample_from_poisson)
+```
+
+Do this repeatedly. Each time, you'll get a different value.
+In fact if you put all the values together you would get
+what we call the sampling distribution of the mean of 10
+Poisson random variables.
+
+Now try:
+```{r seed}
+set.seed(19720505)
+sample_from_poisson = rpois(10, 5)
+sample_from_poisson[1:3]
+mean(sample_from_poisson)
+
+set.seed(19720505)
+sample_from_poisson = rpois(10, 5)
+sample_from_poisson[1:3]
+mean(sample_from_poisson)
+```
+
+Now let us turn to ``dpois`` and ``ppois``. What is the probability that a random variable with Poisson distribution with mean 5 is equal to 5?
+
+We could figure this out by simulation again, e.g. we could draw 10000 samples from the above distribution and count how often we got a 5 on average:
+```{r}
+set.seed(1)
+sample_from_poisson = rpois(10000, 5)
+mean(sample_from_poisson==5)
+```
+
+Or in this case we can get an exact answer:
+```{r}
+dpois(5,5)
+```
+
+What is the probability that the same random variable is less or equal to 5?
+
+```{r}
+mean(sample_from_poisson <= 5)
+```
+
+Using ``ppois``:
+
+```{r}
+ppois(5,5)
+```
+
+Can you get the same result using only ``dpois`` instead of ``ppois``?
+
+
+## Using ``apply``-family functions
+
+We will now try to make ourselves familiar with some continuous distributions, namely the [Exponential](https://en.wikipedia.org/wiki/Exponential_distribution) and [Gamma](https://en.wikipedia.org/wiki/Gamma_distribution) distributions.
+
+
+A mathematical fact from probability theory is that the sum of exponentials gives a gamma distribution. In this section, we will confirm that by simulation and cover some helpful functions in R. We'll prefer using the ``apply`` family of function over ``for`` loops, since they tend to lead to simpler and clearer code.
+
+We will generate 5 samples from an exponential with a rate parameter 0.1 and sum them together. This is ``sum(rexp(n, rate))``. The function ``replicate`` is a convenient wrapper to do this repeatedly. Here, we'll do it 50,000 times to get an idea of the sampling distribution of our procedure.
+
+
+```{r replicate}
+num_replicates = 50000
+nexps = 5
+rate = 0.1
+set.seed(0xdada)
+x1 = replicate(num_replicates, {
+    sum(rexp(n = nexps, rate = rate))
+}) # end of replicate
+head(x1)
+```
+
+To see whether the result is plausible, we can make a histogram of the simulation result and compare it to what we (in this case happen to) know is the truth.
+
+```{r compare_truth}
+hist(x1, freq = FALSE, ylim = c(0, 0.02))
+lines(sort(x1), dgamma(sort(x1), shape = nexps, scale = 1/rate), 
+      col = "blue", lwd = 2)
+```
+
+In fact, ``replicate`` is similar to the ``sapply`` function (have a look at their manual page in R). Both call the R code expression given as the second argument. With ``replicate``, the expression is just evaluated repeatedly as many times as stated in the first argument (``num_replicates`` in our case). With ``sapply``, the repeated evaluations of the expression can depend on the values of the elements of the vector provided in the first argument. (Advanced topic: there are also versions ``lapply``, ``vapply``, ``apply``, ``tapply`` that support various more advanced programming features. Later we'll learn how to use R's vectorization features as well as ``group_by`` of the ``dplyr`` package for another, elegant and efficient way of applying functions to large sets of data.) 
+
+First, let's experiment with ``sapply``:
+
+```{r sapply}
+sapply( 3:7, function(i) { i^2-1 })
+```
+
+And here is how you might do the above ``replicate`` loop with ``sapply`` and ``vapply``.
+You can plot the result using the same commands as above.
+
+```{r apply}
+set.seed(0xdada)
+x1 = sapply(seq_len(num_replicates), function(i) {
+   sum(rexp(n = nexps, rate = rate))
+   }
+) # end of sapply
+head(x1) 
+
+set.seed(0xdada)
+x1 = vapply(seq_len(num_replicates), function(i) {
+  sum(rexp(n = nexps, rate = rate))
+  }, # end of anonymous function
+  FUN.VALUE = numeric(1)
+) # end of vapply
+head(x1) 
+```
+
+Look up the documentation to ``vapply``: What is the difference between ``sapply`` and ``vapply``?
+
+
+**Quiz question 1** : What happens if you replace ``numeric(1)`` in the above code with ``numeric(2)``?
+
+**Quiz question 2** : What if you replace ``numeric(1)`` by ``character(1)``?
+
+
+When we want apply a simple summarisation function (e.g., the mean), the fastest way is often to just make a matrix of all the simulations and then apply that function to the matrix appropriately. The functions ``rowSums`` and ``colSums`` are particularly efficient at this.
+
+```{r row_col_sums, exercise = TRUE, exercise.setup = "setup-rexp"}
+set.seed(0)
+system.time({
+  m = matrix(rexp(n = nexps * num_replicates, rate = rate), 
+             nrow = nexps,
+             ncol = num_replicates)
+  x1 = apply(m, 2, sum)
+})
+head(x1) 
+
+x2 = colSums(m)
+identical(x1, x2)
+```
+
+
+## Quiz questions on probability distributions
+
+
+**Quiz question 3** : What is the most common outcome of a Binomial distribution with parameters `prob=0.4` and `size=20`?
+
+**Quiz question 4** : What is the probability of the most common outcome of a Binomial distribution with parameters `prob=0.4` and `size=20`?
+
+**Quiz question 5** : What is the most common outcome for a Geometric distribution with parameter `prob=0.2`?
+
+**Quiz question 6** : What is the smallest $n$ such that a random variable drawn from a Geometric distribution with parameter `prob=0.2` is less or equal to $n$ with probability greater or equal to $0.95$?
+
+**Quiz question 7** : What is the most common outcome for a Geometric distribution with parameter `prob=0.8`?
+
+**Quiz question 8** : What is the smallest $n$ such that a random variable drawn from a Geometric distribution with parameter `prob=0.8` is less or equal to $n$ with probability greater or equal to $0.95$?
+
+**Quiz question 9** : Find by simulations using the `var` function what the variance of the Poisson distribution with parameter `lambda = 5` is ( +- 0.3 deviation accepted). For example you might want to generate 1000 instances of a Poisson(5) random variable.
+
+**Quiz question 10** : Now instead consider the sum of 50 independent Poisson(0.1) random variables. Again using simulation (or otherwise), find the variance of this (again within +- 0.3 range accepted).
+
+
+## Monte Carlo simulation
+
+We show how to compute the probability of simple events using simulation.
+
+Suppose we rolled two fair dice. What is the probability that their sum is at least 7? We will approach this by simulating many throws of two fair dice, and then computing the fraction of those trials whose sum is at least 7. It will be convenient to write a function that simulates the trials and returns TRUE if the sum is at least 7 (we call this an event), and FALSE otherwise.
+
+
+```{r setup-event}
+isEvent = function(numDice, numSides, targetValue, numTrials){
+  apply(matrix(sample(seq_len(numSides), numDice*numTrials, replace=TRUE), 
+               nrow=numDice), 2, sum) >= targetValue
+}
+```
+
+
+
+Now that we have our function, we are ready to do the Monte Carlo. 
+
+```{r event-seed}
+set.seed(0)
+#try 5 trials
+outcomes = isEvent(2, 6, 7, 5)
+mean(outcomes)
+```
+
+This is far from the theoretical answer of $\frac{21}{36}=0.58333$. Now try with 10,000 trials:
+
+```{r trials}
+set.seed(0)
+outcomes = isEvent(2, 6, 7, 10000)
+mean(outcomes)
+```
+
+
+
+## Bioconductor and simulations
+
+We are now ready to dive into Bioconductor for the first time to answer a question about the *C. elegans* genome nucleotide frequency in a statistically rigorous way: Is the mitochondrial sequence of *C. elegans* consistent with a model of equally likely nucleotides? After basic exploration of the sequence, we will use the chi squared statistic and simulate from the multinomial distribution to answer the above question.
+
+The code below will download the packages from Bioconductor (`Biostrings` is useful for working with biological sequences, while `BSgenome.Celegans.UCSC.ce2` contains the *C. elegans* genome), in case they were not downloaded after Lab1.
+
+```{r warning=FALSE, message=FALSE}
+pkgs_needed = c("Biostrings", "BSgenome.Celegans.UCSC.ce2")
+letsinstall = setdiff(pkgs_needed, installed.packages()) 
+if (length(letsinstall) > 0) {
+  BiocManager::install(letsinstall)
+}
+```
+
+Let us load the packages now, in particular we can load the genome sequence package as we load any other R packages:
+```{r warning=FALSE, message=FALSE}
+library("BSgenome.Celegans.UCSC.ce2")
+library("Biostrings")
+```
+
+
+```{r}
+Celegans
+```
+
+Let us explore this object:
+
+```{r}
+seqnames(Celegans)
+```
+
+```{r}
+class(Celegans$chrM)
+```
+
+Note that ``DNAString`` is a special class defined by the ``Biostrings`` package for working with DNA sequences (but for example it also exports ``AAStrings`` for working with amino acid sequences).
+
+Before turning to our study of the mitochondrial sequence, we ask some questions about the chromosomes:
+
+
+**Quiz Question 11** : How many chromosomes are stored in `Celegans`?
+
+
+We can figure out e.g. the length of Chromosome M as follows:
+
+```{r celegans-length, exercise=TRUE}
+length(Celegans$chrM)
+```
+
+**Quiz Question 12** : What is the length of all chromosomes stored in `Celegans` combined?  (Hint: Look at the documentation of the ``BSgenome`` class.)
+
+**Quiz Question 13** : Which is the smallest chromosome of `Celegans`?
+
+
+We can figure out the how often each of the four bases appears in the mitochondrial DNA sequence using the `letterFrequency` function from the `Biostrings` package:
+
+```{r}
+lfM = letterFrequency(Celegans$chrM, letters=c("A", "C", "G", "T"))
+lfM
+```
+
+Let us do a sanity check:
+```{r}
+sum(lfM) == length(Celegans$chrM)
+```
+
+After normalization we get:
+
+```{r}
+lfM / sum(lfM)
+```
+Could this have come from a uniform distribution on the 4 letters?
+
+We can create a random (each letter with equal probability) sequence of the same length as the *C. elegans* chromosome M:
+
+```{r}
+t(rmultinom(1, length(Celegans$chrM), p = rep(1/4, 4)))
+```
+
+The expected frequencies are just
+
+```{r}
+length(Celegans$chrM) / 4
+```
+
+
+Is the _C.elegans_ data consistent with such a model? We're going to compute a statistic that measures how close two multionial outputs are to each other. We'll take the average squared difference between expected (`e`) and observed (`o`) counts, scaled by `e`. We will call the function `oestat`:
+
+```{r celegans-oestat}
+oestat = function(o, e){
+  sum( (e-o)^2/e )
+}
+oe = oestat( o = lfM, e=length(Celegans$chrM)/4)
+oe
+```
+
+Is this larger than what randomness could explain? We already saw above a set of typical counts we could expect under the null model: But we need a whole set (distribution) of values. We compute these using the replicate function (which as you might recall evaluates a function many times). Try running the following
+
+```{r, celegans-replicate}
+set.seed(1)
+B = 10000
+n = length(Celegans$chrM)
+expected = rep(n/4 ,4)
+oenull = replicate(B, oestat(e=expected, o=rmultinom(1,n,p=rep(1/4,4))))
+```
+
+**Quiz Question 14** : Based on these results, do you believe that the nucleotide frequencies in the _C.elegans_ chrM sequence are all the same? 
+
+
+
+## Power calculation
+Here we will use Monte Carlo to do a power analysis: These are very important when you design your experiments and want to know if you will be able to detect a hypothesized effect! You did a power study already in class for the chi-squared test. Note that the details of the test will become more transparent once we also cover hypothesis testing in class, so it might be helpful to revisit this section then!
+
+The power of a statistical test is the probability that the test rejects the null hypothesis if the alternative is true. There is rarely a closed form for the power, so we resort to simulation. An important question in many clinical trials is how many subjects (samples) do we need to achieve a certain amount of power?
+
+Suppose we want to find out how many samples are needed to distinguish between the means of two normal distributions, $N(1, 0.5)$ and $N(2, 0.5)$ with a power of at least 0.8 at the 0.05 significance level.
+
+We'll take $n$ samples from each population, and compute the statistic $\frac{\bar{X}_1-\bar{X}_2}{\sqrt{(0.5^2+0.5^2)/n}}$. Under the null hypothesis that the two means are the same, this statistic has a $N(0, 1)$ distribution, and the $p$-value is $2P\left(N(0,1)\geq\left|\frac{\bar{X}_1-\bar{X}_2}{\sqrt{(0.5^2+0.5^2)/n}}\right|\right)$.
+
+```{r setup-power}
+
+compute_power = function(n, sigma, numTrials){  
+  sampa = matrix(rnorm(n*numTrials, 1, sigma), ncol=numTrials)
+  sampb= matrix(rnorm(n*numTrials, 2, sigma), ncol=numTrials)
+  statistics = (apply(sampa, 2, mean) - apply(sampb, 2, mean))/sqrt(2*sigma^2/n)
+  return (mean(abs(statistics) >= qnorm(0.975)))
+}
+
+# n is the number of samples, 
+# sigma is the variance of the the 2 samples,
+# numTrials is the number of trials for our Monte Carlo simulation
+
+```
+
+
+How many samples do we need? Let's try 3 and 4 samples:
+
+```{r compute_power-solution}
+set.seed(0)
+compute_power(3, 0.5, 10000)
+compute_power(4, 0.5, 10000) # So it looks like 4 samples will do it.
+```
+
+Try playing around with other inputs to the ```computer_power``` function; what is the importance for ```numTrials``` and how do you think you should choose it? What is the relationship between the power and ```sigma```? (e.g. if you let ```sigma=3```, how many samples do you need to achieve the same power as before?)

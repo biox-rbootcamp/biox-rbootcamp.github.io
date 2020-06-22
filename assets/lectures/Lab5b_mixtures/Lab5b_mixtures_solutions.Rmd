@@ -1,0 +1,63 @@
+---
+title: 'Lab 5b: Solutions to Mixture Models and Variance Stabilization'
+author: "Bios221"
+date: "10/7/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+**Question 1:** How many modes are there?
+
+**Answer:** There are 2 modes.
+
+**Question 2:** Modify the code below to simulate one million coin flips 
+and make a histogram with 500 bins.
+
+```{r}
+library(ggplot2)
+
+sd1 = 0.5 ; sd2 = 0.5
+mean1 = 1 ; mean2 = 3
+
+B = 1e+6
+coinflips = (runif(B)>0.5)
+fairmix = rnorm(length(coinflips),
+                mean = ifelse(coinflips, mean1, mean2),
+                sd   = ifelse(coinflips, sd1,   sd2))
+fairdf = data.frame(fairmix)
+# Make the plot below using bins = 500 instead of binwidth = 0.2 in geom_histogram()
+
+ggplot(fairdf, aes(x = fairmix)) +
+    geom_histogram(fill = "red", color = "grey", bins = 500)
+```
+
+
+**Question 3**:
+a) Try to increase the samples size n1 and n2. What happens then?
+b) Why do you get different results every time you run this code?
+c) How can you make it produce always the same result?
+
+**Answer:**
+a) As n1, n2 increase, we can learn the true means quite accurately.
+b) The EM algorithm is initialized from random centers every time, read the documentation to `?normalmixEM`.
+c) By setting a seed using e.g., `set.seed(1)`.
+
+
+
+**Question 4**:Give the upper end of a centered 95\% confidence interval for the median based on the above bootstrap sample. Tip: Use the ``quantile`` function.
+
+**Answer:**
+```{r}
+library("HistData")
+
+set.seed(1)
+B = 10000
+diff = ZeaMays$diff
+samplesIdx = replicate(B, sample(15, 15, replace = T))
+samplingDist = apply(samplesIdx, 2, function(x) {return(median(diff[x]))})
+
+quantile(samplingDist, 0.975)
+```

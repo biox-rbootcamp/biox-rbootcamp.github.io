@@ -1,0 +1,122 @@
+---
+title: "Lab 6: Solutions to testing and RNA-Seq"
+author: "Bios 221: Modern Statistics for Modern Biology"
+date: "10/10/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+## Install packages:
+
+```{r warning=FALSE, message=FALSE, eval=FALSE}
+pkgs_needed = c("dplyr", "DESeq2","pasilla")
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+
+BiocManager::install(setdiff(pkgs_needed, installed.packages()))
+```
+
+## Load in Pasilla and construct SummarizedExperiment
+
+We first repeat the steps from the lab that load in `pasilla` and create the `SummarizedExperiment`
+
+```{r warning=FALSE, message=FALSE}
+library(DESeq2)
+library(dplyr)
+```
+
+```{r loadpas, results="hide", error=FALSE}
+fn = system.file("extdata", "pasilla_gene_counts.tsv",
+                  package = "pasilla", mustWork = TRUE)
+counts = as.matrix(read.csv(fn, sep = "\t", row.names = "gene_id"))
+```
+
+```{r annotationFile}
+annotationFile = system.file("extdata", "pasilla_sample_annotation.csv",
+                             package = "pasilla", mustWork = TRUE)
+pasillaSampleAnno = readr::read_csv(annotationFile)
+pasillaSampleAnno
+```
+
+```{r factors}
+pasillaSampleAnno = mutate(
+  pasillaSampleAnno,
+  condition = factor(condition, levels = c("untreated", "treated")),
+  type      = factor(type, levels = c("single-read", "paired-end")))
+```
+
+```{r DESeq2, message = FALSE, warning = FALSE}
+mt = match(colnames(counts), sub("fb$", "", pasillaSampleAnno$file))
+pasilla = DESeqDataSetFromMatrix(
+  countData = counts,
+  colData   = pasillaSampleAnno[mt, ],
+  design    = ~ condition)
+class(pasilla)
+is(pasilla, "SummarizedExperiment")
+```
+
+
+**Quiz Question 1**: When we constructed our `SummarizedExperiment` object, we 
+also saved some column metadata which we had initially stored in 
+`pasillaSampleAnno`. With which function can we extract this information again?
+(Hint:`?SummarizedExperiment`)
+
+**Answer:** `colData`
+
+```{r}
+colData(pasilla)
+```
+
+## Multiple testing
+
+Next we use `DESeq2` to find differentially expressed genes:
+
+```{r}
+pasilla = DESeq(pasilla)
+```
+
+```{r}
+res = results(pasilla)
+pvals <- na.omit(res$pvalue)
+```
+
+**Quiz Question 2**: What is the FDR (in %) for the leftmost bin (i.e. when
+rejecting hypotheses smaller than 0.01)? The code snippet below might be a good 
+starting point. Estimate the background level with the median bin count in the 
+histogram object.
+
+```{r hist2}
+pv_hist <- hist(res$pvalue, breaks=seq(0,1, length=100), plot=FALSE)
+```
+
+**Answer:**
+```{r}
+rejected_null_hypotheses <- median(pv_hist$counts)
+rejected_hypotheses <- pv_hist$counts[1]
+fdp_estimate <- rejected_null_hypotheses/rejected_hypotheses
+fdp_estimate*100
+```
+
+**Quiz Question 3**: How many p-values are <= 0.1?
+
+**Answer:**
+```{r}
+sum(pvals <= 0.1)
+```
+**Quiz Question 4**: How many hypotheses do you reject with Benjamini-Hochberg 
+at a FDR of 0.1?
+
+**Answer:**
+```{r}
+sum(p.adjust(pvals, method="BH") <= 0.1)
+```
+**Quiz Question 5**: How many hypotheses do you reject with Bonferroni at a 
+FWER of 0.1?
+
+**Answer:**
+```{r}
+sum(p.adjust(pvals, method="bonferroni") <= 0.1)
+```
+

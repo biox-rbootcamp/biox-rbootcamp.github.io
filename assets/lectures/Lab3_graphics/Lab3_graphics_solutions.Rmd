@@ -1,0 +1,175 @@
+---
+title: "Lab 3: Graphics Solutions"
+author: "Bios 221: Modern Statistics for Modern Biology"
+date: "10/3/2019"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+
+## Load data
+
+```{r para_data, message=FALSE, warning=FALSE}
+library("parathyroidSE")
+library("EnsDb.Hsapiens.v86")
+library("dplyr")
+library("ggplot2")
+
+data("parathyroidGenesSE", package = "parathyroidSE")
+
+genes <- read.csv(textConnection(
+  "name, group
+   ESR1,  estrogen
+   ESR2,  estrogen
+   CASR,  parathyroid
+   VDR,   parathyroid
+   JUN,   parathyroid
+   CALR,  parathyroid
+   ORAI2, parathyroid"), 
+  stringsAsFactors = FALSE, strip.white = TRUE)
+
+ens <- ensembldb::select(EnsDb.Hsapiens.v86,
+  keys = list(GenenameFilter(genes$name), 
+              TxBiotypeFilter("protein_coding")),
+  columns = c("GENEID", "GENENAME"))
+ens <- 
+  dplyr::filter(ens, GENEID %in% rownames(parathyroidGenesSE)) %>%
+  mutate(group = genes$group[match(GENENAME, genes$name)])
+
+
+countData <- assay( parathyroidGenesSE ) 
+gene.counts <- t(countData[ens$GENEID, ])
+colnames(gene.counts) <- ens$GENENAME
+dat <- cbind(data.frame(colData( parathyroidGenesSE)), data.frame(gene.counts))
+head(dat)
+```
+
+## Initial plot
+
+Plot one of the estrogen related gene's counts (ESR1) with 
+plot aesthetics and faceting to separate patients, treatments and times.
+
+```{r para_plot, tidy=FALSE}
+ggplot(dat, aes(col = patient, x = treatment, y = ESR1)) +
+  geom_point(size = 3) + 
+  facet_grid( . ~ time)
+```
+
+
+## Quiz Answers
+
+From the plot of the parathyroid data, answer the following. 
+
+**Quiz question 1** : How many patients are there?
+
+**Answer:** There are four patients.
+
+**Quiz question 2** : How many time points are there?
+  
+**Answer:** There are two timepoints (24h, 48h).
+
+
+**Quiz question 3** : There were 3 treatments: "Control", "DPN", and "OHT". 
+How many measurements were taken from patient 2 under the DPN treatment?
+  
+**Answer:** There were three measurements taken for patient 2 (green) under 
+DPN treament.
+  
+**Question**: Make your own plot of VDR versus CASR.  (That is CASR, not CALR).
+
+**Answer**:
+
+```{r, fig.width=8, fig.height=4}
+ggplot(dat, aes( x = VDR, y = CASR)) +
+    geom_point(aes(fill = patient, shape = treatment, alpha=time), size = 3) +
+    scale_alpha_manual(values = c(1.0, 0.7)) +
+    scale_shape_manual(values = c(21, 22, 24)) +
+    guides(fill = guide_legend(override.aes=list(shape=21))) +
+    facet_grid( . ~ time)
+```
+
+**Quiz question 4** : Which patient has the highest recorded level of CASR?
+
+**Answer:** Patient 2.
+
+**Quiz question 5** : Which of the following pairs of patients seem to be well
+separated in this plot (i.e., for which two patients you can draw a line on 
+the plot that perfectly separates them)?
+
+**Answer:** 
+Patient 1 and patient 2, also
+Patient 1 and patient 3.
+
+**Quiz question 6** : You need to know which pairs of patients are well 
+separated with respect to the genes VDR and CASR (i.e., you can draw a 
+line on the plot that perfectly separates the patients). Which of the 
+following methods can help you visualize this?
+  
+**Answer:** 
+Plot VDR versus CASR, and change the shape of the point according to the patient. 
+Plot VDR versus CASR, and color the points according to the patient. 
+  
+  
+**Quiz question 7** : Which patient looks different from the other three when 
+you plot VDR versus ORAI2?
+
+**Answer:** Patient 2.
+
+```{r, fig.width=8, fig.height=4}
+ggplot(dat, aes( x = VDR, y = ORAI2)) +
+    geom_point(aes(fill = patient, shape = treatment, alpha=time), size = 3) +
+    scale_alpha_manual(values = c(1.0, 0.7)) +
+    scale_shape_manual(values = c(21, 22, 24)) +
+    guides(fill = guide_legend(override.aes=list(shape=21))) +
+    facet_grid( . ~ time)
+```
+
+**Quiz question 8** : Plot ORAI2 versus JUN. Which can you separate best?
+
+**Answer:** 24 hours vs. 48 hours.
+
+```{r, fig.width=6, fig.height=5}
+ggplot(dat, aes( x = JUN, y = ORAI2)) +
+    geom_point(aes(fill = time, shape = patient, alpha=treatment), size = 3) +
+    scale_alpha_manual(values = c(1.0, 0.7, 0.5)) +
+    scale_shape_manual(values = c(21, 22, 23,24)) +
+    guides(fill = guide_legend(override.aes=list(shape=21)))
+```
+
+**Quiz question 9** : Plot CASR versus (ESR1 + ESR2). Fit a separate 
+linear model for each treatment (Control, DPN, OHT). Which linear models 
+are increasing?
+
+**Answer:** DPN and OHT.
+
+```{r, fig.width=8, fig.height=4}
+ggplot(dat, aes( y = CASR, x = ESR1 + ESR2)) +
+    geom_point(aes(fill = treatment, color=treatment, shape = patient, alpha=time), size = 3) +
+    geom_smooth(aes(color = treatment), method = "lm", se=FALSE)+
+    scale_alpha_manual(values = c(1.0, 0.6)) +
+    scale_shape_manual(values = c(21, 22, 23,24)) +
+    guides(fill = guide_legend(override.aes=list(shape=21)))
+```
+
+
+**Quiz question 10** : What is the maximum number of shapes that you are 
+allowed to use in ggplot2 by default?
+  
+**Answer:** 6.
+```{r}
+df_shape <- data.frame(x=runif(10),y=runif(10), shapes=as.factor(1:10))
+ggplot(df_shape, aes(x=x,y=y, shape=shapes)) + geom_point()
+```
+
+**Quiz question 11** : Write the name of the function that you could use to 
+make more than the maximum number of default shapes allowed. Hint: this function 
+has "values" as one of the arguments ____(..., values = (...)).
+
+**Answer:** `scale_shape_manual`.
+
+
+**Quiz question 12** : What do Themes do in ggplot2?
+
+**Answer:** They control non-data components of the plot.   

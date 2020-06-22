@@ -1,0 +1,266 @@
+---
+title: "Lab 2: Simulations Answers"
+author: "Bios 221: Modern Statistics for Modern Biology"
+date: "10/2/2019"
+output: 
+  html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+set.seed(447872364)
+```
+
+## Quiz Answers
+
+**Quiz question 1** : What happens if you replace ``numeric(1)`` in the above 
+code with ``numeric(2)``?
+
+**Answer** : This would return an error because the function 
+`function(i) { sum(rexp(n = nexps, rate = rate))}` returns a single
+(length = 1) numeric value.
+
+**Quiz question 2** : What if you replace ``numeric(1)`` by ``character(1)``?
+
+**Answer** : This again returns an error as
+`function(i) { sum(rexp(n = nexps, rate = rate))}` returns a numeric value
+and not a character value.
+
+**Quiz question 3** : What is the most common outcome of a Binomial 
+distribution with parameters `prob=0.4` and `size=20`?
+
+**Answer** : The most common outcome is 8.
+
+Simulation based answer:
+```{r}
+num_trials <- 10000
+binom_variable <- rbinom(n = num_trials, prob = 0.4, size = 20)
+freqs <- table(binom_variable)
+freqs
+names(freqs)[which.max(freqs)]
+```
+
+Distribution based answer:
+```{r}
+x <- 1:20
+# Probability Mass Function (discrete version of a pdf)
+pmf <- dbinom(x, prob = 0.4, size = 20)
+# Plot the distribution of Binomial Variable with specified parameters
+# Then, look for the x-value which hives the highest probability density
+plot(x = x, y = pmf)
+```
+
+**Quiz question 4** : What is the probability of the most common outcome of a Binomial distribution with parameters `prob=0.4` and `size=20`?
+
+**Answer** : The probability of the most common outcome is around 0.1797058.
+
+```{r}
+dbinom(x = 8, prob = 0.4, size = 20)
+```
+
+
+**Quiz question 5** : What is the most common outcome for a Geometric 
+distribution with parameter `prob=0.2`?
+
+**Answer** : The most common outcome is 0.
+
+Simulation based answer:
+```{r}
+num_trials <- 10000
+binom_variable <- rgeom(n = num_trials, prob = 0.2)
+freqs <- table(binom_variable)
+freqs
+names(freqs)[which.max(freqs)]
+```
+
+Distribution based answer:
+
+```{r}
+x <- 0:10
+pdf <- dgeom(x, prob = 0.2)
+# Plot the distribution of Binomial Variable with specified parameters
+plot(x = x, y = pdf)
+```
+
+
+**Quiz question 6** : What is the smallest $n$ such that a random variable drawn 
+from a Geometric distribution with parameter `prob=0.2` is less or equal to $n$ 
+with probability greater or equal to $0.95$?
+
+**Answer** : The smallest $n$ is 13.
+
+```{r}
+ns_cutoff <- 0:100 #100 arbitrary, large number
+ns_cutoff[min( which(pgeom(ns_cutoff, prob=0.2) >= 0.95))]
+```
+
+An alternative way to arrive at the same result is using the `qgeom` function:
+
+```{r}
+qgeom(p = 0.95, prob = 0.2)
+```
+
+
+**Quiz question 7** : What is the most common outcome for a Geometric distribution with parameter `prob=0.8`?
+
+**Answer** : The most common outcome is 0.
+
+Simulation based answer:
+```{r}
+num_trials <- 10000
+binom_variable <- rgeom(n = num_trials, prob = 0.8)
+freqs <- table(binom_variable)
+freqs
+names(freqs)[which.max(freqs)]
+``` 
+
+
+Distribution based answer:
+
+```{r}
+x <- 0:10
+pdf <- dgeom(x, prob = 0.8)
+# Plot the distribution of Binomial Variable with specified parameters
+plot(x = x, y = pdf)
+```
+
+
+**Quiz question 8** : What is the smallest $n$ such that a random variable
+drawn from a Geometric distribution with parameter `prob=0.8` is less or
+equal to $n$ with probability greater or equal to $0.95$?
+
+**Answer** : The smallest $n$ is 1.
+
+```{r}
+ns_cutoff <- 0:100 #100 arbitrary, large number
+ns_cutoff[min( which(pgeom(ns_cutoff, prob=0.8) >= 0.95))]
+```
+
+Using `qgeom`:
+
+```{r}
+qgeom(p = 0.95, prob = 0.8)
+```
+
+**Quiz question 9** : Find by simulations using the `var` function what the 
+variance of the Poisson distribution with parameter `lambda = 5` is 
+( +/- 0.3 deviation accepted). For example you might want to generate
+1000 instances of a Poisson(5) random variable.
+
+**Answer** : The variance is about 5.
+
+```{r}
+num_trials <- 50000
+var(rpois(n = num_trials, lambda = 5))
+```
+
+Note that the theoretical variance of Poisson variables is equal to lambda
+parameter, so we got a consistent answer.
+
+**Quiz question 10** : Now instead consider the sum of 50 independent Poisson
+(0.1) random variables. Again using simulation (or otherwise), find the variance 
+of this (again within +/- 0.3 range accepted).
+
+**Answer** : The variance is about 5.
+
+```{r}
+num_trials <- 50000
+var(replicate(num_trials, sum(rpois(n = 50, lambda = 0.1))))
+```
+
+Note, that we again get the same answer. This is because, a sum of Poisson
+variables, $X_i \sim Pois(\lambda_i), \quad i = 1, \dots, M$  is Poisson 
+distributed $Y = \sum_{i = 1}^M X_i \sim Pois(\sum_{i = 1}^M\lambda_i)$
+
+
+**Quiz Question 11** : How many chromosomes are stored in `Celegans`?
+
+**Answer **: There are 7 chromosomes
+```{r warning=FALSE, message=FALSE}
+library("BSgenome.Celegans.UCSC.ce2")
+library("Biostrings")
+Celegans
+```
+
+```{r}
+length(Celegans)
+```
+
+
+**Quiz Question 12** : What is the length of all chromosomes stored in `Celegans` 
+combined?  (Hint: Look at the documentation of the ``BSgenome`` class.)
+
+**Answer** :  Combined length is 100291769.
+
+```{r celegans-length, exercise=TRUE}
+sum(seqlengths(Celegans))
+```
+
+**Quiz Question 13** : Which is the smallest chromosome of `Celegans`?
+
+**Answer** : The smallest is the chromosome chrM.
+
+```{r}
+which.min(seqlengths(Celegans))
+```
+
+**Quiz Question 14** : Based on these results, do you believe that the 
+nucleotide frequencies in the _C.elegans_ chrM sequence are all the same? 
+
+
+
+```{r}
+# nucleotide frequency of chrM
+lfM = letterFrequency(Celegans$chrM, letters=c("A", "C", "G", "T"))
+lfM
+```
+
+We're going to compute a statistic that measures how close two multionial 
+outputs are to each other as sum of squared deviation from expected 
+frequencies over expected frequencies. We'll take the average squared 
+difference between expected (`e`) and observed (`o`) counts, scaled by `e`.
+We will call the function `oestat`:
+
+```{r celegans-oestat}
+oestat = function(o, e){
+  sum( (e-o)^2/e )
+}
+n = length(Celegans$chrM)
+expected = rep(n/4 ,4)
+oe = oestat( o = lfM, e=expected)
+oe
+```
+
+Then, we compute the distribution of the same statistics assuming it
+came from the null distribution if all nucleotides were equally likely:
+
+```{r, celegans-replicate}
+set.seed(1)
+B = 10000
+oenull = replicate(B, oestat(e=expected, o=rmultinom(1,size = n, prob = rep(1/4,4))))
+```
+
+
+```{r}
+hist(oenull, breaks = 50)
+```
+
+```{r}
+quantile(oenull, p = 0.95)
+oe
+oe > quantile(oenull, p = 0.95)
+```
+
+
+**Answer** : The observed statistic 'oe' is much bigger than the
+95% quantile of the empirical null distribution of the statistics,
+so we can conclude that Celegans's chrM does not have an even distribution
+of the nucleotides.
+
+
+
+
+

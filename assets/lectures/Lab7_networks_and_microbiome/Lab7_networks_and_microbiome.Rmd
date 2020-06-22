@@ -1,0 +1,569 @@
+---
+title: "Lab 7: Networks and microbiome data"
+author: "Bios 221: Modern Statistics for Modern Biology"
+date: "10/14/2019"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+
+# Goal
+
+
+In this lab you will work through some examples to gain a better understanding
+of concepts related to  Graphs and Networks, Network Visualization and the 
+Minimal Spanning Tree; you will also learn the basics of the analysis of 
+microbiome data with a special emphasis on dimension reduction. 
+
+Work through this lab by running all the R code to your computer and making sure 
+that you understand the input and the output. We encourage you to work through 
+this lab with a partner. Once you get to the end of this lab, go to 
+[Canvas](https://canvas.stanford.edu) to submit your answers to quiz questions.
+
+You may NOT work with other students to answer the questions on Canvas. 
+You will need a Stanford ID to log in to Canvas.
+
+## Setup
+
+Install packages.
+
+```{r setup, warning = FALSE, message = FALSE}
+pkgs_needed = c("tidyverse","genefilter","ggrepel",
+                  "igraph","statnet", "ggnetwork", "rworldmap", "intergraph",
+                  "PMA", "phyloseq","vegan", "ade4", "impute")
+BiocManager::install(setdiff(pkgs_needed, installed.packages()))
+
+knitr::opts_chunk$set(echo = TRUE, fig.width = 8, fig.height = 6, cache=TRUE)
+```
+
+
+# Graphs and Networks
+
+Load packages.
+
+```{r warning = FALSE, message = FALSE}
+library("tidyverse")
+library("igraph")
+library("statnet")
+library("ggnetwork")
+library("rworldmap")
+```
+
+
+A *Graph* $G = (V, E)$ is a set of $n$ vertices in $V$ 
+and a set of edges $E$ which is a set of unordered pairs of vertices.
+We say $i \sim j$ if vertex $i$ is adjacent to vertex $j$ and $i \not\sim j$ otherwise.
+
+An *Adjacency Matrix* $\bf A$ is the matrix representation of $E$.
+If $i \sim j$ then the $(i,j)$ entry of ${\bf A}$ is 1.
+If $i \not\sim j$ then the $(i,j)$ entry of ${\bf A}$ is 0.
+So ${\bf A} \in \{0,1\}^{n \times n}$.
+
+A *Network* is a weighted, directed graph.
+Networks have adjacency matrices ${\bf A} \in R_+^{n \times n}$.
+
+
+## Graph visualization basics
+
+Graphs and networks have a structure which makes them natural but sometimes 
+difficult to represent as an image. While numbers can be represented on 
+a number line (and plotted against each other), we cannot do this with graphs
+and networks.
+
+There are two common ways to represent graphs.
+
+1. Draw (or plot) a graph by *plotting vertices* as points in two
+   dimensions.  Connect two vertices with a line segment if there is
+   an edge between the vertices. This is how graphs are usually visualized.
+   This is useful when edges represent similarity between vertices
+   because points that are similar will appear closer to each other in
+   the figure.
+
+2. Make a *heatmap image of the adjacency matrix*.
+   This is useful for larger networks when the vertices can be
+   organized (clustered) into several groups.
+   This is useful when the edges represent interactions between the
+   vertices because it is easy to see how groups of vertices
+   relate to other groups. This visualization is only as good as the way you 
+   order the vertices into clusters.
+
+We will first go over a simple example and then make some remarks about these 
+figures.
+
+
+
+## Very Small Examples
+
+First recall that any finite state space Markov chain can be represented as 
+a network. See [Markov chain](http://en.wikipedia.org/wiki/Markov_chain)
+for some connections between Markov chains and networks.
+
+
+Now suppose we have a 5 state Markov chain with states $a, b, c, d, e$.
+From state $a$, we can get to states $b, e$.
+From state $b$, we can get to states $a, d$.
+From state $c$, we can get to state $e$.
+From state $d$, we can get to states $c, e$.
+From state $e$, we can get to state $a$.
+Suppose we transition from the current state to the next with equal probability
+over all possible edges (i.e., from $a$, we can get to states $b, e$ each with
+probability $1/2$).
+
+First we'll construct the matrix of potential connections between the states 
+and call that $A$. Then we'll divide by the sum in each row to get a transition
+matrix $P$.
+
+```{r, cache = TRUE}
+v1 = letters[1:5] # vertex names: a, b, c, d, e
+#            a b c d e
+A1 = rbind(c(0,1,0,0,1),
+            c(1,0,0,1,0),
+            c(0,0,0,0,1),
+            c(0,0,1,0,1),
+            c(1,0,0,0,0))
+dimnames(A1) = list(v1,v1) # assign the names to A
+A1
+```
+
+```{r}
+P1 = diag(1/apply(A1, MARGIN = 1, FUN = sum)) %*% A1
+P1
+```
+
+First we will construct an object representing the above graph starting from
+the adjacency matrix. We will use the `network` function:
+
+```{r}
+A1net = network(A1, directed = TRUE) 
+A1net
+```
+
+Below we will plot the network object using a `plot()` function from the 
+``statnet`` library. Note that plotting network objects use a random number 
+generator so we will use the seed.
+
+```{r}
+set.seed(1)
+plot(A1net, label = v1) 
+```
+
+**Quiz question 1**: Which randomization part does `set.seed()` concern here?
+
+When plotting graphs, the goal is to arrange vertices into a two
+dimensional space so that adjacent vertices are near each other, 
+and non-adjacent vertices are not near each other.
+This is usually done with 
+[Force-directed graph drawing algorithms](http://en.wikipedia.org/wiki/Force-directed_graph_drawing).
+You can think of balls in place of the vertices and connecting two balls
+with a short spring if there is an edge between them and a very long spring
+if there is not an edge between them. If you jiggle this mess of balls and 
+springs around, you might get a configuration where all the springs are being 
+stretched or compressed with approximately equal force. Note that as mentioned 
+above, this is randomized algorithm.
+
+
+Instead of using the `statnet` package we can use ``ggplot`` via the 
+``ggnetwork`` package (also the ``ggraph` package). First, the `ggnetwork` function converts the graph into 
+a convenient data frame format, as seen below:
+
+```{r}
+A1df = ggnetwork(A1net)
+head(A1df)
+```
+
+Afterwards we can use this data frame and `ggplot` to visualize the graph.
+
+```{r}
+ggf = ggplot(A1df,aes(x = x, y = y, xend = xend, yend = yend)) +
+              geom_edges() + 
+              geom_nodes(aes(x = x, y = y),size = 6,color = "#8856a7") +
+              geom_nodetext(aes(label = vertex.names),size = 4,color = "white") +
+              theme_blank() + 
+              theme(legend.position = "none")
+ggf
+```
+
+
+
+## Visualizing the Adjacency Matrix
+
+Instead of plotting the graph, we can also visualize the adjacency matrix, 
+e.g., as follows:
+
+```{r}
+heatmap(A1, col = grey(c(0.9,0.1)), symm = TRUE)
+```
+
+
+
+## A STRING database example
+
+To visualize a more interesting network, we have extracted data on the 
+protein-protein interaction network of Cyclin B1 (coded by the CCNB1 gene) 
+from the [STRING](http://www.string-db.org.) database.
+
+
+```{r}
+ccnb1 = read.table(
+  url("http://web.stanford.edu/class/bios221/data/ccnb1datsmall.txt"), 
+  header = TRUE, comment.char = "")
+head(ccnb1)
+```
+
+```{r}
+ccnb1_v = levels(unlist(ccnb1[,1:2]))                   # vertex names
+ccnb1_n = length(ccnb1_v)                               # number of vertices
+ccnb1_e = matrix(
+  match(as.character(unlist(ccnb1[,1:2])), ccnb1_v),    # edge list (as pair of indices)
+  ncol = 2, byrow = FALSE) 
+ccnb1_w = ccnb1$coexpression                            # edge weights
+```
+
+Below we will call M our co-expression network adjacency matrix.
+Since the STRING data only says if proteins i and j are co-expressed and doesn't
+distinguish between i,j and j,i we want to make M symmetric (undirected) by
+considering the weight on i,j is the same as from j,i.
+
+```{r}
+M = matrix(0, ccnb1_n, ccnb1_n)                  # set up a co-expression matrix
+M[ccnb1_e] = ccnb1_w                             # fill it in with edge weights
+M = M + t(M)                                     # make this symmetric
+dimnames(M) = list(ccnb1_v, ccnb1_v)             # label the vertices
+
+# A is our co-expression graph adjacency matrix:
+# We let A_ij = 1 if i and j are coexpressed
+A = 1*(M > 0)
+```
+
+Let's create the network:
+```{r}
+ccnb1_net = network(A, directed = FALSE)
+ccnb1_net
+```
+Note that again we constructed the network from the adjacency matrix, however
+we could just as well have used the edge list, e.g.:
+
+```{r}
+network(ccnb1_e, directed = FALSE)
+```
+
+Now let's plot the graph:
+
+```{r}
+set.seed(1)                               # make the plot look the same as mine
+par(mar = rep(0,4))                       # make plot margins 0
+plot(ccnb1_net, label = ccnb1_v)          # plot the network and label the vertices
+```
+
+
+Change the seed above to another number and observe what happens.
+
+
+Let's also make a heatmap:
+
+```{r}
+# make a heatmap image with colors: white below 0.9,
+# grey from 0.9 to 1 with darker closer to 1
+breaks = c(0, seq(0.9, 1, length = 11))               # breaks in the color bins
+cols = grey(1 - c(0, seq(0.5, 1, length = 10)))       # colors
+
+# color the vertex for CCNB1 blue, its neighbors red, and the others white
+ccnb1ind = which(ccnb1_v == "CCNB1")                  # index for ccnb1
+vcols = rep("white", ccnb1_n)
+vcols[ccnb1ind] = "blue"
+vcols[which(M[, ccnb1ind] > 0 | M[ccnb1ind, ] > 0 )] = "red"  
+
+# now actually make the heat map
+par(mar = rep(0,4))                                    # make plot margins 0
+heatmap(M, symm = TRUE, ColSideColors = vcols, RowSideColors = vcols,
+        col = cols, breaks = breaks,  frame = T)
+legend("topleft", c("Neighbors(CCNB1)", "CCNB1"), fill = c("red","blue"),  
+       bty = "n", inset = 0, xpd = T,  border = F)
+```
+
+
+This gives a visualization of the strongest interactions in the two step 
+neighborhood of CCNB1. Both the plotted graph and the heatmap image show the 
+same data: there seems to be a cluster of proteins which are all similar to 
+CCNB1 and there is a cluster of other proteins. Many of the proteins in the 
+CCNB1 cluster are coexpressed at the same time as each other.
+
+
+
+
+## Minimum Spanning Trees
+
+A very simple and useful graph is the so-called minimum spanning tree (MST). 
+Given distances between vertices; the MST is the tree that spans all the points
+and has the minimum total length.
+
+There are many implementations for computing the MST in R, e.g.
+the function `mst` in the ``igraph`` package, as well as the `ape` package.
+
+Here we are going to take the DNA sequence distances between strains of HIV 
+from patients all over the world and construct their minimum spanning
+tree.
+
+```{r}
+load(url("http://web.stanford.edu/class/bios221/data/dist2009.RData"))
+# clean up names a bit
+country09 = sapply(attr(dist2009, "Labels"), function(x) {
+  strsplit(x,"_") %>% unlist %>% `[`(length(.))
+  })  %>%
+  unname %>%
+  ifelse(. ==  "U.S.", "United States", .)
+attr(dist2009, "Labels") = country09
+```
+
+Now let's find the MST (in adjacency matrix form) and use the `igraph` package 
+to convert it into a graph object. Finally we plot it using `ggnetwork`:
+
+```{r}
+# this takes a few minutes
+mstree2009 = ape::mst(dist2009)
+gr09 = graph.adjacency(mstree2009, mode = "undirected")
+gg = ggnetwork(gr09, arrow.gap = 0, layout = "fruchtermanreingold")
+
+ggplot(gg, aes(x = x, y = y, xend = xend, yend = yend)) +
+  geom_edges(color = "black",alpha = 0.5,curvature = 0.1) +
+  geom_nodes(aes(color = vertex.names), size = 2) +
+  geom_nodetext(aes(label = vertex.names), color = "black",size = 2) +
+  theme_blank() +
+  guides(color = guide_legend(keyheight = 0.1,keywidth = 0.1,
+      title = "Countries"))
+```
+
+**Quiz question 2**: How many edges are in this MST?
+
+It could be preferable to use a graph layout that incorporates the known 
+geographic coordinates. Thus, we might be able to see how the virus jumped large 
+distances across the world through traveler mobility. We introduce approximate 
+country coordinates which we then jitter slightly to avoid too much overlapping.
+Here, we use we use `countriesLow` object from `rworldmap` package to find
+the latitudes and longitudes of countries.
+
+```{r}
+mat = match(country09, countriesLow$NAME)
+lat2009 = countriesLow$LAT[mat]
+lon2009 = countriesLow$LON[mat]
+coords2009 = data.frame(lat = lat2009, lon = lon2009, country = country09)
+x = jitter(coords2009$lon, amount = 15)
+y = jitter(coords2009$lat, amount = 8)
+layoutCoordinates = cbind(x, y)
+labc = names(table(country09)[which(table(country09) > 1)])
+idx = match(labc, countriesLow$NAME)
+latc = countriesLow$LAT[idx]
+lonc = countriesLow$LON[idx]
+dfc = data.frame(latc, lonc, labc)
+dfctrans = dfc
+dfctrans[, 1] = (dfc[, 1]+31)/(93)
+dfctrans[, 2] = (dfc[, 2]+105)/(238)
+
+ggeo09 = ggnetwork(gr09, arrow.gap = 0, layout= layoutCoordinates)
+ggplot(ggeo09,  aes(x = x,  y = y, xend = xend,  yend = yend)) +
+  geom_edges(color  = "black", alpha = 0.5, curvature = 0.1) +
+  geom_nodes(aes(color = vertex.names), size = 2) +
+  theme_blank() +
+  geom_label(
+    data = dfctrans,aes(x = lonc, xend = lonc,
+                        y = latc, yend = latc, label = labc,
+  fill = labc),colour = "white", alpha = 0.5, size = 3)+
+   theme(legend.position = "none")
+```
+
+# Microbiome analysis
+
+In this section we will go through examples of Multivariate Analysis methods
+for heterogeneous data, which were discussed in class.
+
+Load packages 
+
+```{r warning = FALSE, message = FALSE}
+library("ggplot2")
+library("PMA")
+library("dplyr")
+library("ade4")
+library("genefilter")
+library("ggrepel")
+library("phyloseq")
+library("vegan")
+```
+
+
+## Data import
+
+
+The data we will analyze in the first part of the lab corresponds to 360 fecal 
+samples which were collected from 12 mice longitudinally over the first year 
+of life, to investigate the development and stabilization of the murine 
+microbiome. Let's download the dataset:
+
+```{r}
+download.file("https://cdn.rawgit.com/spholmes/F1000_workflow/891463f6/data/ps.rds",
+              "ps.rds", mode = "wb")
+ps = readRDS("ps.rds")
+```
+
+The `ps` object is of class `phyloseq` from the package `phyloseq`.
+
+```{r}
+class(ps)
+```
+
+As has been mentioned before, the phyloseq package is a tool to import, store,
+analyze, and graphically display complex phylogenetic sequencing data. Take some 
+time to explore the object, before we start doing statistical analyses:
+
+
+**Quiz question 3**: How many slots does the `ps` object have?
+
+**Quiz question 4**: How many distinct Phyla (such as "Bacteroidetes") have been 
+identified in this dataset? (Hint: Look up the `tax_table` function and then 
+inspect its output. Also make sure to ignore potential `NA` values!)
+
+**Quiz question 5**: In total, does this dataset include more measurements for
+female or male mice (Hint: Look up the documentation of `sample_data`)?
+
+**Quiz question 6**: How many unique female mice were part of this experiment?
+
+
+## Preprocessing
+
+Before doing the multivariate projections, we will do some basic preprocessing.
+First we remove features with ambiguous Phylum annotation:
+
+```{r}
+ps = subset_taxa(ps, !is.na(Phylum) & !Phylum %in% c("", "uncharacterized"))
+```
+
+
+Now let's look at a histogram of the ages of the mice:
+
+```{r}
+ggplot(sample_data(ps), aes(x = age)) + 
+               geom_histogram(bins=40) + 
+               xlab("age")
+```
+
+We see that the ages of the mice come in a couple of groups, and so we make 
+a categorical variable corresponding to young, middle-aged, and old mice. 
+
+```{r}
+sample_data(ps)$age_binned = cut(
+  sample_data(ps)$age, breaks = c(0, 100, 200, 400))
+```
+
+Next, we apply an inverse hyperbolic sine transform on the data. 
+
+This is an approximate variance stabilizing transformation (it would be more 
+appropriate to use the variance stabilizing functionality available in the 
+`DESeq2` package).
+
+```{r}
+pstrans = transform_sample_counts(ps, function(x) asinh(x))
+```
+
+We can plot the phylogenetic tree associated withe the data:
+
+```{r}
+plot_tree(pstrans, "treeonly")
+```
+
+
+## A first principal coordinates analysis (PCoA)
+
+For a first pass, we look at principal coordinates analysis (PCoA) with either
+the Bray-Curtis dissimilarity on the weighted Unifrac distance. 
+
+```{r}
+set.seed(10)     # for random assignment of the root in the phylogenetic tree
+# The function call below might take some time due to weighted UniFrac distance computations
+out_wuf_asinh = ordinate(pstrans, method= "MDS", distance = "wunifrac")
+evals = out_wuf_asinh$values$Eigenvalues
+```
+
+```{r}
+plot_ordination(pstrans, out_wuf_asinh, color = "age_binned", shape = "sex") +
+  labs(col = "Binned Age") +
+  coord_fixed(sqrt(evals[2] / evals[1]))
+```
+
+
+**Quiz question 7**: The above plot shows the proportion of variance explained 
+by the 1st axis  around 46% and the 2nd axis around 11%. What is the variance explained
+by the 3rd axis? (Hint: Look at `evals`. Note that `evals[1], evals[2]` 
+is 2.25, 0.55)
+
+We see immediately that there are some outliers. We will take them out, 
+since we are mainly interested in the relationships between the non-outlier 
+points (however, here we skip the details of how to specify the outliers).
+
+```{r}
+outlier_idx = rownames(sample_data(pstrans)) %in% c("M3D149","M2D19","M1D9", "M1D149", "F5D165", "F6D165")
+pstrans2 = prune_samples(!outlier_idx, pstrans)
+```
+
+
+**Quiz Question 8**: Redo the same ordination as above after outlier removal.
+What is the proportion of variance explained by the 1st axis?
+
+
+## Different ordination projections
+
+In this section we will explore different ordination projections.
+
+First we will perform a PCoA using Bray-Curtis dissimilarity.
+
+```{r}
+out_bc_asinh = ordinate(pstrans2, method = "MDS", distance = "bray")
+```
+
+```{r}
+evals_bc = out_bc_asinh$values$Eigenvalues
+plot_ordination(pstrans2, out_bc_asinh, color = "age_binned") +
+  coord_fixed(sqrt(evals_bc[2] / evals_bc[1])) +
+  labs(col = "Binned Age")
+```
+
+
+The plot above shows the ordination of the samples, and we see that the second 
+axis corresponds to an age effect, with the samples from the younger and 
+older mice separating fairly well.
+
+Next we look at double principal coordinates analysis (DPCoA), which is a 
+phylogenetic ordination method that provides a biplot representation of both 
+samples and taxonomic categories. (Warning: This next line will take a while to 
+compute.)
+
+```{r}
+# this might take a while
+out_dpcoa_asinh = ordinate(pstrans2, method = "DPCoA")
+```
+
+ 
+```{r}
+evals_dpcoa = out_dpcoa_asinh$eig
+plot_ordination(pstrans2, out_dpcoa_asinh, color = "age_binned",
+                shape = "family_relationship") +
+  coord_fixed(sqrt(evals_dpcoa[2] / evals_dpcoa[1])) +
+  labs(col = "Binned Age", shape = "Litter")
+```
+
+We see again that the second axis corresponds to young vs. old mice.
+
+
+```{r}
+plot_ordination(pstrans2, out_dpcoa_asinh, type = "species", color = "Phylum") +
+  coord_fixed(sqrt(evals_dpcoa[2] / evals_dpcoa[1]))
+```
+
+The second plot suggests an interpretation of the second axis: samples that 
+have larger scores on the second axis have more taxa from Bacteroidetes and 
+one subset of Firmicutes.
+
+**Quiz question 9**: Consider a sample which is particularly enriched in 
+bacteria from the `Bacteroidetes` Phylum. Do you think it is more likely that
+its projection on the first axis will have a positive value or negative value?  
+

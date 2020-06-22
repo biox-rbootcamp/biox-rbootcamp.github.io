@@ -1,0 +1,490 @@
+---
+title: 'Lab 8: Machine Learning'
+author: "Bios221"
+date: "2019-07-11"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+<link href='http://fonts.googleapis.com/css?family=Lato&subset=latin,latin-ext' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Chewy&subset=latin,latin-ext' rel='stylesheet' type='text/css'>
+
+<style type="text/css"> 
+body{
+  font-family: Lato;
+  font-size: 11pt;
+}
+h1,h2,h3,h4,h5,h6{
+  font-family: Chewy;
+  font-size: 14pt;
+}
+</style>
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, cache = TRUE, autodep = TRUE)
+```
+
+# Goal
+
+In this lab we will learn the basics of Machine Learning (ML). We will focus 
+on supervised learning. There is a corresponding quiz on Canvas -- the questions 
+are dispersed throughout this lab (called Quiz question). There are also 
+additional questions which you do not have to turn in. 
+
+# Setup Git and GitHub
+
+Before delving into the Machine Learning applications, we will first quickly learn how to use git and GitHub as a way to keep track of your code. This will hopefully be useful for you in your future data analysis projects!
+
+
+1. Sign up for an account: https://github.com/
+2. Install GitHub client: https://desktop.github.com/
+3. (Optional) Request student discount: https://education.github.com/pack
+3. Create new private repository:
+    * Go to: https://github.com/YourUserName
+    * Select `Repositories` tab
+    * Click `New` button
+    * Select `Public` (or `Private`)  and `Initialize this repository with a README`
+    * Edit `README.md`
+    * Write and save `README.md`:
+    
+    ```
+    # Hello World
+
+    This is my first git repository.
+    ```
+    
+5. Clone your repository
+    * Click `Clone or download` green button, then `Open in Desktop`
+    * Click `Clone` button to make a local copy of your repository
+6. Move today's `Rmd` file in cloned folder
+7. Synchronize your local copy with the one on GitHub
+    * Click `1 Uncommitted Change`
+    * Write in summary text field:
+    
+    ```
+    This is my first commit
+    ``` 
+    
+    * Click `Commit and Sync master`
+8. Continue with the labs, when you are done `Commit and Sync master` to save everything you have done on GitHub
+
+Now let us move on to to the main part of this lab:
+
+# Packages
+
+Install packages.
+
+```{r warning=FALSE, message=FALSE}
+pkgs_needed = c("MASS","ExperimentHub", "tidyverse","glmnet",
+                "RColorBrewer","caret", "magrittr")
+letsinstall = setdiff(pkgs_needed, installed.packages()) 
+if (length(letsinstall) > 0) {
+  BiocManager::install(setdiff(pkgs_needed, installed.packages()))
+}
+```
+
+Load packages.
+
+```{r warning=FALSE, message=FALSE}
+library("tidyverse")
+library("MASS")
+library("ExperimentHub")
+library("glmnet")
+library("RColorBrewer")
+library("caret")
+library("magrittr")
+```
+
+
+# Linear discrimination
+
+We start with one of the simplest possible discrimination problems. Our aim is to partition the 2D plane into classes, using class boundaries that are straight lines.
+
+## Diabetes data set
+
+The ``diabetes`` dataset presents three different groups of diabetes
+patients and five clinical variables measured on them.
+
+```{r diabetes}
+diabetes = read_csv(url("http://web.stanford.edu/class/bios221/data/diabetes.csv"), 
+                    col_names = TRUE)
+diabetes
+diabetes$group %<>% factor
+```
+
+We used the forward-backward pipe operator `%<>%` to convert the
+`group` column into a factor. 
+
+```{r ldagroups, fig.width = 7, fig.height = 5}
+diabetes.long = gather(diabetes, variable, value, -c(id,group))
+ggplot(diabetes.long, aes(x = value, col = group)) +
+  geom_density() + facet_wrap( ~ variable, ncol = 2, scales = "free") 
+```
+
+We see already from the one-dimensional distributions that some of the
+individual variables could potentially predict which group a patient is more 
+likely to belong to. Our goal will be to combine variables to improve these 
+one dimensional predictions.
+  
+## LDA
+
+Let's see whether we can predict the `group` from the `insulin` and `glutest`
+variables in the diabetes data. It's always a good idea to first visualize the 
+data:
+
+```{r scatterdiabetes}
+ggdb = ggplot(mapping = aes(x = insulin, y = glutest)) +
+         geom_point(aes(colour = group), data = diabetes)
+ggdb
+```
+
+We'll start with a method called linear discriminant analysis (LDA). 
+This method is a foundation stone of classification, many of the more 
+complicated (and sometimes more powerful) algorithms are really just 
+generalizations of LDA.
+
+```{r ldaresults}
+diabetes_lda = lda(group ~ insulin + glutest, data = diabetes) # from MASS package
+diabetes_lda
+ghat = predict(diabetes_lda)$class
+table(predicted = ghat, truth = diabetes$group)
+mean(ghat != diabetes$group)
+```
+
+Now, let's visualize the LDA result. We are going to plot the prediction regions 
+for each of the three groups. We do this by creating a grid of points and using
+our prediction rule on each of them. We'll then also dig a bit deeper into the 
+mechanics of LDA and plot the class centers. Assembling this visualization 
+requires us to write a bit of code.
+
+```{r make1Dgrid}
+make1Dgrid = function(x) {
+  rg = grDevices::extendrange(x)
+  seq(from = rg[1], to = rg[2], length.out = 100)
+}
+```
+
+Set up the points for prediction, a $100 \times 100$ grid that covers the data 
+range.
+
+```{r diabetes_grid}
+diabetes_grid = with(diabetes,
+  expand.grid(insulin = make1Dgrid(insulin),
+              glutest = make1Dgrid(glutest)))
+```
+
+Do the predictions.
+
+```{r diabetes_grid2}
+diabetes_grid$ghat = predict(diabetes_lda, newdata = diabetes_grid)$class
+```
+
+The group centers.
+
+```{r centers}
+centers = diabetes_lda$means
+```
+
+Now we are ready to plot:
+
+```{r modeldiabetes, fig.width = 5, fig.height = 4}
+ggdb + geom_raster(
+  data = diabetes_grid, alpha = 0.25,
+  aes(fill = ghat),
+  interpolate = TRUE ) +
+  geom_point(data = as_tibble(centers), pch = "+", size = 8) +
+  scale_x_continuous(expand = c(0, 0)) + 
+  scale_y_continuous(expand = c(0, 0))
+```
+
+Instead of trying to predict with 2 variables, we could use LDA with all 
+5 variables.
+
+```{r}
+diabetes_lda5 = lda(group ~ relwt + glufast + glutest +
+           steady + insulin, data = diabetes)
+diabetes_lda5
+```
+
+Let us get the predictions:
+
+```{r}
+ghat5 = predict(diabetes_lda5)$class
+table(ghat5, diabetes$group)
+```
+
+And the prediction error:
+
+```{r}
+mean(ghat5 != diabetes$group)
+```
+
+The prediction error is almost half compared to what we got with only the 
+insulin and glufast variables. Is this because indeed the classifier based on
+5 variables is better, or are we just overfitting our dataset? Cross-validation 
+in the next section will provide one possible answer to this question.
+
+# Cross-validation
+
+Often machine learning algorithms have parameters that we need to choose. 
+One way of doing this is via cross-validation. Below we will look at one way 
+of achieving this, called leave-one-out cross-validation (LOOCV). For each data 
+point, we fit the whole model without this data point and then we predict its 
+label. The nice thing is that we know the true label of that data point and 
+the learning algorithm did not, hence we can get a reasonable estimate of the
+algorithm's performance on "fresh" data (e.g. the misclassification rate or 
+some other metric). Let's write a function which does this:
+
+```{r}
+estimate_mcl_loocv = function(x, resp) {
+  vapply(seq_len(nrow(x)), function(i) {
+    fit  = lda(x[-i, ], resp[-i])
+    ptrn = predict(fit, newdata = x[-i,, drop = FALSE])$class
+    ptst = predict(fit, newdata = x[ i,, drop = FALSE])$class
+    c(train = mean(ptrn != resp[-i]), test = (ptst != resp[i]))
+  }, FUN.VALUE = numeric(2)) %>% rowMeans %>% t %>% as_tibble
+}
+```
+
+Now let's try a simulation: 
+
+We generate artificial "apple" and "orange" data and measure $p$ predictors on 
+them. The predictors are constructed in such a way that the first 6 are 
+informative (i.e. apples and oranges are different with respect to these), 
+but the rest are just random noise. We want to try different models where we
+include the first $k$ predictors. We will use LOOCV to find $k$. Note that 
+from the simulation setting we know we should pick $k=6$ but LOOCV does not
+know this:
+
+(Remark: The code below might take a while to run -- indeed one of the 
+disadvantages of LOOCV is its long run time. If it takes too long you can 
+try reducing the replications from 100 to a small number. In fact, it might 
+be interesting to reduce the replications to 1 since with real datasets you 
+don't have the luxury of repeating the data generation!)
+
+
+```{r curseofdim, warning = FALSE}
+n = 20
+p   = 2:20
+# This will take a while
+mcl = replicate(100, {
+  xmat = matrix(rnorm(n * last(p)), nrow = n)
+  resp = sample(c("apple", "orange"), n, replace = TRUE)
+  xmat[, 1:6] = xmat[, 1:6] + as.integer(factor(resp))
+
+  lapply(p, function(k) {
+    estimate_mcl_loocv(xmat[, 1:k], resp)
+  }) %>% bind_rows %>% cbind(p = p) %>% gather(variable, value, -p)
+}, simplify = FALSE) %>% bind_rows 
+
+mcl =  group_by(mcl, p, variable) %>%
+   summarise(value = mean(value))
+
+ggplot(mcl, aes(x = p, y = value, col = variable)) + geom_line() +
+      geom_point() + ylab("Misclassification rate")
+```
+
+In the section below you will see CV used to pick a parameter for LASSO-logistic 
+regression.
+
+# Variance-bias trade-off
+
+Zeller et al. studied metagenome sequencing data from fecal samples of 156 
+humans that included colorectal cancer patients and tumor-free controls. Their 
+aim was to see whether they could identify biomarkers (presence or abundance 
+of certain taxa) that could help with early tumor detection. The data are 
+available from [Bioconductor](https://www.bioconductor.org) through its 
+`ExperimentHub` service under the identifier EH359.
+
+```{r colon1, results = "hide"}
+library("ExperimentHub")
+eh = ExperimentHub()
+zeller = eh[["EH361"]]
+```
+
+```{r colon1b}
+table(zeller$disease)
+```
+
+Explore the `eh` object to see what other datasets there are.
+
+
+For the following, let's focus on the normal and cancer samples and set the 
+adenomas aside.
+
+```{r colon2}
+zellerNC = zeller[, zeller$disease %in% c("n", "cancer")]
+```
+
+Before jumping into model fitting, as always it's a good idea to do some
+exploration of the data. First, let's look at the sample annotations. The 
+following code prints the data from three randomly  picked samples. (Only 
+looking at the first ones, say with the R function `head`, is also an option, 
+but may not be representative of the whole dataset).
+
+```{r zellerpData}
+pData(zellerNC)[ sample(ncol(zellerNC), 3), ]
+```
+
+Next, let's explore the feature names.
+  
+```{r zellerpData_end}
+rownames(zellerNC)[1:4]
+rownames(zellerNC)[nrow(zellerNC) + (-2:0)]
+```
+
+As you can see, the features are a mixture of abundance quantifications at 
+different taxonomic levels, from **k**ingdom over **p**hylum to **s**pecies.
+We could select only some of these, but here we continue with all of them. 
+Next, let's look at the distribution of some of the features. Here, we show 
+an arbitrary choice of two, number 510 and 527; in practice, it is helpful 
+to scroll through many such plots quickly to get an impression.
+
+```{r zellerHist}
+tidy_zeller_subset <- as.data.frame(t(exprs(zellerNC)[c(510, 527), ])) %>% 
+               mutate(Var2 = colnames(exprs(zellerNC))) %>% 
+               gather(Var1, value, - Var2)
+
+ggplot(tidy_zeller_subset, aes(x = value)) +
+    geom_histogram(bins = 25) +
+    facet_wrap( ~ Var1, ncol = 1, scales = "free")
+```
+
+In the simplest case, we fit model
+
+$$
+\log \frac{P(Y=i\,|\,X=x)}{P(Y=k\,|\,X=x)} = \beta^0_i + \beta_i x
+$$
+
+as follows.
+
+```{r glmnet}
+library("glmnet")
+glmfit = glmnet(x = t(exprs(zellerNC)),
+                y = factor(zellerNC$disease),
+                family = "binomial")
+```
+
+A remarkable feature of the `glmnet` function is that it fits the model not 
+only for one choice of $\lambda$, but for all possible $\lambda$s at once. 
+For now, let's look at the prediction performance for, say, $\lambda=0.04$.
+The name of the function parameter is `s`:
+
+```{r colonPred}
+pred = predict(glmfit, newx = t(exprs(zellerNC)), type = "class", s = 0.04)
+confusion_table = table(predicted = pred, truth = zellerNC$disease)
+confusion_table
+```
+
+**Quiz questions 1 and 2**: What is the true positive rate (TPR) and true
+negative rate (SPC)? Hint: See book or [Wikipedia](https://en.wikipedia.org/wiki/Sensitivity_and_specificity).
+
+
+Not bad. But remember that this is on the training data, without 
+cross-validation. Let's have a closer look at `glmfit`. The `glmnet` package
+offers a a diagnostic plot that is worth looking at:
+
+```{r plotglmfit}
+plot(glmfit, xvar = "norm", col = RColorBrewer::brewer.pal(12, "Set3"), lwd = sqrt(3))
+```
+
+What is the x-axis? What are the different lines? Check the ``plot.glmnet``
+documentation.
+
+In particular, we note that as the penalty $\lambda$ increases, the L1 Norm 
+of the coefficients ($\sum |\beta_i|$) shrinks.
+
+For example as above let's see what fitted coefficients we got for 
+$\lambda = 0.04$:
+
+```{r}
+fitted_beta = coef(glmfit, s=0.04)
+sum(abs(fitted_beta))
+```
+
+Let's try with larger $\lambda$:
+
+```{r}
+sum(abs(coef(glmfit, s=0.1)))
+```
+
+**Quiz question 3**: Inspect the `glmfit` object: For how many different 
+values of $\lambda$ did `glmnet` fit the model using settings as above?
+
+
+**Quiz question 4**: For each of the values of $\lambda$ in the object above, 
+calculate the L1 Norm (as we did above for two values of $\lambda$). 
+Which $\lambda$ most closely corresponds to a L1 norm 6000?
+
+
+**Quiz question 5**: How many non-zero coefficients do you get for 
+the $\lambda$ that you found in the previous question?
+
+
+To choose the best regularization parameter $\lambda$, we use cross-validation.
+
+```{r colonCV}
+set.seed(0xdada2)
+cvglmfit = cv.glmnet(x = t(exprs(zellerNC)),
+                     y = factor(zellerNC$disease),
+                     family = "binomial")
+plot(cvglmfit)
+```
+
+We can access the optimal value with:
+
+```{r lambda.min}
+cvglmfit$lambda.min
+```
+
+As this value results from finding a minimum in an estimated curve, it turns out 
+that it is often too small, i.\,e., that the implied penalization is too weak. 
+A heuristic recommended by the authors of the `glmnet` package is to use a 
+somewhat larger value instead, namely the largest value of $\lambda$ such that
+the performance measure is within 1 standard error of the minimum.
+
+```{r lambda.1se}
+s0 = cvglmfit$lambda.1se
+s0
+```
+
+**Quiz question 6**: How does the confusion table look like for $\lambda=$ 
+lambda.1se ? Report the top left element of the confusion table 
+(i.e. number of correctly classified cancer samples). Hint: Use function
+`predict`.
+
+
+**Quiz question 7**: What features drive the classification (at the $\lambda$ 
+chosen by cross-validation)? Report the top one. Hint: The first line in the 
+code below might be useful to get you started.
+
+
+```{r zellercoef}
+coefs = coef(glmfit)[, which.min(abs(glmfit$lambda - s0))]
+```
+
+# Method hacking
+
+We encountered p-value hacking. A similar phenomenon exists in statistical 
+learning: given a dataset, we explore various different methods of preprocessing 
+(such as normalization, outlier detection, transformation, feature selection), 
+try out different machine learning algorithms and tune their parameters until 
+we are content with the result. The measured accuracy is likely to be too 
+optimistic, i.e., will not generalize to a new dataset. Embedding as many of 
+our methodical choices into a computational formalism and having an outer 
+cross-validation loop (not to be confused with the inner loop that does the 
+parameter tuning) will ameliorate the problem. But is unlikely to address it 
+completely, since not all our choices can be formalized.
+
+The gold standard remains validation on truly unseen data. In addition, it is
+never a bad thing if the classifier is not a black box but can be interpreted 
+in terms of do- main knowledge. Finally, report not just summary statistics, 
+such as misclassification rates, but lay open the complete computational 
+workflow, so that anyone (including your future self) can convince themselves
+of the robustness of the result or of the influence of the preprocessing, 
+model selection and tuning choices.
+
+

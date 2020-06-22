@@ -1,0 +1,391 @@
+---
+title: 'Lab 4: Solutions to quiz questions of Multivariate Analysis lab'
+author: "Bios 221: Modern Statistics for Modern Biology"
+date: "10/7/2019"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+
+## Goal
+
+In this lab we will learn the basics of Multivariate Analysis and PCA using 
+a few simple examples.
+
+Work through this lab by running all the R code to your computer and making sure 
+that you understand the input and the output. Make alterations where you seem
+fit. We encourage you to work through  this lab with a partner. 
+
+Once you get to the end of this lab, go to [Canvas](https://canvas.stanford.edu) 
+to submit your answer to the quiz questions dispersed throughout this lab.
+Some questions will be open-ended and you will not see them appear
+on Canvas.
+
+You may NOT work with other students to answer the questions on Canvas. 
+You will need a Stanford ID to log in to Canvas.
+
+```{r setup, warning=FALSE, message=FALSE, results='hide'}
+knitr::opts_chunk$set(echo = TRUE)
+pkgs_needed = c("tidyverse","GGally", "factoextra", "ade4")
+BiocManager::install(setdiff(pkgs_needed, installed.packages()))
+library("tidyverse")
+```
+
+
+## Obtain Data 
+
+In this lab we will be working with the following two simple datasets:
+
+```{r}
+turtles = read.table(url("https://web.stanford.edu/class/bios221/data/PaintedTurtles.txt"),
+                     header=TRUE)
+head(turtles)
+```
+
+```{r}
+download.file(url = "https://web.stanford.edu/class/bios221/data/athletes.RData",
+              destfile = "athletes.RData",mode = "wb")
+load("athletes.RData")
+athletes[1:3,]
+```
+
+## Low dimensional data summaries and preparation
+
+It is instructive to first consider 2-dimensional summaries of the datasets:
+
+```{r}
+library("GGally")
+ggpairs(turtles[,-1], axisLabels="none")
+```
+
+Can you do the same for the athletes data?
+
+```{r}
+# TODO
+```
+
+Correlations can be displayed on a color scale by a simple call to the `pheatmap` function:
+
+```{r heatmapathletes}
+library("pheatmap")
+pheatmap(cor(athletes),cell.width=10,cell.height=10)
+```
+
+## Preprocessing the data
+
+Our first task in data analysis is to transform the data: standardizing the data 
+to a common standard deviation. This rescaling is done using the `scale` 
+function which makes every column have a variance of 1 (and also mean 0).
+
+```{r turtlesDim12}
+scaledTurtles=data.frame(scale(turtles[,-1]),sex=turtles[,1])
+ggplot(scaledTurtles,aes(x=width,y=height, group =sex)) +
+  geom_point(aes(color=sex))
+```
+
+Can you compute the standard deviation and mean of each column in the `turtles`
+data frame? Can you do the same on the scaled dataset, i.e. on `scaledturtles`?
+
+**Quiz question 1**: What was the mean of turtles' heights before standardizing?
+
+**Answer:**
+
+```{r}
+mean(turtles$length)
+```
+
+
+
+
+**Quiz question 2**: What was the standard deviation of turtles' widths before standardizing?
+
+**Answer:**
+```{r}
+sd(turtles$width)
+```
+
+**Quiz question 3**: What was the standard deviation of turtles' widths after standardizing?
+
+**Answer:**
+```{r}
+sd(scaledTurtles$width)
+```
+
+
+## Dimension reduction
+
+```{r}
+library("ggplot2")
+athletes = scale(athletes)
+n = nrow(athletes)
+athletes = data.frame(athletes)
+```
+
+
+```{r SimpleScatter}
+p = ggplot(athletes, aes(x = weight,y=  disc)) +
+  geom_point(size = 2, shape=21)
+p + geom_point(aes(y = rep(0, n)), colour="red") +
+  geom_segment(aes(xend = weight, yend = rep(0,n)), linetype = "dashed")
+```
+
+Now try to do the following:
+
+**Quiz question 4**: Calculate the variance of the red points in the above
+figure. (points are projected onto the weight-axis).
+
+**Answer:**
+```{r}
+var(athletes$weight)
+```
+
+**Quiz question 5**: Make a similar plot showing projection lines onto the y 
+axis and show projected points in blue. What is the variance of the projected 
+points now?
+
+**Answer:**
+```{r}
+p + geom_point(aes(x = rep(0, n)), colour="blue") +
+  geom_segment(aes(yend = disc, xend = rep(0, n)), linetype = "dashed")
+```
+The variance is:
+
+```{r}
+var(athletes$disc)
+```
+
+## Summarize 2D-data by a line
+
+We regress `disc` on `weight` with the `lm` function (linear model) to find the regression line; its slope (a) is given by the second coefficient in the output of `lm` and its intercept (b) is the first:
+
+```{r Reg1}
+reg1 = lm(disc ~ weight,data = athletes)
+a = reg1$coefficients[1] # Intercept
+b = reg1$coefficients[2] # slope
+pline = p + geom_abline(intercept = a, slope = b, col = "blue", lwd = 1.5)
+pline + geom_segment(aes(xend = weight, yend = reg1$fitted),
+                     colour = "red", arrow = arrow(length = unit(0.15,"cm")))
+```
+
+Can you regress `weight` on `discs` and generate a similar plot? 
+
+```{r}
+# TODO
+```
+
+Can you create a plot that shows all points, as well as both regression lines, i.e., a plot that show both the line you get from `lm(disc ~ weight)` and `lm(weight ~ disc)`?
+
+```{r}
+# TODO
+```
+
+### A line that minimizes distances in both directions
+
+Now we will plot the line chosen to minimize the sum of squares of the orthogonal (perpendicular) projections of data points onto it; we call this the principal component line.
+
+```{r PCAmin}
+X = cbind(athletes$disc, athletes$weight)
+svda = svd(X)
+pc = X %*% svda$v[, 1] %*% t(svda$v[, 1])
+bp = svda$v[2, 1] / svda$v[1, 1]
+ap = mean(pc[, 2]) - bp * mean(pc[, 1])
+
+p + geom_segment(xend = pc[,1], yend = pc[,2]) + 
+  geom_abline(intercept = ap, slope = bp, col = "purple", lwd = 1.5) + 
+  coord_fixed()
+```
+
+Can you create a plot that includes both the line from the plot above, plus the two regression lines `lm(disc ~ weight)` and `lm(weight ~ disc)`?
+
+```{r}
+#TODO
+```
+
+
+If we rotate the `(discus, weight)` plane with this change of coordinates making the purple line the horizontal $x$ axis, we obtain what is know as the first principal plane:
+
+```{r CompareSDs}
+ppdf = data.frame(PC1n = -svda$u[,1]*svda$d[1], PC2n=svda$u[,2] * svda$d[2])
+
+ggplot(ppdf,aes(x = PC1n, y=PC2n)) + geom_point() + ylab("PC2 ") +
+  geom_hline(yintercept = 0, color = "purple", lwd = 1.5, alpha = 0.5) +
+  geom_point(aes(x = PC1n, y = 0),color = "red") + xlab("PC1 ")+
+  xlim(-3.5, 2.7)+ylim(-2, 2) + coord_fixed() +
+  geom_segment(aes(xend = PC1n,yend = 0), color = "red")
+```
+
+**Quiz question 6**: What are the sums of squares of the red segments equal to?
+
+**Answer:**
+```{r}
+sum(ppdf$PC2n^2)
+```
+
+**Quiz question 7**: What is the variance of this new set of red points?
+
+**Answer:**
+```{r}
+var(ppdf$PC1n)
+```
+
+**Quiz question 8**: What is the sum of the variances of `ppdf$PC1n` and `ppdf$PC2n`?
+
+**Answer:**
+```{r}
+var(ppdf$PC1n) + var(ppdf$PC2n)
+```
+We could have gotten the same results using the `princomp` command as follows:
+
+```{r}
+pca_athletes = princomp(X)
+```
+
+Now compare (note that e.g. loadings are not unique up to sign, but the lines they define are the same):
+
+```{r}
+svda$v
+pca_athletes$loadings
+```
+
+```{r}
+head(pca_athletes$scores)
+```
+
+```{r}
+head(svda$u %*% diag(svda$d))
+```
+
+**Quiz question 9**: Which field in `pca_athletes` contains approximately the same object as `c(sd(ppdf$PC1n), sd(ppdf$PC2n))`? 
+
+**Answer:**
+```{r}
+pca_athletes$sdev
+```
+
+**Quiz question 10**: Unfortunately the results stored in the above field do not perfectly match  `c(sd(ppdf$PC1n), sd(ppdf$PC2n))`. If you multiply by which correction factor will you get the results to match `c(sd(ppdf$PC1n), sd(ppdf$PC2n))`?
+
+**Answer:**
+The factor is $\sqrt(33/32)$.
+
+```{r}
+sqrt(33/32)*pca_athletes$sdev
+```
+Not that the above is the same as:
+```{r}
+c(sd(ppdf$PC1n), sd(ppdf$PC2n))
+```
+The difference is that ``princomp`` returns unbiased estimates of sample standard deviations.
+
+## Turtle PCA
+
+Now let's continue inspecting the turtles data.
+
+```{r PCAturtlesunscaled}
+turtles3var = turtles[, -1]
+apply(turtles3var, 2, mean)
+```
+
+We start by looking at the variances of the three components in the **un**standardized case:
+
+```{r simplecomp}
+apply(turtles3var, 2, var)
+```
+
+Next we see that basically all 3 variables are very strongly correlated:
+
+```{r PCAturtles}
+turtlesc = scale(turtles3var)
+cor(turtlesc)
+```
+
+Because of the strong correlations, we would expect that the data matrix can be well approximated by a rank 1 matrix. Let's do the PCA:
+
+```{r}
+library("factoextra")
+pca1 = princomp(turtlesc)
+# or alternatively:
+#pca1 = ade4::dudi.pca(turtlesc, scannf = FALSE)
+pca1
+fviz_eig(pca1, geom = "bar", width = 0.4)
+```
+
+The screeplot showing the eigenvalues for the standardized data: one very large component in this case and two very small ones. In this case the data are (almost) one dimensional.
+
+
+**Quiz question 11**: What is the percentage of variance
+explained by the first PC?
+
+**Answer:**
+
+```{r}
+100*pca1$sdev[1]^2/sum(pca1$sdev^2)
+```
+
+
+```{r turtlesbiplot}
+fviz_pca_biplot(pca1, label = "var", col.ind = turtles[,1]) 
+```
+
+Add ellipses for female and male groups to the plot above.
+
+```{r}
+fviz_pca_biplot(pca1, label = "var", col.ind = turtles[,1], addEllipses=TRUE) 
+```
+
+
+**Quiz question 12**: Did the males or female turtles tend to be larger?
+
+**Answer:**
+The female turtles are larger.
+
+## Back to the athletes
+
+Now let us try to interpret another scree plot with more dimensions.
+
+```{r}
+library("ade4")
+pca.ath = dudi.pca(athletes, scannf = FALSE)
+pca.ath$eig
+```
+
+```{r}
+fviz_eig(pca.ath, geom = "bar", bar_width = 0.3) + ggtitle("")
+```
+
+The screeplot make a clear drop after the second eigenvalue. This indicates a good approximation will be obtained at rank 2. Let’s look at an interpretation of the first two axes by projecting the loadings of the original (old) variables as they project onto the two new ones.
+
+```{r}
+fviz_pca_var(pca.ath, col.circle = "black") + ggtitle("")
+```
+
+**Note**
+
+It can seem paradoxical that the m variables are opposed to the others.
+
+**Question (not on the quiz): Why does this occur?**
+
+We can make the variables align and give the left direction on PCA 1 to
+be an axis of athletic ability by changing the signs:
+
+```{r}
+athletes[, c(1, 5, 6, 10)] = -athletes[, c(1, 5, 6, 10)]
+cor(athletes) %>% round(1)
+```
+
+```{r}
+pcan.ath = dudi.pca(athletes, nf = 2, scannf = FALSE)
+pcan.ath$eig
+```
+
+```{r}
+fviz_pca_var(pcan.ath, col.circle="black") + ggtitle("")
+```
+
+```{r}
+fviz_pca_ind(pcan.ath) + ggtitle("") + ylim(c(-2.5,5.7))
+```
+
+What do you notice about the numbers?
+

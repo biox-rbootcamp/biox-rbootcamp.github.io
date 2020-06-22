@@ -1,0 +1,561 @@
+---
+title: 'Lab 5b: Mixture Models and Variance Stabilization'
+author: "Bios 221: Modern Statistics for Modern Biology"
+date: "10/9/2019"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+```{r include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.width=7, fig.height=5) 
+```
+
+## Goal
+
+In this lab we will learn the basics of mixture modeling. Mixtures models are strongly tied to both your previous lab on Clustering, but also your next lab on RNA-Seq analysis. Furthermore, we will learn about the Bootstrap and variance stabilizing transformations: You already used a variance stabilizing transformation in the clustering Lab, and heard about its application to RNA-Seq data in class yesterday. The Lab does not have an associated Quiz, however there are questions interspersed throughout to which we will post solutions.
+
+## Load packages
+
+```{r setup, message = FALSE, warning = FALSE, results = 'hide'}
+pkgs_needed = c("tidyverse", "ggplot2", "mixtools", "HistData",
+                "bootstrap", "ggbeeswarm", "pasilla", "matrixStats", "DESeq2")
+BiocManager::install(setdiff(pkgs_needed, installed.packages()))
+library("tidyverse")
+library("ggplot2")
+library("mixtools")
+library("HistData")
+library("bootstrap")
+library("ggbeeswarm")
+library("pasilla")
+library("matrixStats")
+library("DESeq2")
+```
+
+
+
+## Introduction
+
+In the lectures we saw that sequences could come from CpG islands or not 
+and that the nucleotide patterns were different in each. Sometimes we can see 
+the data as a simple mixture of a few components, we call these finite mixtures.
+Other mixtures can involve almost as many types as we have observations, these 
+we call infinite mixtures.
+
+We also saw a simple generative model with a Poisson distribution led us to 
+make useful inferences in the detection of an Epitope. Unfortunately, 
+a satisfactory fit to real data with such a simple model is often out of reach.
+However, simple models  such as the normal or Poisson distributions can serve 
+as building blocks for more realistic models using the mixing framework, which
+occurs naturally for flow cytometry data, biometric measurements, for RNA-seq, 
+Chip-Seq, microbiome and many other types of data collected using modern 
+biotechnology.
+
+## Finite Mixtures
+
+### Simple examples and computer experiments
+
+Here is a first example of a mixture model with two equally important 
+components. We decompose the generating process into steps:
+
+1. Flip a fair coin
+2. If it comes up heads, generate a random number from a normal with mean 1 and variance 0.25.
+3. If it comes up tails, generate a random number from a normal with mean 3 and variance 0.25.
+
+Let's produce a histogram by repeating these three steps 10,000 times.
+
+```{r TwoNormals}
+coinflips = (runif(10000) > 0.5)
+table(coinflips)
+
+sd1 = 0.5 ; sd2 = 0.5
+mean1 = 1 ; mean2 = 3
+
+fairmix = rnorm(length(coinflips),
+                mean = ifelse(coinflips, mean1, mean2),
+                sd   = ifelse(coinflips, sd1,   sd2))
+fairdf = data.frame(fairmix)
+ggplot(fairdf, aes(x = fairmix)) +
+    geom_histogram(fill = "red", color = "grey", binwidth = 0.2)
+```
+
+**Question 1:** How many modes are there?
+
+
+
+**Question 2:**  Modify the code below to simulate one million coin flips 
+and make a histogram with 500 bins.
+
+```{r}
+B = 1e+6
+coinflips = (runif(B)>0.5)
+fairmix = rnorm(length(coinflips),
+                mean = ifelse(coinflips, mean1, mean2),
+                sd   = ifelse(coinflips, sd1,   sd2))
+fairdf = data.frame(fairmix)
+# Make the plot below using bins = 500 instead of binwidth = 0.2 in geom_histogram()
+
+```
+
+What you should see is that with many observations and bins, the histogram 
+is becoming similar to a smooth curve. This smooth limiting curve is called 
+*the density function* of the random variable `fairmix`.
+
+The density function for a normal ${\mathcal N}(\mu,\sigma)$ random variable 
+can be written explicitly, we usually call it 
+$\phi(x)=\frac{1}{\sigma \sqrt{2\pi}}e^{-\frac{1}{2}(\frac{x-\mu}{\sigma})^2}$.
+
+Next we will proceed as follows:
+
+1) For cases where the coinflip was one, make a histogram of `fairmix` values.
+Use a binwidth of 0.01, choose {\tt y = ..density..} in the `ggplot()` {\tt aes}
+mapping, meaning that the vertical axis is the density of counts 
+(i.e. values such that the area of the histograms is 1).
+2) Overlay the line corresponding to $\phi(z)$
+
+```{r overlaydensity}
+faird = data.frame(fairdf,coinflips)
+setone = faird %>% dplyr::filter(coinflips==1)
+fnpoints = faird[sample(nrow(faird),1000),]
+ggplot(setone, aes(x= fairmix)) +
+   geom_histogram(aes(y = ..density..), fill = "purple", binwidth=0.01) +
+   stat_function(fun = dnorm, data=fnpoints,
+                       args = list(mean = mean1, sd = sd2),color="red")
+```
+
+
+
+In fact, we can write the mathematical formula for the density (the limiting 
+curve that the histograms tend to look like) as a sum of the two densities.
+
+\begin{equation}
+f(x)=\frac{1}{2}\phi_1(x)+\frac{1}{2}\phi_2(x)
+\label{eq:halfhalf}
+\end{equation}
+
+where $\phi_1$ is the density of the normal ${\mathcal N}(\mu_1=1,\sigma^2=0.25)$
+and $\phi_2$ is the density of the normal ${\mathcal N}(\mu_2=3,\sigma^2=0.25)$.
+Hence by using the function `dnorm` we can produce theoretical density plots as below:
+
+
+```{r Density2}
+xs = seq(-1, 5, length = 1000)
+dens2 = 0.5 * dnorm(xs, mean=1, sd=0.5)+
+        0.5 * dnorm(xs, mean=3, sd=0.5)
+fairtheory=data.frame(xs,dens2)
+ggplot(fairtheory)+ aes(x = xs, y = dens2) +
+  geom_line(color = "red",size=1.5) + ylab("mixture density")
+```
+
+In this case  the mixture model is extremely visible as the two distributions
+have little overlap. Figure \ref{fig:twodensity} shows two distinct peaks,
+we call this a \eindex{bimodal} distribution. This happens when we have two 
+very separate populations, for instance different species of fish whose weights
+have very different means. However, in many cases the separation is not so 
+clear.
+
+```{r histmystery, warning=FALSE}
+set.seed(1233341)
+sd1 = sd2 = sqrt(0.5)
+mean1 = 1; mean2 = 2
+coinflips = (runif(1000) > 0.5)
+
+output = rnorm(length(coinflips),
+               mean = ifelse(coinflips, mean1, mean2),
+               sd   = ifelse(coinflips, sd1,   sd2))
+
+ht = hist(output,nclass=30, plot=FALSE)
+maxcount = max(ht$count)
+mysterydata = data.frame(x = output, group = ifelse(coinflips, "A", "B"))
+xmin = min(output); xmax = max(output)
+
+ggplot(mysterydata, aes(x = x)) +
+  geom_histogram(fill = "purple", alpha = 0.5, bins=30)+
+  xlim(c(xmin,xmax))+ ylim(c(0, maxcount))
+```
+
+If we color in red the histogram that was generated from
+the *heads* coin flip and blue the one from *tails*, we can see the
+the two underlying distributions.
+
+```{r betterhistogram, message=FALSE,warning=FALSE}
+head( mysterydata, 3)
+ggplot(mysterydata, aes(x = x,group= group)) +
+  geom_histogram(data = dplyr::filter(mysterydata, group == "A"),
+                 fill = "red",  alpha = 0.3, bins = 30) +
+  geom_histogram(data = dplyr::filter(mysterydata, group == "B"),
+                 fill = "darkblue", alpha = 0.3, bins = 30) +
+  xlim(c(xmin,xmax))+ ylim(c(0, maxcount))
+```
+
+The overlapping points are  piled up on top of each other in the final 
+histogram.
+
+Here it is in an overlaid plot showing the three histograms: 
+the two components and the mixture in orange.
+
+
+```{r comparecomponents, message=FALSE, warning=FALSE}
+ggplot(mysterydata, aes(x = x)) +
+  geom_histogram(fill = "orange", alpha = 0.4, bins=30) +
+  geom_histogram(data = dplyr::filter(mysterydata, group == "A"),
+                 fill = "red",  alpha = 0.4 , bins=30) +
+  geom_histogram(data = dplyr::filter(mysterydata, group == "B"),
+                 fill = "darkblue", alpha = 0.4, bins=30) +
+  xlim(c(xmin,xmax))+ ylim(c(0, maxcount)) 
+```
+
+Here we were able to color each of the components using the function
+`filter` from the `dplyr` package because we knew how we had generated 
+the points, their provenance was either A or B depending on the original 
+coinflip. In real data, this information is missing.
+
+
+## Discovering the hidden class labels
+
+In the case of simple parametric components, we use a method called the
+expectation-maximization (EM) algorithm to infer the value of the hidden
+groupings. The expectation-maximization algorithm is a popular
+iterative procedure that alternates between
+
+* pretending we know the probability with which each observation belongs 
+to a component and estimating the parameters of the components,
+* and pretending we know the parameters of the component distributions 
+and estimating the probability with which each observation belongs to the 
+components.
+
+
+### Mixture of normals
+
+Suppose we have a  mixture of two normals with mean parameters unknown 
+and standard deviations $1$, $(\mu_1=?,\,\mu_2=?,\,\sigma_1=\sigma_2=1)$.
+
+Here is an example of data  generated according to this model, the 
+labels are $u$.
+
+```{r mixnorm1}
+set.seed(198435)
+mus = c(-0.5,1.5)
+u = sample(2, 20, replace = TRUE)
+y = rnorm(length(u), mean = mus[u])
+duy = data.frame(u, y)
+group_by(duy, u)[1:6, ]
+```
+
+If we would know the true labels, we could split the data into two independent
+pieces and estimate parameters for each piece independently:
+
+```{r mixnorm2}
+group_by(duy, u) %>% summarize(mean(y))
+```
+
+In reality we do not know the $u$ labels, nor do we know the mixture is balanced
+(i.e. $\alpha=\frac{1}{2}$). We have to start with an initial guesses for
+the labels and the parameters and go through several iterations of the 
+algorithm, updating at each step our current best guess of the group labels and
+the parameters until we see no substantial improvement in our optimizations.
+
+A somewhat more elaborate implementation of this algorithm has been implemented 
+in the `mixtools` package:
+
+```{r mixtools,message = FALSE}
+library("mixtools")
+n1 = 100; n2 = 50
+mu1 = -0.2; mu2 = 0.5
+sigma1 = 0.5; sigma2 = 1
+
+y = c(rnorm(n1, mu1, sd = sigma1), rnorm(n2, mu2, sigma2))
+gm = normalmixEM(y, k = 2, lambda = c(0.5, 0.5),
+                 mu = c(-0.02, 0.02), sigma = c(1, 1))
+gm$lambda
+gm$mu
+gm$sigma
+```
+
+
+**Question 3**:
+a) Try to increase the samples size n1 and n2. What happens then?
+b) Why do you get different results every time you run this code?
+c) How can you make it produce always the same result?
+
+
+## Bootstrap
+
+In this section we consider the the differences in heights of 15 pairs 
+(15 self hybridized and 15  crossed) of  *Zea Mays* plants (data were generated 
+by Darwin in a carefully designed paired experiment).
+
+```{r ecdfZea,fig.height=2, fig.width=4}
+library("HistData")
+ZeaMays$diff
+ggplot(data.frame(ZeaMays, y = 1/15),
+       aes(x = diff, ymax = 1/15, ymin = 0)) +
+  geom_linerange(size=1, col= "forestgreen") +
+  ylim(0, 0.25)
+```
+
+We use simulations as described above to approximate the sampling distribution 
+for the median of the Zea Mays differences: 
+
+Draw $B=10,000$ samples of size 15 from the 15 values (each their own little 
+component in the 15 part mixture). Then compute the 10,000 medians of each 
+of these sets of 15 values and look at their distribution:
+
+```{r bootmedian}
+set.seed(1)
+B = 10000
+diff = ZeaMays$diff
+samplesIdx = replicate(B, sample(15, 15, replace = T))
+samplingDist = apply(samplesIdx, 2, function(x) {return(median(diff[x]))})
+
+ggplot(data.frame(samplingDist),aes(x = samplingDist)) +
+  geom_histogram(bins=30, col = "white", fill = "purple")
+```
+
+Can you use `geom_vline` to visualize the median of the full 
+(non-simulated) `ZeaMays$diff` dataset? Where does it lie compared to 
+the medians calculated via bootstrapping?
+
+**Question 4**:Give the upper end of a centered 95\% confidence interval for the median based on the above bootstrap sample. Tip: Use the ``quantile`` function.
+
+```{r confidence_interval}
+# TODO
+```
+
+
+## Infinite mixtures
+
+
+In our finite mixture examples, we generated observations as follows: 
+choose the parameter $\theta$ to be one of two values $\lambda_1, \lambda_2$ 
+at random (e.g. by flipping a coin), then draw an observation from a parametric
+distribution with parameter $\theta$ equal to either $\lambda_1$ or $\lambda_2$ 
+depending on the outcome of the coin flip. 
+
+It turns, that this procedure is easily generalizable. Instead of having
+the parameter $\theta$ assume one of finately many possible values, e.g.
+$\theta \in \{\lambda_1, \lambda_2, dots, \lambda_K\}$, we can model
+$\theta$ itself as a random variable from a continuous distribution 
+(and hence there will be infinitely many choices for $\theta$).
+
+One key example is the following two-step scheme, which gives rise to the 
+so called Gamma-Poisson distribution:
+
+* Generate a set of parameters $\theta_1, \theta_2,\dotsc $
+ from a Gamma distribution.
+* Use these to generate a set of $\text{Poisson}(\theta_i)$ random variables, 
+one for each $\theta_i$.
+
+Let us quickly remark that we already saw the Gamma distribution in Lab 1, 
+where it appears as the result of adding exponential random variables. 
+To get more insight, we also note that the Gamma distribution is always
+continuous and positive-valued.  
+
+While the density of the exponential variable has its maximum at zero and then
+simply decreases towards 0 as the value goes to infinity, the density of the
+gamma distribution has its maximum at some finite value. Let’s explore this
+distribution by simulation examples with various parameters.
+
+```{r}
+ggplot(data.frame(x = rgamma(10000, shape = 2, rate = 1/3)),
+   aes(x = x)) + geom_histogram(bins = 100, fill= "purple")
+```
+
+```{r}
+ggplot(data.frame(x = rgamma(10000, shape = 10, rate = 3/2)),
+   aes(x = x)) + geom_histogram(bins = 100, fill= "purple")
+```
+
+Now that we understand the Ggamma distribution a bit better, we are ready to 
+draw samples from the Gamma Poisson distribution using the two-step scheme 
+described above (remember that Gamma-Poisson is a discrete distribution):
+
+```{r}
+lambda = rgamma(100000, shape = 10, rate = 3/2)
+gp = rpois(length(lambda), lambda = lambda)
+
+ggplot(data.frame(x = gp), aes(x = x)) +
+  geom_histogram(bins = 100, fill= "purple")
+```
+
+
+
+
+We point out that the Gamma-Poisson distribution is also often called
+the Negative-Binomial distribution. They are the same (can only differ by the choice of parametrization). 
+In R you can directly generate samples from this distribution using 
+```rnbinom``` (and of course you have access to ```dnbinom``` etc).
+
+
+## Variance Stabilization
+
+A key issue we need to control when we analyse experimental data is how much 
+variability there is between repeated measurements of the same underlying true 
+value. This will determine whether and how well we can see any true differences,
+due to, e.g., atreatment with a drug.  Data that arise through the type of
+hierarchical models we have studied in this chapter often turn out to have very 
+heterogenous variances, and this can be a challenge.  We'll see how in such
+cases variance stabilizing transformations can help.
+
+Let's start with a series of Poisson variables with rates $\lambda$:
+
+```{r seriesofpoisson1}
+lambdas = seq(100, 500, by = 100)
+
+simdat = lapply(lambdas, function(l)
+  data.frame(y = rpois(n = 100, lambda = l), lambda = l)) %>% 
+  bind_rows()
+
+library("ggbeeswarm")
+ggplot(simdat, aes( x=lambda, y=y)) +
+  geom_beeswarm(alpha = 0.6, color="purple")
+```
+
+Clearly, the variance of the random numbers, differs at different levels of 
+$\lambda$ ($\lambda$ the parameter of a Poisson distribution is also equal 
+to its mean $\mu$).
+
+In fact, we can show mathematically, that for Poisson variables there is 
+a mean-variance relationship of the form $V(\mu)=\mu$, i.e. the variance is 
+equal to the mean!
+
+But we can approximately stabilize the variances (make it constant across 
+different levels of the mean) by transforming the $y$ variable
+with a square root function. This is often referd to as variance stabilizing
+transformation (VST). Note that, the square root works for Poisson variables,
+but it might not be appropriate for other functions. Thus, VST's are 
+distribution specific.
+
+```{r seriesofpoisson2}
+ggplot(simdat, aes( x=lambda, y=sqrt(y))) +
+  geom_beeswarm(alpha = 0.6, color="purple")
+```
+
+If the square root transformation is applied to each of the variables, 
+then the transformed variables will have approximately constant variance 
+(actually if  we take the transformation $x \longrightarrow 2\sqrt{x}$ we 
+obtain a standard deviation approximately equal to 1).
+
+```{r vstpois}
+summarise(group_by(simdat, lambda), sd(y), sd(2*sqrt(y)))
+```
+
+Similar strategies have been developed also for messy real world datasets, 
+such as Microarrays and RNA-Seq datasets and have been essential to their 
+statistical analysis.
+
+
+For another example, let us revisit the negative binomial (Gamma-Poisson 
+distribution), here the mean variance relationship takes the form 
+$V(\mu) = \mu + c\mu^2$, so the factor $c\mu^2$ is additional variability 
+compared to the poisson. Let us explore this by simulation as well. 
+We generate Gamma-Poisson variables and plot the 95% confidence intervals 
+around the mean.
+
+```{r}
+muvalues = 2^seq(0, 10, by = 1)
+simgp = lapply(muvalues, function(mu) {
+  u = rnbinom(n = 1e4, mu = mu, size = 4)
+  data.frame(mean = mean(u), sd = sd(u),
+         lower = quantile(u, 0.025),
+         upper = quantile(u, 0.975),
+         mu = mu)
+  } ) %>% bind_rows
+head(as.data.frame(simgp), 2)
+```
+
+```{r}
+ggplot(simgp, aes(x = mu, y = mean, ymin = lower, ymax = upper)) +
+  geom_point() + geom_errorbar()
+```
+
+
+Repeat the above with an equidistant grid of `muvalues` and 
+the plot the Variance versus the Mean. Do you observe the mean-variance 
+relationship of the form $V(\mu) = \mu + c\mu^2$?
+
+See the book about how to variance stabilize data coming from a Negative
+Binomial distribution!
+
+## Intro to RNA-Seq
+
+The ideas we have presented in this lab were quintessential for the development 
+of methods (such as DESeq2, which we will cover tomorrow) able to handle 
+high-throughput count data.
+
+Such datasets often come with a low number of replicates, which means that 
+it is important to have a parametric model. On the other hand, assuming the
+simplest model for count data, i.e. Poisson, is too simplistic and does not
+account for additional biological variability beyond Poisson noise. Luckily, 
+we can capture this additional variability to really good approximation by
+employing the Gamma-Poisson distribution, which as we saw above is an infinite 
+mixture of Poisson distributions. Moreover, the Gamma-Poisson distribution 
+enables the development of a particular variance stabilization strategy 
+(which is somewhat more complicated than the square root transformation for
+Poisson counts, but not a lot!). 
+
+Let us see the above in action with a RNASeq dataset, which is from an
+experiment on Drosophila melanogaster cell cultures that investigated the 
+effect of RNAi knock-down of the splicing factor pasilla (Brooks et al. 2011) 
+on the cells’ transcriptome. There were two experimental conditions, termed 
+untreated and treated in the header of the count table that we loaded. 
+They correspond to negative control and to siRNA against pasilla. 
+
+
+Let us first load the dataset:
+
+```{r}
+fn = system.file("extdata", "pasilla_gene_counts.tsv",
+                 package = "pasilla", mustWork = TRUE)
+counts = as.matrix(read.csv(fn, sep = "\t", row.names = "gene_id"))
+dim(counts)
+```
+
+Note that the ```counts``` matrix consists of the counts for each of 14599 
+genes as measured in 7 different samples.
+
+Before proceeding we note that a difficulty of working with count datasets 
+is that there are variations in the total number of reads in each sample. 
+The step below, which will be explained in more detail next week, normalizes 
+the counts, hence "fixing" the issue of unequal number of reads (essentially
+we multiply the counts of all genes coming from a given sample with an 
+appropriate scalar size factor).
+
+```{r}
+head(counts)
+```
+
+
+```{r}
+sf = estimateSizeFactorsForMatrix(counts)
+ncounts  = counts / matrix(sf, byrow = TRUE, ncol = ncol(counts), nrow = nrow(counts))
+head(ncounts)
+```
+
+```{r}
+# only untreated samples
+uncounts = ncounts[, grep("^untreated", colnames(ncounts)), drop = FALSE]
+head(uncounts)
+```
+
+Now that we normalized the counts, let us explore the mean-variance relationship:
+
+```{r warning=FALSE}
+ggplot(data.frame( mean = rowMeans(uncounts), var  = rowVars( uncounts)),
+       aes(x = log(mean), y = log(var))) +
+  geom_hex() + 
+  geom_abline(slope = 1:2, color = c("forestgreen", "red")) +
+  coord_fixed() + theme(legend.position = "none") 
+```
+
+Here again we can clearly see the mean-variance relationship which we 
+theoretically expect for the gamma-Poisson distribution! 
+
+Note that, the green line (slope 1) is what we expect if the variance equals 
+the mean as is the case for a Poisson-distributed random variable.
+We see that this approximately fits the data in the lower range. 
+The red line (slope 2) corresponds to the quadratic mean-variance 
+relationship $v=m^2$.
+
+
