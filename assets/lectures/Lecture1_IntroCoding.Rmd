@@ -1,5 +1,5 @@
 --- 
-title: 'Introduction to R'
+title: 'Basics of coding in R'
 subtitle: 'Week 1 Session 2'
 date: "July 1st, 2020" 
 author: 
@@ -28,10 +28,10 @@ knitr::opts_chunk$set(
   cache = FALSE, tidy = FALSE, size = "small")
 ```
 
-# Basics of coding in R  
+
+# R as a calculator 
 
 ## R as a calculator 
-
 - R can be used as a calculator, e.g.
 
 ```{r} 
@@ -46,6 +46,7 @@ division: (`/`), exponentiation: (`^`), modulus: (`%%`)
 - Built-in constants: `pi, LETTERS, letters, month.abb, month.name`
 
 
+# Variables 
 ## Variables 
 
 >- **Variables** are objects used to store various information.
@@ -117,7 +118,8 @@ R will return this when the value is too big, e.g. `2^1024`
 is undefined, e.g. `0/0`.
 </div>
 
-## Data types 
+# Data types 
+## Data types
 
 Values in R are limited to **only 6 atomic classes**:
 
@@ -166,7 +168,7 @@ print(ls())
 
 
 
-## Vectors 
+# Vectors 
 
 Vectors are the simplest R data objects; there are no scalars in R. 
 
@@ -345,8 +347,8 @@ continued to run, but perhaps it did not work as you intended.
 
 
 
-## Matrices 
-
+# Matrices 
+## Matrices
 
 Matrices in R are objects with **homogeneous elements** (of the same type),
 **arranged in a 2D rectangular layout**. A matrix can be created with a function:
@@ -466,8 +468,8 @@ More on matrix algebra [here](http://www.statmethods.net/advstats/matrix.html)
 
 
 
-## Arrays 
-
+# Arrays 
+## Arrays
 
 - In R, arrays are data objects with more than two dimensions, \ 
 e.g. a (4x3x2)-array has 2 tables of size 4 rows by 3 columns.
@@ -488,8 +490,8 @@ matrix.names)))
 
 
 
-## Lists 
-
+# Lists 
+## Lists
 Lists can **contain elements of different types** e.g. numbers, strings, 
 vectors and/or another list. List is created using `list()` function.
 
@@ -522,8 +524,8 @@ n.list$yearOfBirth
 
 
 
+# Data-frames 
 ## Data-frames 
-
 
 A data frame is a table or a **2D array-like structure**, whose:
 
@@ -646,7 +648,8 @@ new.employees <- data.frame(
 </div>
 
 
-## Factors 
+# Factors 
+## Factors
 
 Factors are used to **categorize the data and store it as levels**. 
 They are useful for variables which take on a limited number of unique values.
@@ -721,7 +724,7 @@ as.Date('2019-01-01') - Sys.Date()
 Type `?strptime` for a list of possible date formats.
 
 
-## Random numbers
+# Random numbers
 
 You can generate vectors of random numbers from different distributions.
 

@@ -5,7 +5,7 @@
   <meta name="generator" content="pandoc">
   <meta name="author" content="Claire Donnat" />
   <meta name="author" content="(based on the material by Lan Huong Nguyen)" />
-  <title>Introduction to R</title>
+  <title>Basics of coding in R</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
@@ -488,14 +488,14 @@ document.getElementsByTagName('head')[0].appendChild(style);
     <div class="slides">
 
 <section>
-    <h1 class="title">Introduction to R</h1>
+    <h1 class="title">Basics of coding in R</h1>
   <h1 class="subtitle">Week 1 Session 2</h1>
     <h2 class="author">Claire Donnat</h2>
     <h2 class="author">(based on the material by Lan Huong Nguyen)</h2>
     <h3 class="date">July 1st, 2020</h3>
 </section>
 
-<section><section id="basics-of-coding-in-r" class="titleslide slide level1"><h1>Basics of coding in R</h1></section><section id="r-as-a-calculator" class="slide level2">
+<section><section id="r-as-a-calculator" class="titleslide slide level1"><h1>R as a calculator</h1></section><section id="r-as-a-calculator-1" class="slide level2">
 <h2>R as a calculator</h2>
 <ul>
 <li>R can be used as a calculator, e.g.</li>
@@ -510,7 +510,8 @@ document.getElementsByTagName('head')[0].appendChild(style);
 <li><p>Intuitive arithmetic operators: addition (<code>+</code>), subtraction (<code>-</code>), multiplication (<code>*</code>), division: (<code>/</code>), exponentiation: (<code>^</code>), modulus: (<code>%%</code>)</p></li>
 <li><p>Built-in constants: <code>pi, LETTERS, letters, month.abb, month.name</code></p></li>
 </ul>
-</section><section id="variables" class="slide level2">
+</section></section>
+<section><section id="variables" class="titleslide slide level1"><h1>Variables</h1></section><section id="variables-1" class="slide level2">
 <h2>Variables</h2>
 <ul>
 <li class="fragment"><strong>Variables</strong> are objects used to store various information.</li>
@@ -569,7 +570,8 @@ very_long_name.<span class="dv">3</span> &lt;-<span class="st"> </span><span cla
 <li><code>NaN</code> means “Not a Number”. R will return this when a computation is undefined, e.g. <code>0/0</code>.</li>
 </ul>
 </div>
-</section><section id="data-types" class="slide level2">
+</section></section>
+<section><section id="data-types" class="titleslide slide level1"><h1>Data types</h1></section><section id="data-types-1" class="slide level2">
 <h2>Data types</h2>
 <p>Values in R are limited to <strong>only 6 atomic classes</strong>:</p>
 <ul>
@@ -623,33 +625,8 @@ very_long_name.<span class="dv">3</span> &lt;-<span class="st"> </span><span cla
 <p>You can see what variables are <strong>currently available in the workspace</strong> by calling</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(<span class="kw">ls</span>()) </code></pre></div>
 <pre><code>## [1] &quot;a&quot;                &quot;first.variable&quot;   &quot;SecondVariable&quot;   &quot;var.1&quot;            &quot;var.2&quot;            &quot;var.3&quot;            &quot;variable_2&quot;       &quot;very_long_name.3&quot; &quot;x&quot;</code></pre>
-</section><section id="vectors" class="slide level2">
-<h2>Vectors</h2>
-<p>Vectors are the simplest R data objects; there are no scalars in R.</p>
-<div class="left" ,="" style="width: 50%">
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Create a vector with &quot;combine&quot;</span>
-x1 &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">3</span>, <span class="dv">7</span><span class="op">:</span><span class="dv">12</span>) 
-x2 &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&#39;apple&#39;</span>, <span class="st">&#39;banana&#39;</span>, <span class="st">&#39;watermelon&#39;</span>)
-<span class="co"># Look at content of a variable:</span>
-x1</code></pre></div>
-<pre><code>## [1]  1  3  7  8  9 10 11 12</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(x2)</code></pre></div>
-<pre><code>## [1] &quot;apple&quot;      &quot;banana&quot;     &quot;watermelon&quot;</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Including in () also prints content</span>
-(x3 &lt;-<span class="st"> </span><span class="dv">1</span><span class="op">:</span><span class="dv">5</span>)</code></pre></div>
-<pre><code>## [1] 1 2 3 4 5</code></pre>
-</div>
-<div class="right" ,="" style="width: 50%">
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># If mixed, on-character values are coerced </span>
-<span class="co"># to character type </span>
-(s &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&#39;apple&#39;</span>, <span class="fl">123.56</span>, <span class="dv">5</span>, <span class="ot">TRUE</span>)) </code></pre></div>
-<pre><code>## [1] &quot;apple&quot;  &quot;123.56&quot; &quot;5&quot;      &quot;TRUE&quot;</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Generate numerical sequence, e.g. sequence</span>
-<span class="co"># from 5 to 7 with 0.4 increment. </span>
-(v &lt;-<span class="st"> </span><span class="kw">seq</span>(<span class="dv">5</span>, <span class="dv">7</span>, <span class="dt">by =</span> <span class="fl">0.4</span>))</code></pre></div>
-<pre><code>## [1] 5.0 5.4 5.8 6.2 6.6 7.0</code></pre>
-</div>
-</section><section id="vector-indexing" class="slide level2">
+</section></section>
+<section><section id="vectors" class="titleslide slide level1"><h1>Vectors</h1></section><section id="vector-indexing" class="slide level2">
 <h2>Vector indexing</h2>
 <div class="left" ,="" style="width: 50%">
 <ul>
@@ -748,7 +725,8 @@ v1 <span class="op">*</span><span class="st"> </span><span class="kw">c</span>(<
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">v1 <span class="op">+</span><span class="st"> </span><span class="kw">c</span>(<span class="dv">3</span>, <span class="dv">7</span>, <span class="dv">10</span>)</code></pre></div>
 <pre><code>##  [1]  4  9 13  7 12 16 10 15 19 13</code></pre>
 <p><strong>Note</strong>: a warning is not an error. It only informs you that your code continued to run, but perhaps it did not work as you intended.</p>
-</section><section id="matrices" class="slide level2">
+</section></section>
+<section><section id="matrices" class="titleslide slide level1"><h1>Matrices</h1></section><section id="matrices-1" class="slide level2">
 <h2>Matrices</h2>
 <p>Matrices in R are objects with <strong>homogeneous elements</strong> (of the same type), <strong>arranged in a 2D rectangular layout</strong>. A matrix can be created with a function:</p>
 <p><code>matrix(data, nrow, ncol, byrow, dimnames)</code></p>
@@ -866,7 +844,8 @@ A <span class="op">%*%</span><span class="st"> </span><span class="kw">t</span>(
 ## [2,]    3   36   13
 ## [3,]   22   54   30</code></pre>
 <p>More on matrix algebra <a href="http://www.statmethods.net/advstats/matrix.html">here</a></p>
-</section><section id="arrays" class="slide level2">
+</section></section>
+<section><section id="arrays" class="titleslide slide level1"><h1>Arrays</h1></section><section id="arrays-1" class="slide level2">
 <h2>Arrays</h2>
 <ul>
 <li>In R, arrays are data objects with more than two dimensions,   e.g. a (4x3x2)-array has 2 tables of size 4 rows by 3 columns.</li>
@@ -896,7 +875,8 @@ matrix.names))) </code></pre></div>
 ## ROW2   14   18   22
 ## ROW3   15   19   23
 ## ROW4   16   20   24</code></pre>
-</section><section id="lists" class="slide level2">
+</section></section>
+<section><section id="lists" class="titleslide slide level1"><h1>Lists</h1></section><section id="lists-1" class="slide level2">
 <h2>Lists</h2>
 <p>Lists can <strong>contain elements of different types</strong> e.g. numbers, strings, vectors and/or another list. List is created using <code>list()</code> function.</p>
 <div class="left" ,="" style="width: 50%">
@@ -949,7 +929,8 @@ n.list[[<span class="dv">3</span>]]</code></pre></div>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Access &quot;yearOfBirth&quot; element</span>
 n.list<span class="op">$</span>yearOfBirth</code></pre></div>
 <pre><code>## [1] 1990</code></pre>
-</section><section id="data-frames" class="slide level2">
+</section></section>
+<section><section id="data-frames" class="titleslide slide level1"><h1>Data-frames</h1></section><section id="data-frames-1" class="slide level2">
 <h2>Data-frames</h2>
 <p>A data frame is a table or a <strong>2D array-like structure</strong>, whose:</p>
 <ul>
@@ -1075,7 +1056,8 @@ new.employees &lt;-<span class="st"> </span><span class="kw">data.frame</span>(
 ## E7   Pranab 722.50 2013-07-30 Operations
 ## E8    Tusar 632.80 2014-06-17   Fianance</code></pre>
 </div>
-</section><section id="factors" class="slide level2">
+</section></section>
+<section><section id="factors" class="titleslide slide level1"><h1>Factors</h1></section><section id="factors-1" class="slide level2">
 <h2>Factors</h2>
 <p>Factors are used to <strong>categorize the data and store it as levels</strong>. They are useful for variables which take on a limited number of unique values.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">days &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;Mon&quot;</span>, <span class="st">&quot;Tue&quot;</span>, <span class="st">&quot;Wed&quot;</span>, <span class="st">&quot;Thu&quot;</span>, <span class="st">&quot;Fri&quot;</span>, <span class="st">&quot;Sat&quot;</span>, <span class="st">&quot;Sun&quot;</span>)
@@ -1093,15 +1075,15 @@ new.employees &lt;-<span class="st"> </span><span class="kw">data.frame</span>(
 <h2>Factors ordering</h2>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">days.sample &lt;-<span class="st"> </span><span class="kw">sample</span>(days, <span class="dv">5</span>)
 days.sample</code></pre></div>
-<pre><code>## [1] Sat Sun Mon Thu Fri
+<pre><code>## [1] Thu Sun Tue Mon Fri
 ## Levels: Fri Mon Sat Sun Thu Tue Wed</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Create factor with given levels</span>
 (days.sample &lt;-<span class="st"> </span><span class="kw">factor</span>(days.sample, <span class="dt">levels =</span> days)) </code></pre></div>
-<pre><code>## [1] Sat Sun Mon Thu Fri
+<pre><code>## [1] Thu Sun Tue Mon Fri
 ## Levels: Mon Tue Wed Thu Fri Sat Sun</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Create factor with ordered levels</span>
 (days.sample &lt;-<span class="st"> </span><span class="kw">factor</span>(days.sample, <span class="dt">levels =</span> days, <span class="dt">ordered =</span> <span class="ot">TRUE</span>)) </code></pre></div>
-<pre><code>## [1] Sat Sun Mon Thu Fri
+<pre><code>## [1] Thu Sun Tue Mon Fri
 ## Levels: Mon &lt; Tue &lt; Wed &lt; Thu &lt; Fri &lt; Sat &lt; Sun</code></pre>
 <p>Note that factor <strong>labels are not the same as levels</strong>.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">day_names &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;Monday&quot;</span>, <span class="st">&quot;Tuesday&quot;</span>, <span class="st">&quot;Wednesday&quot;</span>, <span class="st">&quot;Thursday&quot;</span>, <span class="st">&quot;Friday&quot;</span>, <span class="st">&quot;Saturday&quot;</span>, <span class="st">&quot;Sunday&quot;</span>)
@@ -1120,24 +1102,13 @@ x &lt;-<span class="st"> </span><span class="kw">seq</span>(<span class="dt">fro
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">Sys.Date</span>()     <span class="co"># What day  is it? </span></code></pre></div>
 <pre><code>## [1] &quot;2020-06-22&quot;</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">Sys.time</span>()     <span class="co"># What time is it? </span></code></pre></div>
-<pre><code>## [1] &quot;2020-06-22 10:09:52 PDT&quot;</code></pre>
+<pre><code>## [1] &quot;2020-06-22 10:31:15 PDT&quot;</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Number of days until the New Year. </span>
 <span class="kw">as.Date</span>(<span class="st">&#39;2019-01-01&#39;</span>) <span class="op">-</span><span class="st"> </span><span class="kw">Sys.Date</span>() </code></pre></div>
 <pre><code>## Time difference of -538 days</code></pre>
 <p>Type <code>?strptime</code> for a list of possible date formats.</p>
-</section><section id="random-numbers" class="slide level2">
-<h2>Random numbers</h2>
-<p>You can generate vectors of random numbers from different distributions.</p>
-<p>To make your results reproducible, provide a seed for the generator.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">set.seed</span>(<span class="dv">123456</span>)
-
-<span class="kw">sample</span>(<span class="dt">x =</span> <span class="dv">20</span><span class="op">:</span><span class="dv">100</span>, <span class="dt">size =</span> <span class="dv">10</span>) <span class="co"># Random integers</span></code></pre></div>
-<pre><code>##  [1] 79 61 90 73 93 22 86 42 94 57</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">runif</span>(<span class="dv">5</span>, <span class="dt">min =</span> <span class="dv">0</span>, <span class="dt">max =</span> <span class="dv">1</span>)    <span class="co"># Uniform distribution</span></code></pre></div>
-<pre><code>## [1] 0.1326503 0.1719054 0.4777778 0.7005048 0.8798891</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">rnorm</span>(<span class="dv">5</span>, <span class="dt">mean =</span> <span class="dv">0</span>, <span class="dt">sd =</span> <span class="dv">1</span>)    <span class="co"># Normal distribution</span></code></pre></div>
-<pre><code>## [1]  1.1640281 -0.9701434  1.1222795 -1.1795938 -1.4032109</code></pre>
-</section><section id="random-sampling" class="slide level2">
+</section></section>
+<section><section id="random-numbers" class="titleslide slide level1"><h1>Random numbers</h1></section><section id="random-sampling" class="slide level2">
 <h2>Random sampling</h2>
 <p>You can generate a random sample from the elements of a vector using the function sample.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">v &lt;-<span class="st"> </span><span class="kw">seq</span>(<span class="dv">1</span>, <span class="dv">10</span>)
