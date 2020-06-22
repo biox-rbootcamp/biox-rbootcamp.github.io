@@ -1,0 +1,149 @@
+---
+title: "Week 1 Session 2"
+subtitle: "Basics of Coding in R"
+date: July 1st, 2020
+output: 
+  html_notebook:
+    toc: true
+    toc_float: true
+---
+
+# Exercise 0: Swirl courses
+
+The purpose of this first lab is to familiarize yourself with the R language. 
+To this end, we will use one of the Swirl courses (which we installed during the discussion session).
+
+Installation:
+
+```{r cars, eval=FALSE}
+library(swirl)
+install_course_github("swirldev", "R_Programming_E")
+swirl()
+```
+
+This will initiate a series of promts:
+
+- Type 1 for "1: R Programming: The basics of programming in R" when prompted to install a course.
+- Type 1 for "1: R Programming" when prompted to choose a course.
+
+Go through lessons 1 through 11.
+Once you're done, prepare the following exercises which we will go over during the discussion.
+
+# Exercise 1: Vectors
+
+1. Generate and print a vector of 10 random numbers between 5 and 500.
+2. Generate a random vector Z of 1000 letters (from "a" to "z"). Hint: the 
+variable `letters` is already defined in R.
+3. Print a summary of Z in the form of a frequency table.
+4. Print the list of letters that appear an even number of times in Z.
+
+# Exercise 2: Matrices
+
+1. Create the following 5 by 5 matrix and store it as variable X.
+```{r echo = FALSE}
+matrix(1:30, nrow = 5, byrow = FALSE)
+```
+
+2. Create a matrix Y by adding an independent Gaussian noise (random numbers)
+with mean 0 and standard deviation 1 to each entry of X. e.g.
+
+3. Find the inverse of Y.
+
+4. Show numerically that the matrix product of Y and its inverse 
+is the identity matrix.
+
+
+# Exercise 3: Data frames
+
+1. Create the following data frame and name it “exams”.
+
+```{r, echo = FALSE}
+set.seed(123)
+data.frame(
+  student = c("Alice", "Sarah", "Harry", "Ron", "Kate"),
+  score = sample(80:100, 5),
+  letter = sample(c("A","B"), 5, replace = TRUE),
+  late = sample(c(T, F), 5, replace = TRUE)
+)
+```
+
+2. Compute the mean score for this exam and print it.
+3. Find the student with the highest score and print the corresponding 
+row of "exams". Hint: use the function `which.max()`.
+
+
+# Execise 4: Control Flow 
+
+## Part 1.1
+
+Use a for loop to:
+
+a. Print all the letters of the Latin alphabet:`
+
+b. Print the numbers 10 to 100 that are divisible by 7
+
+c. Print the numbers 1 to 100 that are divisible by 5 but not by 3.
+
+
+
+## Part 1.2
+
+a. Find all numbers not greater than 10,000 that are divisible by 
+5, 7 and 11 and print them.
+
+b. Print for each of the numbers x = 2, . . . 20, all numbers that divide x
+(all factors) excluding 1 and x. Hence, for 18, it should print 2 3 6 9.
+
+
+# Execise 5: Functions
+
+## Part 2.1
+
+a.Create a function what will return the number
+of times a given integer is contained a given vector of integers.
+The function should have two arguments one for a vector
+and the other for a scalar. 
+
+b. Then, generate a random vector of 100 
+integers (in a range 1-20) use the function to count the number
+of times the number 12 is in that vector. 
+
+## Part 2.2
+
+Write a function that takes in a data.frame as an input, 
+prints out the column names, and returns its dimensions.
+
+# Execise 6: Apply family functions
+
+## Part 1
+Below we print six first rows of the built-in dataset, `mtcars`, 
+from the 1974 Motor Trend US magazine, which comprises information
+on the fuel consumption and 10 aspects of automobile design 
+and performance for 32 selected car models. 
+
+```{r}
+head(mtcars)
+```
+
+Use `apply()` function to find the standard deviation and the 0.8-quantile  
+of each of the automobile characteristic.
+
+## Part 2
+
+Below is a vector of dates in year 2018.
+
+```{r}
+set.seed(1234)
+y2018 <- seq(as.Date("2018-01-01", format = "%Y-%m-%d"), 
+             as.Date("2018-12-31", format = "%Y-%m-%d"), 
+             "days")
+length(y2018)
+# A random sample of 10 dates from 2018
+y2018_sample <- sample(y2018, size = 10)
+y2018_sample
+```
+
+Use an `apply` family function to return the number of weeks
+left from each day in `y2018_sample` to the New Year, 2019/01/01.
+
+
