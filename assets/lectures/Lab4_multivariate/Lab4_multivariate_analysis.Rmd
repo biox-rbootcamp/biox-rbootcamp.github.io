@@ -1,7 +1,7 @@
 ---
-title: 'Lab 4:Multivariate Analysis'
-author: "Bios 221: Modern Statistics for Modern Biology"
-date: "10/7/2019"
+title: 'Multivariate Analysis'
+author: "Week 4: Session 12"
+date: "07/20/2020"
 output: 
   html_document:
     toc: true
@@ -16,15 +16,7 @@ a few simple examples.
 
 Work through this lab by running all the R code to your computer and making sure 
 that you understand the input and the output. Make alterations where you seem
-fit. We encourage you to work through  this lab with a partner. 
-
-Once you get to the end of this lab, go to [Canvas](https://canvas.stanford.edu) 
-to submit your answer to the quiz questions dispersed throughout this lab.
-Some questions will be open-ended and you will not see them appear
-on Canvas.
-
-You may NOT work with other students to answer the questions on Canvas. 
-You will need a Stanford ID to log in to Canvas.
+fit.
 
 ```{r setup, warning=FALSE, message=FALSE, results='hide'}
 knitr::opts_chunk$set(echo = TRUE)
