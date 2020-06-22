@@ -1,8 +1,8 @@
 --- 
 title: 'Lecture 1: Introduction to R'
-subtitle: 'CME/STATS 195'
-date: "September 27, 2018" 
-author: "Lan Huong Nguyen"
+subtitle: 'bioX R Summer Bootcamp'
+date: "June 29th, 2020" 
+author: "Claire Donnat, James Li, Lan Huong Nguyen"
 output: 
   revealjs::revealjs_presentation:
     self_contained: false
@@ -45,46 +45,36 @@ knitr::opts_chunk$set(
 
 </br>
 
-CME/STATS 195 will run for 4 weeks: 09/27-10/23/2018
+The bootcamp will run for 8 weeks: 06/29-08/23/2020
 
-- Lectures: Tue, Thu 12:00 PM - 1:20 PM, Building 200 room 034
-- Office hours: Mon 4PM, Huang (Basement) Student Area
+- Lectures: Monday, Wednesday, Thursday 10:00 AM - 11:00 AM
+- Office hours: Mon 4PM 
 - Class website: https://cme195.github.io/
-- Homework submission: https://canvas.stanford.edu/
-- Questions/Communication: https://canvas.stanford.edu/
+- Questions/Communication: cdonnat@stanford.edu
 
 </br>
 
-Grading (Satisfactory/No Credit):
+No Grading but:
 
-- Homework assignments (40%) 
-- (Group) final project (40%)
-- Participation (20%)
+- 15 h of work per week
+- Labs and videos should be watched and done before the discussion
+- Zoom classes are for discussion
+- James will have office hours should you require more one-on-one support.
 
-## Assignments
+## Assignements: Labs
 
 
-Homework:
+Assignement:
 
-- work individually
-- due the 3rd week of class
+- work individually (best for you)
+- participate in discussion sessions.
 
-Final project:
-
-- work in groups up to 4 students
-- title and abstract due the 3rd week of class
-- final report and R code due one week after the last class
-- details can be found on [class website](https://cme195.github.io/assignments)
-
-Late day policy:
-
-- no later than 5 days post due date; 10% penalty per day 
 
 
 ## Pre-requisites and expectations
 
-No formal pre-requisites, but you should have some prior
-knowledge of statistics and some programming experience.
+No formal pre-requisites,
+knowledge of statistics nor programming experience.
 
 The goal of this course is for you to:
 
@@ -115,7 +105,7 @@ This is a short course, so you will not learn everything about R.
 
 - Exploratory data analysis (EDA)
 
-- Elements of statics: modeling, predicting and testing.
+- Elements of statistics: modeling, predicting and testing.
 
 - Some R tools for supervised & unsupervised learning.
 
@@ -218,7 +208,7 @@ Source: [http://blog.revolutionanalytics.com/](http://blog.revolutionanalytics.c
 
 ## "Textbook"
 
-We will use *R for Data Science* as a primary reference.
+We will use *R for Data Science* as a primary reference. Other resources are listed on the website/
 
 <img src="./Lecture1-figure/r_textbook.png", height="600"></img> 
 
