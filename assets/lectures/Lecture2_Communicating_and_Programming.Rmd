@@ -1,8 +1,10 @@
 --- 
-title: 'Lecture 2: Communicating and Programming in R'
-subtitle: 'CME/STATS 195'
+title: 'Using tidyverse'
+subtitle: 'Week 2 Session 4'
 date: "October 2, 2018" 
-author: "Lan Huong Nguyen"
+author: 
+- Claire Donnat
+- (based on the material by Lan Huong Nguyen)
 output: 
   revealjs::revealjs_presentation:
     self_contained: false

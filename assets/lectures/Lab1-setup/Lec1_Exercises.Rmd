@@ -8,6 +8,12 @@ output:
     toc_float: true
 ---
 
+# Watch the video for Session 2
+
+Watch the video lecture associated to Session 2 (find the link on the website) -- it will walk you through some of the basic syntax in R.
+Once you're done, go through the following exercises to get more familiar with the R syntax.
+
+
 # Exercise 0: Swirl courses
 
 The purpose of this first lab is to familiarize yourself with the R language. 

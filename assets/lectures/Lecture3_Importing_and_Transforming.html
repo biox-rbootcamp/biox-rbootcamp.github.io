@@ -3,8 +3,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="generator" content="pandoc">
-  <meta name="author" content="Lan Huong Nguyen" />
-  <title>Lecture 3: Importing and transforming data</title>
+  <meta name="author" content="Claire Donnat" />
+  <meta name="author" content="(based on the material by Lan Huong Nguyen)" />
+  <title>Using tidyverse</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
@@ -487,9 +488,10 @@ document.getElementsByTagName('head')[0].appendChild(style);
     <div class="slides">
 
 <section>
-    <h1 class="title">Lecture 3: Importing and transforming data</h1>
-  <h1 class="subtitle">CME/STATS 195</h1>
-    <h2 class="author">Lan Huong Nguyen</h2>
+    <h1 class="title">Using tidyverse</h1>
+  <h1 class="subtitle">Week 2 Session 4</h1>
+    <h2 class="author">Claire Donnat</h2>
+    <h2 class="author">(based on the material by Lan Huong Nguyen)</h2>
     <h3 class="date">October 4, 2018</h3>
 </section>
 
@@ -532,7 +534,7 @@ document.getElementsByTagName('head')[0].appendChild(style);
 <li><p>To see the current working directory use <code>getwd()</code>:</p></li>
 </ul>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">getwd</span>()   <span class="co"># with no arguments</span></code></pre></div>
-<pre><code>## [1] &quot;/home/lanhuong/MEGA/Teaching/cme195_intro_to_R/cme195.github.io/assets/lectures&quot;</code></pre>
+<pre><code>## [1] &quot;/Users/cdonnat/Dropbox/biox-rbootcamp.github.io/assets/lectures&quot;</code></pre>
 <ul>
 <li>To change the working directory use <code>setwd(path_name)</code> with a specified path as na argument:</li>
 </ul>
@@ -600,21 +602,21 @@ mydata &lt;-<span class="st"> </span><span class="kw">read.csv</span>(<span clas
 <p>All <code>read_&lt;...&gt;()</code> functions have a similar syntax, so we focus on <code>read_csv()</code>.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Get path to example dataset</span>
 <span class="kw">readr_example</span>(<span class="st">&quot;mtcars.csv&quot;</span>)</code></pre></div>
-<pre><code>## [1] &quot;/home/lanhuong/R/x86_64-pc-linux-gnu-library/3.4/readr/extdata/mtcars.csv&quot;</code></pre>
+<pre><code>## [1] &quot;/Library/Frameworks/R.framework/Versions/3.6/Resources/library/readr/extdata/mtcars.csv&quot;</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">mtcars &lt;-<span class="st"> </span><span class="kw">read_csv</span>(<span class="kw">readr_example</span>(<span class="st">&quot;mtcars.csv&quot;</span>))</code></pre></div>
 <pre><code>## Parsed with column specification:
 ## cols(
 ##   mpg = col_double(),
-##   cyl = col_integer(),
+##   cyl = col_double(),
 ##   disp = col_double(),
-##   hp = col_integer(),
+##   hp = col_double(),
 ##   drat = col_double(),
 ##   wt = col_double(),
 ##   qsec = col_double(),
-##   vs = col_integer(),
-##   am = col_integer(),
-##   gear = col_integer(),
-##   carb = col_integer()
+##   vs = col_double(),
+##   am = col_double(),
+##   gear = col_double(),
+##   carb = col_double()
 ## )</code></pre>
 <p><code>mtcars</code> is a dataset on fuel consumption, and other 10 aspects of design and performance (<code>?mtcars</code>).</p>
 </section><section id="the-read_csv-function" class="slide level2">
@@ -628,7 +630,7 @@ mydata &lt;-<span class="st"> </span><span class="kw">read.csv</span>(<span clas
 )</code></pre></div>
 <pre><code>## # A tibble: 2 x 3
 ##       a     b     c
-##   &lt;int&gt; &lt;int&gt; &lt;int&gt;
+##   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
 ## 1     1     2     3
 ## 2     4     5     6</code></pre>
 </div>
@@ -711,7 +713,8 @@ mydata &lt;-<span class="st"> </span><span class="kw">read.csv</span>(<span clas
 <p>Example: French format with full name of month:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">parse_date</span>(<span class="st">&quot;1 janvier 2010&quot;</span>)</code></pre></div>
 <pre><code>## Warning: 1 parsing failure.
-## row # A tibble: 1 x 4 col     row   col expected     actual         expected   &lt;int&gt; &lt;int&gt; &lt;chr&gt;        &lt;chr&gt;          actual 1     1    NA &quot;date like &quot; 1 janvier 2010</code></pre>
+## row col   expected         actual
+##   1  -- date like  1 janvier 2010</code></pre>
 <pre><code>## [1] NA</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">parse_date</span>(<span class="st">&quot;1 janvier 2010&quot;</span>, <span class="dt">format=</span><span class="st">&quot;%d %B %Y&quot;</span>, <span class="dt">locale=</span><span class="kw">locale</span>(<span class="st">&quot;fr&quot;</span>))</code></pre></div>
 <pre><code>## [1] &quot;2010-01-01&quot;</code></pre>
@@ -744,7 +747,8 @@ mydata &lt;-<span class="st"> </span><span class="kw">read.csv</span>(<span clas
 <p>Real numbers using a different decimal mark</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">parse_double</span>(<span class="st">&quot;1,23&quot;</span>)</code></pre></div>
 <pre><code>## Warning: 1 parsing failure.
-## row # A tibble: 1 x 4 col     row   col expected               actual expected   &lt;int&gt; &lt;int&gt; &lt;chr&gt;                  &lt;chr&gt;  actual 1     1    NA no trailing characters ,23</code></pre>
+## row col               expected actual
+##   1  -- no trailing characters    ,23</code></pre>
 <pre><code>## [1] NA
 ## attr(,&quot;problems&quot;)
 ## # A tibble: 1 x 4
@@ -794,14 +798,17 @@ mydata &lt;-<span class="st"> </span><span class="kw">read.csv</span>(<span clas
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">challenge &lt;-<span class="st"> </span><span class="kw">read_csv</span>(<span class="kw">readr_example</span>(<span class="st">&quot;challenge.csv&quot;</span>))</code></pre></div>
 <pre><code>## Parsed with column specification:
 ## cols(
-##   x = col_integer(),
-##   y = col_character()
+##   x = col_double(),
+##   y = col_logical()
 ## )</code></pre>
-<pre><code>## Warning in rbind(names(probs), probs_f): number of columns of result is not a
-## multiple of vector length (arg 1)</code></pre>
 <pre><code>## Warning: 1000 parsing failures.
-## row # A tibble: 5 x 5 col     row col   expected        actual      file                                  expected   &lt;int&gt; &lt;chr&gt; &lt;chr&gt;           &lt;chr&gt;       &lt;chr&gt;                                 actual 1  1001 x     no trailing ch… .238379750… &#39;/home/lanhuong/R/x86_64-pc-linux-gn… file 2  1002 x     no trailing ch… .411679971… &#39;/home/lanhuong/R/x86_64-pc-linux-gn… row 3  1003 x     no trailing ch… .746071676… &#39;/home/lanhuong/R/x86_64-pc-linux-gn… col 4  1004 x     no trailing ch… .723450553… &#39;/home/lanhuong/R/x86_64-pc-linux-gn… expected 5  1005 x     no trailing ch… .614524137… &#39;/home/lanhuong/R/x86_64-pc-linux-gn…
-## ... ................. ... ............................................................................... ........ ............................................................................... ...... ............................................................................... .... ............................................................................... ... ............................................................................... ... ............................................................................... ........ ...............................................................................
+##  row col           expected     actual                                                                                         file
+## 1001   y 1/0/T/F/TRUE/FALSE 2015-01-16 &#39;/Library/Frameworks/R.framework/Versions/3.6/Resources/library/readr/extdata/challenge.csv&#39;
+## 1002   y 1/0/T/F/TRUE/FALSE 2018-05-18 &#39;/Library/Frameworks/R.framework/Versions/3.6/Resources/library/readr/extdata/challenge.csv&#39;
+## 1003   y 1/0/T/F/TRUE/FALSE 2015-09-05 &#39;/Library/Frameworks/R.framework/Versions/3.6/Resources/library/readr/extdata/challenge.csv&#39;
+## 1004   y 1/0/T/F/TRUE/FALSE 2012-11-28 &#39;/Library/Frameworks/R.framework/Versions/3.6/Resources/library/readr/extdata/challenge.csv&#39;
+## 1005   y 1/0/T/F/TRUE/FALSE 2020-01-13 &#39;/Library/Frameworks/R.framework/Versions/3.6/Resources/library/readr/extdata/challenge.csv&#39;
+## .... ... .................. .......... ............................................................................................
 ## See problems(...) for more details.</code></pre>
 </div>
 </section><section id="examining-what-went-wrong" class="slide level2">
@@ -809,29 +816,32 @@ mydata &lt;-<span class="st"> </span><span class="kw">read.csv</span>(<span clas
 <p>See problems(…) for more details.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">problems</span>(challenge)</code></pre></div>
 <pre><code>## # A tibble: 1,000 x 5
-##      row col   expected        actual      file                                
-##    &lt;int&gt; &lt;chr&gt; &lt;chr&gt;           &lt;chr&gt;       &lt;chr&gt;                               
-##  1  1001 x     no trailing ch… .238379750… &#39;/home/lanhuong/R/x86_64-pc-linux-g…
-##  2  1002 x     no trailing ch… .411679971… &#39;/home/lanhuong/R/x86_64-pc-linux-g…
-##  3  1003 x     no trailing ch… .746071676… &#39;/home/lanhuong/R/x86_64-pc-linux-g…
-##  4  1004 x     no trailing ch… .723450553… &#39;/home/lanhuong/R/x86_64-pc-linux-g…
-##  5  1005 x     no trailing ch… .614524137… &#39;/home/lanhuong/R/x86_64-pc-linux-g…
-##  6  1006 x     no trailing ch… .473980569… &#39;/home/lanhuong/R/x86_64-pc-linux-g…
-##  7  1007 x     no trailing ch… .578461039… &#39;/home/lanhuong/R/x86_64-pc-linux-g…
-##  8  1008 x     no trailing ch… .241593722… &#39;/home/lanhuong/R/x86_64-pc-linux-g…
-##  9  1009 x     no trailing ch… .114378662… &#39;/home/lanhuong/R/x86_64-pc-linux-g…
-## 10  1010 x     no trailing ch… .298344632… &#39;/home/lanhuong/R/x86_64-pc-linux-g…
+##      row col   expected       actual   file                                     
+##    &lt;int&gt; &lt;chr&gt; &lt;chr&gt;          &lt;chr&gt;    &lt;chr&gt;                                    
+##  1  1001 y     1/0/T/F/TRUE/… 2015-01… &#39;/Library/Frameworks/R.framework/Version…
+##  2  1002 y     1/0/T/F/TRUE/… 2018-05… &#39;/Library/Frameworks/R.framework/Version…
+##  3  1003 y     1/0/T/F/TRUE/… 2015-09… &#39;/Library/Frameworks/R.framework/Version…
+##  4  1004 y     1/0/T/F/TRUE/… 2012-11… &#39;/Library/Frameworks/R.framework/Version…
+##  5  1005 y     1/0/T/F/TRUE/… 2020-01… &#39;/Library/Frameworks/R.framework/Version…
+##  6  1006 y     1/0/T/F/TRUE/… 2016-04… &#39;/Library/Frameworks/R.framework/Version…
+##  7  1007 y     1/0/T/F/TRUE/… 2011-05… &#39;/Library/Frameworks/R.framework/Version…
+##  8  1008 y     1/0/T/F/TRUE/… 2020-07… &#39;/Library/Frameworks/R.framework/Version…
+##  9  1009 y     1/0/T/F/TRUE/… 2011-04… &#39;/Library/Frameworks/R.framework/Version…
+## 10  1010 y     1/0/T/F/TRUE/… 2010-05… &#39;/Library/Frameworks/R.framework/Version…
 ## # … with 990 more rows</code></pre>
 </section><section id="fixing-the-column-specifications" class="slide level2">
 <h2>Fixing the column specifications</h2>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Automatic colomn specifications are:</span>
 challenge &lt;-<span class="st"> </span><span class="kw">read_csv</span>(<span class="kw">readr_example</span>(<span class="st">&quot;challenge.csv&quot;</span>), 
   <span class="dt">col_types =</span> <span class="kw">cols</span>(<span class="dt">x =</span> <span class="kw">col_integer</span>(), <span class="dt">y =</span> <span class="kw">col_character</span>()) )</code></pre></div>
-<pre><code>## Warning in rbind(names(probs), probs_f): number of columns of result is not a
-## multiple of vector length (arg 1)</code></pre>
 <pre><code>## Warning: 1000 parsing failures.
-## row # A tibble: 5 x 5 col     row col   expected        actual      file                                  expected   &lt;int&gt; &lt;chr&gt; &lt;chr&gt;           &lt;chr&gt;       &lt;chr&gt;                                 actual 1  1001 x     no trailing ch… .238379750… &#39;/home/lanhuong/R/x86_64-pc-linux-gn… file 2  1002 x     no trailing ch… .411679971… &#39;/home/lanhuong/R/x86_64-pc-linux-gn… row 3  1003 x     no trailing ch… .746071676… &#39;/home/lanhuong/R/x86_64-pc-linux-gn… col 4  1004 x     no trailing ch… .723450553… &#39;/home/lanhuong/R/x86_64-pc-linux-gn… expected 5  1005 x     no trailing ch… .614524137… &#39;/home/lanhuong/R/x86_64-pc-linux-gn…
-## ... ................. ... ............................................................................... ........ ............................................................................... ...... ............................................................................... .... ............................................................................... ... ............................................................................... ... ............................................................................... ........ ...............................................................................
+##  row col               expected             actual                                                                                         file
+## 1001   x no trailing characters .23837975086644292 &#39;/Library/Frameworks/R.framework/Versions/3.6/Resources/library/readr/extdata/challenge.csv&#39;
+## 1002   x no trailing characters .41167997173033655 &#39;/Library/Frameworks/R.framework/Versions/3.6/Resources/library/readr/extdata/challenge.csv&#39;
+## 1003   x no trailing characters .7460716762579978  &#39;/Library/Frameworks/R.framework/Versions/3.6/Resources/library/readr/extdata/challenge.csv&#39;
+## 1004   x no trailing characters .723450553836301   &#39;/Library/Frameworks/R.framework/Versions/3.6/Resources/library/readr/extdata/challenge.csv&#39;
+## 1005   x no trailing characters .614524137461558   &#39;/Library/Frameworks/R.framework/Versions/3.6/Resources/library/readr/extdata/challenge.csv&#39;
+## .... ... ...................... .................. ............................................................................................
 ## See problems(...) for more details.</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># It seems that first column should be a real number:</span>
 ( challenge &lt;-<span class="st"> </span><span class="kw">read_csv</span>(<span class="kw">readr_example</span>(<span class="st">&quot;challenge.csv&quot;</span>), 
@@ -1249,7 +1259,7 @@ movies &lt;-<span class="st"> </span><span class="kw">read_csv</span>(url)
 movies</code></pre></div>
 <pre><code>## # A tibble: 6,820 x 15
 ##    budget company country director genre  gross name  rating released runtime
-##     &lt;dbl&gt; &lt;chr&gt;   &lt;chr&gt;   &lt;chr&gt;    &lt;chr&gt;  &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;      &lt;int&gt;
+##     &lt;dbl&gt; &lt;chr&gt;   &lt;chr&gt;   &lt;chr&gt;    &lt;chr&gt;  &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;      &lt;dbl&gt;
 ##  1 8.00e6 Columb… USA     Rob Rei… Adve… 5.23e7 Stan… R      1986-08…      89
 ##  2 6.00e6 Paramo… USA     John Hu… Come… 7.01e7 Ferr… PG-13  1986-06…     103
 ##  3 1.50e7 Paramo… USA     Tony Sc… Acti… 1.80e8 Top … PG     1986-05…     110
@@ -1261,7 +1271,7 @@ movies</code></pre></div>
 ##  9 9.00e6 Paramo… USA     Howard … Come… 4.05e7 Pret… PG-13  1986-02…      96
 ## 10 1.50e7 SLM Pr… USA     David C… Drama 4.05e7 The … R      1986-08…      96
 ## # … with 6,810 more rows, and 5 more variables: score &lt;dbl&gt;, star &lt;chr&gt;,
-## #   votes &lt;int&gt;, writer &lt;chr&gt;, year &lt;int&gt;</code></pre>
+## #   votes &lt;dbl&gt;, writer &lt;chr&gt;, year &lt;dbl&gt;</code></pre>
 </section><section id="filter-retain-rows-matching-a-criteria" class="slide level2">
 <h2><code>filter()</code>: retain rows matching a criteria</h2>
 <p><code>filter()</code> allows you to subset observations based on their values.</p>
@@ -1269,7 +1279,7 @@ movies</code></pre></div>
 <span class="kw">filter</span>(movies, genre <span class="op">==</span><span class="st"> &quot;Comedy&quot;</span>, director <span class="op">==</span><span class="st"> &quot;Woody Allen&quot;</span>)</code></pre></div>
 <pre><code>## # A tibble: 27 x 15
 ##    budget company country director genre  gross name  rating released runtime
-##     &lt;dbl&gt; &lt;chr&gt;   &lt;chr&gt;   &lt;chr&gt;    &lt;chr&gt;  &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;      &lt;int&gt;
+##     &lt;dbl&gt; &lt;chr&gt;   &lt;chr&gt;   &lt;chr&gt;    &lt;chr&gt;  &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;      &lt;dbl&gt;
 ##  1 6.40e6 Orion … USA     Woody A… Come… 4.01e7 Hann… PG-13  1986-03…     107
 ##  2 1.60e7 Orion … USA     Woody A… Come… 1.48e7 Radi… PG     1987-01…      88
 ##  3 1.90e7 Jack R… USA     Woody A… Come… 1.83e7 Crim… PG-13  1989-11…     104
@@ -1281,7 +1291,7 @@ movies</code></pre></div>
 ##  9 2.00e7 Miramax USA     Woody A… Come… 1.34e7 Bull… R      1995-02…      98
 ## 10 1.50e7 Sweetl… USA     Woody A… Come… 6.70e6 Migh… R      1995-11…      95
 ## # … with 17 more rows, and 5 more variables: score &lt;dbl&gt;, star &lt;chr&gt;,
-## #   votes &lt;int&gt;, writer &lt;chr&gt;, year &lt;int&gt;</code></pre>
+## #   votes &lt;dbl&gt;, writer &lt;chr&gt;, year &lt;dbl&gt;</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># base R approach would be more wordy:</span>
 movies[movies<span class="op">$</span>genre <span class="op">==</span><span class="st"> &quot;Comedy&quot;</span> <span class="op">&amp;</span><span class="st"> </span>movies<span class="op">$</span>director <span class="op">==</span><span class="st"> &quot;Woody Allen&quot;</span>, ]</code></pre></div>
 <p>Package <code>dplyr</code> executes the filtering and returns a new data frame. <strong>It never modifies the original one.</strong></p>
@@ -1305,17 +1315,17 @@ movies[movies<span class="op">$</span>genre <span class="op">==</span><span clas
 <span class="kw">filter</span>(movies, country <span class="op">%in%</span><span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;Peru&quot;</span>, <span class="st">&quot;Colombia&quot;</span>, <span class="st">&quot;Chile&quot;</span>))</code></pre></div>
 <pre><code>## # A tibble: 8 x 15
 ##   budget company country director genre  gross name  rating released runtime
-##    &lt;dbl&gt; &lt;chr&gt;   &lt;chr&gt;   &lt;chr&gt;    &lt;chr&gt;  &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;      &lt;int&gt;
+##    &lt;dbl&gt; &lt;chr&gt;   &lt;chr&gt;   &lt;chr&gt;    &lt;chr&gt;  &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;      &lt;dbl&gt;
 ## 1 0.     Concor… Peru    &quot;August… Acti… 4.11e5 Ultr… R      1990-03…     100
-## 2 4.50e7 Warner… Peru    Luis Ll… Acti… 5.74e7 The … R      1994-10…     110
-## 3 3.00e6 HBO Fi… Colomb… Joshua … Crime 6.52e6 Mari… R      2004-08…     101
+## 2 4.50e7 Warner… Peru    &quot;Luis L… Acti… 5.74e7 The … R      1994-10…     110
+## 3 3.00e6 HBO Fi… Colomb… &quot;Joshua… Crime 6.52e6 Mari… R      2004-08…     101
 ## 4 0.     Partic… Chile   &quot;Pablo … Drama 2.34e6 No    R      2012-11…     118
-## 5 2.60e7 Alcon … Chile   Patrici… Biog… 1.22e7 Los … PG-13  2015-11…     127
-## 6 1.40e6 Buffal… Colomb… Ciro Gu… Adve… 1.33e6 Embr… NOT R… 2015-05…     125
+## 5 2.60e7 Alcon … Chile   &quot;Patric… Biog… 1.22e7 Los … PG-13  2015-11…     127
+## 6 1.40e6 Buffal… Colomb… &quot;Ciro G… Adve… 1.33e6 Embr… NOT R… 2015-05…     125
 ## 7 9.00e6 Fox Se… Chile   &quot;Pablo … Biog… 1.40e7 Jack… R      2016-12…     100
 ## 8 0.     AZ Fil… Chile   &quot;Pablo … Biog… 9.39e5 Neru… R      2017-03…     107
-## # … with 5 more variables: score &lt;dbl&gt;, star &lt;chr&gt;, votes &lt;int&gt;, writer &lt;chr&gt;,
-## #   year &lt;int&gt;</code></pre>
+## # … with 5 more variables: score &lt;dbl&gt;, star &lt;chr&gt;, votes &lt;dbl&gt;, writer &lt;chr&gt;,
+## #   year &lt;dbl&gt;</code></pre>
 </section><section id="select-pick-columns-by-name" class="slide level2">
 <h2><code>select()</code>: pick columns by name</h2>
 <p><code>select()</code> let’s you choose a subset variables, specified by name.</p>
@@ -1324,7 +1334,7 @@ movies[movies<span class="op">$</span>genre <span class="op">==</span><span clas
 <span class="kw">select</span>(movies, name, country, year, genre)</code></pre></div>
 <pre><code>## # A tibble: 6,820 x 4
 ##    name                     country  year genre    
-##    &lt;chr&gt;                    &lt;chr&gt;   &lt;int&gt; &lt;chr&gt;    
+##    &lt;chr&gt;                    &lt;chr&gt;   &lt;dbl&gt; &lt;chr&gt;    
 ##  1 Stand by Me              USA      1986 Adventure
 ##  2 Ferris Bueller&#39;s Day Off USA      1986 Comedy   
 ##  3 Top Gun                  USA      1986 Action   
@@ -1343,7 +1353,7 @@ movies[, <span class="kw">c</span>(<span class="st">&quot;name&quot;</span>, <sp
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">select</span>(movies, name, genre<span class="op">:</span>score) <span class="co"># use colon to select contiguous columns, </span></code></pre></div>
 <pre><code>## # A tibble: 6,820 x 7
 ##    name                     genre         gross rating released   runtime score
-##    &lt;chr&gt;                    &lt;chr&gt;         &lt;dbl&gt; &lt;chr&gt;  &lt;chr&gt;        &lt;int&gt; &lt;dbl&gt;
+##    &lt;chr&gt;                    &lt;chr&gt;         &lt;dbl&gt; &lt;chr&gt;  &lt;chr&gt;        &lt;dbl&gt; &lt;dbl&gt;
 ##  1 Stand by Me              Adventure  52287414 R      1986-08-22      89   8.1
 ##  2 Ferris Bueller&#39;s Day Off Comedy     70136369 PG-13  1986-06-11     103   7.8
 ##  3 Top Gun                  Action    179800601 PG     1986-05-16     110   6.9
@@ -1358,7 +1368,7 @@ movies[, <span class="kw">c</span>(<span class="st">&quot;name&quot;</span>, <sp
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">select</span>(movies, <span class="op">-</span>(star<span class="op">:</span>writer))    <span class="co"># To drop columns use a minus, &quot;-&quot; </span></code></pre></div>
 <pre><code>## # A tibble: 6,820 x 12
 ##    budget company country director genre  gross name  rating released runtime
-##     &lt;dbl&gt; &lt;chr&gt;   &lt;chr&gt;   &lt;chr&gt;    &lt;chr&gt;  &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;      &lt;int&gt;
+##     &lt;dbl&gt; &lt;chr&gt;   &lt;chr&gt;   &lt;chr&gt;    &lt;chr&gt;  &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;      &lt;dbl&gt;
 ##  1 8.00e6 Columb… USA     Rob Rei… Adve… 5.23e7 Stan… R      1986-08…      89
 ##  2 6.00e6 Paramo… USA     John Hu… Come… 7.01e7 Ferr… PG-13  1986-06…     103
 ##  3 1.50e7 Paramo… USA     Tony Sc… Acti… 1.80e8 Top … PG     1986-05…     110
@@ -1369,7 +1379,7 @@ movies[, <span class="kw">c</span>(<span class="st">&quot;name&quot;</span>, <sp
 ##  8 6.00e6 De Lau… USA     David L… Drama 8.55e6 Blue… R      1986-10…     120
 ##  9 9.00e6 Paramo… USA     Howard … Come… 4.05e7 Pret… PG-13  1986-02…      96
 ## 10 1.50e7 SLM Pr… USA     David C… Drama 4.05e7 The … R      1986-08…      96
-## # … with 6,810 more rows, and 2 more variables: score &lt;dbl&gt;, year &lt;int&gt;</code></pre>
+## # … with 6,810 more rows, and 2 more variables: score &lt;dbl&gt;, year &lt;dbl&gt;</code></pre>
 </section><section id="select-helpers" class="slide level2">
 <h2><code>select()</code> helpers</h2>
 <p>You can use the following functions to help select the columns:</p>
@@ -1391,42 +1401,42 @@ For descending order, use the function <code>desc()</code> around the column nam
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(<span class="kw">arrange</span>(movies, runtime), <span class="dt">n =</span> <span class="dv">4</span>)</code></pre></div>
 <pre><code>## # A tibble: 6,820 x 15
 ##   budget company country director genre  gross name  rating released runtime
-##    &lt;dbl&gt; &lt;chr&gt;   &lt;chr&gt;   &lt;chr&gt;    &lt;chr&gt;  &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;      &lt;int&gt;
-## 1 0.     Iwerks… France  Jean-Ja… Adve… 1.51e7 Wing… G      1996-09…      50
-## 2 1.25e7 Univer… USA     Don Blu… Anim… 4.81e7 The … G      1988-11…      69
-## 3 6.00e3 Next W… UK      Christo… Crime 4.85e4 Foll… R      1999-11…      69
+##    &lt;dbl&gt; &lt;chr&gt;   &lt;chr&gt;   &lt;chr&gt;    &lt;chr&gt;  &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;      &lt;dbl&gt;
+## 1 0.     Iwerks… France  Jean-Ja… Adve… 1.51e7 &quot;Win… G      1996-09…      50
+## 2 1.25e7 Univer… USA     Don Blu… Anim… 4.81e7 &quot;The… G      1988-11…      69
+## 3 6.00e3 Next W… UK      Christo… Crime 4.85e4 &quot;Fol… R      1999-11…      69
 ## 4 0.     Hyperi… USA     Bruce W… Anim… 8.44e6 &quot;B\x… PG-13  1992-07…      70
 ## # … with 6,816 more rows, and 5 more variables: score &lt;dbl&gt;, star &lt;chr&gt;,
-## #   votes &lt;int&gt;, writer &lt;chr&gt;, year &lt;int&gt;</code></pre>
+## #   votes &lt;dbl&gt;, writer &lt;chr&gt;, year &lt;dbl&gt;</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># use `desc` for descending</span>
 <span class="kw">print</span>(<span class="kw">arrange</span>(movies, <span class="kw">desc</span>(budget)), <span class="dt">n =</span> <span class="dv">4</span>)</code></pre></div>
 <pre><code>## # A tibble: 6,820 x 15
 ##   budget company country director genre  gross name  rating released runtime
-##    &lt;dbl&gt; &lt;chr&gt;   &lt;chr&gt;   &lt;chr&gt;    &lt;chr&gt;  &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;      &lt;int&gt;
+##    &lt;dbl&gt; &lt;chr&gt;   &lt;chr&gt;   &lt;chr&gt;    &lt;chr&gt;  &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;      &lt;dbl&gt;
 ## 1 3.00e8 Walt D… USA     Gore Ve… Acti… 3.09e8 Pira… PG-13  2007-05…     169
 ## 2 2.60e8 Walt D… USA     Nathan … Anim… 2.01e8 Tang… PG     2010-11…     100
 ## 3 2.58e8 Columb… USA     Sam Rai… Acti… 3.37e8 Spid… PG-13  2007-05…     139
 ## 4 2.50e8 Warner… UK      David Y… Adve… 3.02e8 Harr… PG     2009-07…     153
 ## # … with 6,816 more rows, and 5 more variables: score &lt;dbl&gt;, star &lt;chr&gt;,
-## #   votes &lt;int&gt;, writer &lt;chr&gt;, year &lt;int&gt;</code></pre>
+## #   votes &lt;dbl&gt;, writer &lt;chr&gt;, year &lt;dbl&gt;</code></pre>
 </section><section id="mutate-add-new-variables" class="slide level2">
 <h2><code>mutate()</code>: add new variables</h2>
 <p><code>mutate()</code> adds new columns that are a function of the existing ones</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">movies &lt;-<span class="st"> </span><span class="kw">mutate</span>(movies, <span class="dt">profit =</span> gross <span class="op">-</span><span class="st"> </span>budget)
 <span class="kw">select</span>(movies, name, gross, budget, profit)</code></pre></div>
 <pre><code>## # A tibble: 6,820 x 4
-##    name                         gross   budget     profit
-##    &lt;chr&gt;                        &lt;dbl&gt;    &lt;dbl&gt;      &lt;dbl&gt;
-##  1 Stand by Me               52287414  8000000   44287414
-##  2 Ferris Bueller&#39;s Day Off  70136369  6000000   64136369
-##  3 Top Gun                  179800601 15000000  164800601
-##  4 Aliens                    85160248 18500000   66660248
-##  5 Flight of the Navigator   18564613  9000000    9564613
-##  6 Platoon                  138530565  6000000  132530565
-##  7 Labyrinth                 12729917 25000000  -12270083
-##  8 Blue Velvet                8551228  6000000    2551228
-##  9 Pretty in Pink            40471663  9000000   31471663
-## 10 The Fly                   40456565 15000000   25456565
+##    name                         gross   budget    profit
+##    &lt;chr&gt;                        &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;
+##  1 Stand by Me               52287414  8000000  44287414
+##  2 Ferris Bueller&#39;s Day Off  70136369  6000000  64136369
+##  3 Top Gun                  179800601 15000000 164800601
+##  4 Aliens                    85160248 18500000  66660248
+##  5 Flight of the Navigator   18564613  9000000   9564613
+##  6 Platoon                  138530565  6000000 132530565
+##  7 Labyrinth                 12729917 25000000 -12270083
+##  8 Blue Velvet                8551228  6000000   2551228
+##  9 Pretty in Pink            40471663  9000000  31471663
+## 10 The Fly                   40456565 15000000  25456565
 ## # … with 6,810 more rows</code></pre>
 <p>To discard old variables, use <code>transmute()</code> instead of <code>mutate()</code>.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># base R approach to create a new variable &#39;profit&#39;</span>
@@ -1443,18 +1453,18 @@ movies &lt;-<span class="st"> </span><span class="kw">mutate</span>(
 )
 <span class="kw">select</span>(movies, name, year, country, <span class="kw">contains</span>(<span class="st">&quot;_in_mil&quot;</span>), profit)</code></pre></div>
 <pre><code>## # A tibble: 6,820 x 7
-##    name          year country gross_in_mil budget_in_mil profit_in_mil   profit
-##    &lt;chr&gt;        &lt;int&gt; &lt;chr&gt;          &lt;dbl&gt;         &lt;dbl&gt;         &lt;dbl&gt;    &lt;dbl&gt;
-##  1 Stand by Me   1986 USA            52.3            8           44.3    4.43e7
-##  2 Ferris Buel…  1986 USA            70.1            6           64.1    6.41e7
-##  3 Top Gun       1986 USA           180.            15          165.     1.65e8
-##  4 Aliens        1986 USA            85.2           18.5         66.7    6.67e7
-##  5 Flight of t…  1986 USA            18.6            9            9.56   9.56e6
-##  6 Platoon       1986 UK            139.             6          133.     1.33e8
-##  7 Labyrinth     1986 UK             12.7           25          -12.3   -1.23e7
-##  8 Blue Velvet   1986 USA             8.55           6            2.55   2.55e6
-##  9 Pretty in P…  1986 USA            40.5            9           31.5    3.15e7
-## 10 The Fly       1986 USA            40.5           15           25.5    2.55e7
+##    name            year country gross_in_mil budget_in_mil profit_in_mil  profit
+##    &lt;chr&gt;          &lt;dbl&gt; &lt;chr&gt;          &lt;dbl&gt;         &lt;dbl&gt;         &lt;dbl&gt;   &lt;dbl&gt;
+##  1 Stand by Me     1986 USA            52.3            8           44.3   4.43e7
+##  2 Ferris Buelle…  1986 USA            70.1            6           64.1   6.41e7
+##  3 Top Gun         1986 USA           180.            15          165.    1.65e8
+##  4 Aliens          1986 USA            85.2           18.5         66.7   6.67e7
+##  5 Flight of the…  1986 USA            18.6            9            9.56  9.56e6
+##  6 Platoon         1986 UK            139.             6          133.    1.33e8
+##  7 Labyrinth       1986 UK             12.7           25          -12.3  -1.23e7
+##  8 Blue Velvet     1986 USA             8.55           6            2.55  2.55e6
+##  9 Pretty in Pink  1986 USA            40.5            9           31.5   3.15e7
+## 10 The Fly         1986 USA            40.5           15           25.5   2.55e7
 ## # … with 6,810 more rows</code></pre>
 <div class="left" ,="" style="width: 100%; font-size: 0.7em;">
 <p><strong>Any vectorized function can be used with <code>mutate()</code></strong>, including:</p>
@@ -1579,31 +1589,31 @@ top2 &lt;-<span class="st"> </span><span class="kw">top_n</span>(<span class="kw
 <span class="kw">arrange</span>(top2, genre, year, score)  </code></pre></div>
 <pre><code>## # A tibble: 35 x 9
 ## # Groups:   genre [17]
-##    name              genre   country    year budget  gross  profit rating score
-##    &lt;chr&gt;             &lt;chr&gt;   &lt;chr&gt;     &lt;int&gt;  &lt;dbl&gt;  &lt;dbl&gt;   &lt;dbl&gt; &lt;chr&gt;  &lt;dbl&gt;
-##  1 The Dark Knight   Action  USA        2008 1.85e8 5.35e8  3.50e8 PG-13    9  
-##  2 Inception         Action  USA        2010 1.60e8 2.93e8  1.33e8 PG-13    8.8
-##  3 The Lord of the … Advent… New Zeal…  2001 9.30e7 3.16e8  2.23e8 PG-13    8.8
-##  4 The Lord of the … Advent… USA        2003 9.40e7 3.78e8  2.84e8 PG-13    8.9
-##  5 The Lion King     Animat… USA        1994 4.50e7 3.13e8  2.68e8 G        8.5
-##  6 Spirited Away     Animat… Japan      2001 1.90e7 1.01e7 -8.94e6 PG       8.6
-##  7 Your name         Animat… Japan      2016 0.     5.02e6  5.02e6 PG       8.5
-##  8 Schindler&#39;s List  Biogra… USA        1993 2.20e7 9.61e7  7.41e7 R        8.9
-##  9 The Intouchables  Biogra… France     2011 0.     1.32e7  1.32e7 R        8.6
-## 10 Forrest Gump      Comedy  USA        1994 5.50e7 3.30e8  2.75e8 PG-13    8.8
+##    name               genre   country    year budget  gross  profit rating score
+##    &lt;chr&gt;              &lt;chr&gt;   &lt;chr&gt;     &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;   &lt;dbl&gt; &lt;chr&gt;  &lt;dbl&gt;
+##  1 The Dark Knight    Action  USA        2008 1.85e8 5.35e8  3.50e8 PG-13    9  
+##  2 Inception          Action  USA        2010 1.60e8 2.93e8  1.33e8 PG-13    8.8
+##  3 The Lord of the R… Advent… New Zeal…  2001 9.30e7 3.16e8  2.23e8 PG-13    8.8
+##  4 The Lord of the R… Advent… USA        2003 9.40e7 3.78e8  2.84e8 PG-13    8.9
+##  5 The Lion King      Animat… USA        1994 4.50e7 3.13e8  2.68e8 G        8.5
+##  6 Spirited Away      Animat… Japan      2001 1.90e7 1.01e7 -8.94e6 PG       8.6
+##  7 Your name          Animat… Japan      2016 0.     5.02e6  5.02e6 PG       8.5
+##  8 Schindler&#39;s List   Biogra… USA        1993 2.20e7 9.61e7  7.41e7 R        8.9
+##  9 The Intouchables   Biogra… France     2011 0.     1.32e7  1.32e7 R        8.6
+## 10 Forrest Gump       Comedy  USA        1994 5.50e7 3.30e8  2.75e8 PG-13    8.8
 ## # … with 25 more rows</code></pre>
 </section><section id="other-useful-functions-in-dplyr" class="slide level2">
 <h2>Other useful functions in <code>dplyr</code></h2>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Renaming variables</span>
 <span class="kw">print</span>(<span class="kw">rename</span>(movies2, <span class="dt">gross_revenue =</span> gross), <span class="dt">n =</span> <span class="dv">5</span>)</code></pre></div>
 <pre><code>## # A tibble: 6,820 x 9
-##   name          genre   country  year budget gross_revenue  profit rating score
-##   &lt;chr&gt;         &lt;chr&gt;   &lt;chr&gt;   &lt;int&gt;  &lt;dbl&gt;         &lt;dbl&gt;   &lt;dbl&gt; &lt;chr&gt;  &lt;dbl&gt;
-## 1 Stand by Me   Advent… USA      1986 8.00e6      52287414  4.43e7 R        8.1
-## 2 Ferris Buell… Comedy  USA      1986 6.00e6      70136369  6.41e7 PG-13    7.8
-## 3 Top Gun       Action  USA      1986 1.50e7     179800601  1.65e8 PG       6.9
-## 4 Aliens        Action  USA      1986 1.85e7      85160248  6.67e7 R        8.4
-## 5 Flight of th… Advent… USA      1986 9.00e6      18564613  9.56e6 PG       6.9
+##   name           genre   country  year budget gross_revenue  profit rating score
+##   &lt;chr&gt;          &lt;chr&gt;   &lt;chr&gt;   &lt;dbl&gt;  &lt;dbl&gt;         &lt;dbl&gt;   &lt;dbl&gt; &lt;chr&gt;  &lt;dbl&gt;
+## 1 Stand by Me    Advent… USA      1986 8.00e6      52287414  4.43e7 R        8.1
+## 2 Ferris Buelle… Comedy  USA      1986 6.00e6      70136369  6.41e7 PG-13    7.8
+## 3 Top Gun        Action  USA      1986 1.50e7     179800601  1.65e8 PG       6.9
+## 4 Aliens         Action  USA      1986 1.85e7      85160248  6.67e7 R        8.4
+## 5 Flight of the… Advent… USA      1986 9.00e6      18564613  9.56e6 PG       6.9
 ## # … with 6,815 more rows</code></pre>
 <div class="left" ,="" style="width: 50%">
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Unique values</span>
@@ -1648,31 +1658,31 @@ top2 &lt;-<span class="st"> </span><span class="kw">top_n</span>(<span class="kw
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">sample_n</span>(movies, <span class="dv">5</span>)                    <span class="co"># fixed number of rows, without replacement</span></code></pre></div>
 <pre><code>## # A tibble: 5 x 19
 ##   budget company country director genre  gross name  rating released runtime
-##    &lt;dbl&gt; &lt;chr&gt;   &lt;chr&gt;   &lt;chr&gt;    &lt;chr&gt;  &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;      &lt;int&gt;
-## 1 8.03e6 Davis … USA     Deran S… Acti… 3.41e6 Gunm… R      1994-02…      94
-## 2 5.00e7 Young … UK      Peter W… Crime 2.77e7 Hann… R      2007-02…     121
-## 3 1.60e8 Warner… USA     Gareth … Acti… 2.01e8 Godz… PG-13  2014-05…     123
-## 4 3.50e7 Punch … USA     Robert … Come… 2.06e7 Boys… PG-13  2000-06…      94
-## 5 0.     Mockin… USA     Robin S… Come… 3.57e6 The … PG-13  2007-10…     106
-## # … with 9 more variables: score &lt;dbl&gt;, star &lt;chr&gt;, votes &lt;int&gt;, writer &lt;chr&gt;,
-## #   year &lt;int&gt;, profit &lt;dbl&gt;, gross_in_mil &lt;dbl&gt;, budget_in_mil &lt;dbl&gt;,
+##    &lt;dbl&gt; &lt;chr&gt;   &lt;chr&gt;   &lt;chr&gt;    &lt;chr&gt;  &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;      &lt;dbl&gt;
+## 1 2.00e7 Columb… USA     Doug Li… Come… 1.68e7 &quot;Go&quot;  R      1999-04…     102
+## 2 1.75e7 The We… USA     Cory Ed… Anim… 5.14e7 &quot;Hoo… PG     2006-01…      80
+## 3 0.     Twenti… USA     Michael… Come… 3.41e7 &quot;The… PG-13  1996-04…      97
+## 4 0.     Gaumont France  Luc Bes… Crime 1.95e7 &quot;L\x… R      1994-11…     110
+## 5 1.00e7 De Lau… USA     John Gu… Acti… 4.71e6 &quot;Kin… PG-13  1986-12…     105
+## # … with 9 more variables: score &lt;dbl&gt;, star &lt;chr&gt;, votes &lt;dbl&gt;, writer &lt;chr&gt;,
+## #   year &lt;dbl&gt;, profit &lt;dbl&gt;, gross_in_mil &lt;dbl&gt;, budget_in_mil &lt;dbl&gt;,
 ## #   profit_in_mil &lt;dbl&gt;</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">sample_frac</span>(movies, <span class="fl">0.005</span>, <span class="dt">replace=</span><span class="ot">TRUE</span>) <span class="co"># fraction of rows, with replacement</span></code></pre></div>
 <pre><code>## # A tibble: 34 x 19
 ##    budget company country director genre  gross name  rating released runtime
-##     &lt;dbl&gt; &lt;chr&gt;   &lt;chr&gt;   &lt;chr&gt;    &lt;chr&gt;  &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;      &lt;int&gt;
-##  1 0.     New Ar… USA     Courten… Come… 8.13e3 Just… R      2015-04…      95
-##  2 7.00e6 Paramo… USA     Louis C… Come… 3.29e6 Poot… PG-13  2001-06…      81
-##  3 5.00e6 Renais… Ireland Trevor … Come… 5.52e5 Twel… PG     1996-10…     134
-##  4 1.50e7 Columb… USA     Richard… Drama 1.73e6 Litt… PG     1988-03…      98
-##  5 0.     &quot;Path\… France  Julian … Biog… 5.99e6 The … PG-13  2008-02…     112
-##  6 0.     BBC Fi… UK      John Ma… Biog… 3.43e5 Love… UNRAT… 1998-10…      87
-##  7 0.     Golden… Hong K… Michael… Adve… 3.96e5 Sex … R      1991-11…     100
-##  8 1.50e7 New Li… USA     Sean Mc… Fami… 1.04e7 Rais… PG     2004-10…     100
-##  9 5.50e7 Univer… USA     Jesse D… Come… 1.05e8 Amer… R      2003-08…      96
-## 10 3.50e6 Incent… USA     Derek C… Drama 9.74e6 Blue… R      2011-01…     112
+##     &lt;dbl&gt; &lt;chr&gt;   &lt;chr&gt;   &lt;chr&gt;    &lt;chr&gt;  &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;      &lt;dbl&gt;
+##  1 3.50e6 New Li… USA     F. Gary… Come… 2.75e7 Frid… R      1995-04…      91
+##  2 0.     Concor… USA     Jim Wyn… Horr… 1.55e6 The … R      1990-02…      82
+##  3 0.     Carolc… USA     Steve R… Come… 6.13e5 Quee… R      1991-02…     100
+##  4 1.90e7 United… USA     Costa-G… Drama 2.58e7 Betr… R      1988-08…     127
+##  5 7.50e6 Zanuck… USA     Bruce B… Drama 1.07e8 Driv… PG     1990-01…      99
+##  6 1.00e8 Warner… USA     Francis… Drama 7.60e7 Cons… R      2005-02…     121
+##  7 2.00e7 Screen… USA     John Lu… Acti… 5.77e7 Take… PG-13  2010-08…     107
+##  8 0.     Aamir … India   Aamir K… Drama 1.20e6 Like… PG     2007-12…     165
+##  9 1.28e8 Walt D… USA     Aaron B… Anim… 8.53e7 Tier… G      2003-10…      85
+## 10 1.30e7 MFF Fe… USA     Chris K… Adve… 6.00e7 Snow… PG     2000-02…      89
 ## # … with 24 more rows, and 9 more variables: score &lt;dbl&gt;, star &lt;chr&gt;,
-## #   votes &lt;int&gt;, writer &lt;chr&gt;, year &lt;int&gt;, profit &lt;dbl&gt;, gross_in_mil &lt;dbl&gt;,
+## #   votes &lt;dbl&gt;, writer &lt;chr&gt;, year &lt;dbl&gt;, profit &lt;dbl&gt;, gross_in_mil &lt;dbl&gt;,
 ## #   budget_in_mil &lt;dbl&gt;, profit_in_mil &lt;dbl&gt;</code></pre>
 </section></section>
 <section><section id="chaining-operations" class="titleslide slide level1"><h1>Chaining operations</h1></section><section id="the-magrittr-package" class="slide level2">
@@ -1695,7 +1705,7 @@ top2 &lt;-<span class="st"> </span><span class="kw">top_n</span>(<span class="kw
 <span class="st">  </span><span class="kw">matrix</span>(<span class="dt">ncol =</span> <span class="dv">50</span>) <span class="op">%&gt;%</span>
 <span class="st">  </span><span class="kw">colSums</span>() <span class="op">%&gt;%</span>
 <span class="st">  </span><span class="kw">plot</span>(<span class="dt">x =</span> columns)</code></pre></div>
-<p><img src="Lecture3_Importing_and_transforming_data_files/figure-revealjs/unnamed-chunk-74-1.png" width="672" /></p>
+<p><img src="Lecture3_Importing_and_Transforming_files/figure-revealjs/unnamed-chunk-74-1.png" width="672" /></p>
 </div>
 </section><section id="chaining-operations-1" class="slide level2">
 <h2>Chaining operations</h2>

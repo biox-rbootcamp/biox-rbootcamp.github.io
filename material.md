@@ -4,12 +4,12 @@ layout: cme195
 
 # [](#schedule) Schedule
 
-| Session | Day | Topic | Material | Lab | Video/ Slides | Further Material for the discussion |
+| Session | Day | Topic | Material | Lab | Slides| Further Material for the discussion |
 |-|-|-|-|-|-|-|
 | 1 | M | Getting Started | [R installation](./installation) + Course introduction | [Introductory Slides](./assets/lectures/Lecture1_Intro.html)|  |  | 
-| 2 | W | The basics of R | Introduction to the R syntax: vectors, matrices, functions, concatenation, etc | [Lab 2: Swirl](./assets/lectures/Lab1-setup/Lec1_Exercises.nb.html) | [Slides: The R-syntax](./assets/lectures/Lecture1_IntroCoding.html)| |
+| 2 | W | The basics of R | [Introduction to the R syntax: vectors, matrices, functions, concatenation, etc.]() | [Lab 2: Swirl](./assets/lectures/Lab1-setup/Lec1_Exercises.nb.html) | [Slides: The R-syntax](./assets/lectures/Lecture1_IntroCoding.html)| |
 | 3 | Th | The basics of Rmarkdown | Introduction to data handling: Importing and transforming data, loading packages| [Lab 3: Basics of coding in R](./assets/lectures/Lab1_setup/Lecture1_Intro2Markdown.html)|  |   [Exercise Template for Lab 3](./assets/lectures/Lab1-setup/template-exerciseweek1.Rmd)
-| 4 | M | Tidyverse and Data Pre-processing| Using the tidyverse syntax and cleaning up the data |  |  |  |
+| 4 | M | Tidyverse and Data Pre-processing| [Using the tidyverse syntax and cleaning up the data]() | [Lab: idyverse](./assets/lectures/Labs-Week2/session4_Exercises.nb.html)| [Slides: Tidyverse](./assets/lectures/Lecture_tidyverse.html) |  |
 | 5 | W | Basic Probability | Introduction to basic probability models: probabilities, distributions and the CLT (I) |  |  |  |
 | 6 | Th |  | Introduction to basic probability models: probabilities, distributions and the CLT (II)|  |  |  |
 | 7 | M | Simulations and ggplot | Introduction to tidyverse and dplyr + traditional plots for data analysis |  |  |  |
