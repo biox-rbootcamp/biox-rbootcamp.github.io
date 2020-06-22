@@ -4,7 +4,7 @@ layout: cme195
 
 # [](#schedule) Schedule
 
-| Session | Day | Topic | Material | Lab | Slides| Further Material for the discussion |
+| Session | Day | Topic | Material/ Link to video | Lab | Slides| Further Material for the discussion |
 |-|-|-|-|-|-|-|
 | 1 | M | Getting Started | [R installation](./installation) + Course introduction | [Introductory Slides](./assets/lectures/Lecture1_Intro.html)|  |  | 
 | 2 | W | The basics of R | [Introduction to the R syntax: vectors, matrices, functions, concatenation, etc.]() | [Lab 2: Swirl](./assets/lectures/Lab1-setup/Lec1_Exercises.nb.html) | [Slides: The R-syntax](./assets/lectures/Lecture1_IntroCoding.html)| |
