@@ -32,7 +32,7 @@ No prior knowledge of R or of statistics is required. This is not a graded class
 ## [](#logistics) Logistics
 
 * Location: Zoom Meeting ID: 995 9177 8894 (password sent via email)
-* Time: Monday Wednesday Thursday: 10 am to 11 am
+* Time: Mon/Wed/Thu 10 am to 11 am
 * Dates: 06/29/2020 to 08/23/2020
 
 **Instructor:** Claire Donnat, PhD (cdonnat at stanford dot edu)
@@ -42,9 +42,15 @@ No prior knowledge of R or of statistics is required. This is not a graded class
 **Instruction Assistant:** Zelin (James) Li (jameszli at stanford dot edu)
 
 **Office hours:** 
+* Mon 2 - 3 PM
+* Tue 3 - 4 PM
+* Wed 3 - 4 PM
+* Thu 4 - 5 PM
+* Others by appointment (please email James)
+* Zoom Meeting ID: 490 875 5281
 
 **Communication:** Please direct your questions on class materials and
-assignments to Claire: (cdonnat at stanford dot edu)
+assignments to Claire (cdonnat at stanford dot edu) and cc James (jameszli at stanford dot edu)
 
 ## [](#course) Syllabus (tentative)
 
