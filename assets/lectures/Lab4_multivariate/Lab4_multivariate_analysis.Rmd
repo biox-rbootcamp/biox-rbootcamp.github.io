@@ -8,6 +8,8 @@ output:
     toc_float: true
 ---
 
+## Video
+Watch the corresponding video on the website.
 
 ## Goal
 
@@ -20,7 +22,7 @@ fit.
 
 ```{r setup, warning=FALSE, message=FALSE, results='hide'}
 knitr::opts_chunk$set(echo = TRUE)
-pkgs_needed = c("tidyverse","GGally", "factoextra", "ade4")
+pkgs_needed = c("tidyverse","GGally", "factoextra", "ade4","pheatmap")
 BiocManager::install(setdiff(pkgs_needed, installed.packages()))
 library("tidyverse")
 ```
