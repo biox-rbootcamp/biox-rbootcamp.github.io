@@ -43,8 +43,8 @@ No prior knowledge of R or of statistics is required. This is not a graded class
 * Others by appointment (please email James)
 * Zoom Meeting ID: 490 875 5281
 
-**Communication:** Please direct your questions on class materials and
-assignments to Claire (cdonnat at stanford dot edu) and cc James (jameszli at stanford dot edu)
+**Communication:** 
+Please direct your questions on class materials and assignments to Claire (cdonnat at stanford dot edu) and cc James (jameszli at stanford dot edu)
 
 ## [](#course) Syllabus (tentative)
 
