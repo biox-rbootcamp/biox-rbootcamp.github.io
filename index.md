@@ -42,10 +42,7 @@ No prior knowledge of R or of statistics is required. This is not a graded class
 **Instruction Assistant:** Zelin (James) Li (jameszli at stanford dot edu)
 
 **Office hours:** 
-* Mon 2 - 3 PM
-* Tue 3 - 4 PM
-* Wed 3 - 4 PM
-* Thu 4 - 5 PM
+* Mon 2 - 3 PM, Tue 3 - 4 PM, Wed 3 - 4 PM, and Thu 4 - 5 PM
 * Others by appointment (please email James)
 * Zoom Meeting ID: 490 875 5281
 
