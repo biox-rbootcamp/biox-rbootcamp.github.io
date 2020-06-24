@@ -14,7 +14,7 @@ layout: cme195
 | 6 | Th |  | Introduction to basic probability models: probabilities, distributions and the CLT Part II: [a) Normal Distribution](https://www.youtube.com/watch?v=fwaxgik7aj4) [b) Populations, Samples, Estimates](https://www.youtube.com/watch?v=99WNX608k0Y) [c) Central Limit Theorem](https://www.youtube.com/watch?v=aYA8ZG-ltqQ) [d) CLT in Practice](https://www.youtube.com/watch?v=QOeoxOgYpzU)| [Lab 6: Probability Models II](./biox-rbootcamp.github.io/assets/lectures/session6.html) |  |  [Exercise Template for Lab 6](./biox-rbootcamp.github.io/assets/lectures/session6.Rmd)|
 | 7 | M | Simulations | [Video]() | [Lab 7: Simulations](./biox-rbootcamp.github.io/assets/lectures/Lab2_simulations/Lab2_simulations.html)  |  |  |
 | 8 | W |  | Basic visualization tools  [a)Histograms](https://www.youtube.com/watch?v=UaXYRf6qtEg) [b) QQplots](https://www.youtube.com/watch?v=5F62EwMF26c) [c) Boxplots](https://www.youtube.com/watch?v=Hh-Pd23OmVo) [d)Scatter plots](https://www.youtube.com/watch?v=dmJzInKpuRE) [e)Plots to avoid](https://www.youtube.com/watch?v=p-dYnSbBTa8) | |  |  |
-| 9 | Th |  | [Plotting with ggplot](https://drive.google.com/file/d/1BBNvt2EWtZnixHbGxnXg-vbivP7Iu0EI/view?usp=sharing) | [Lab 9: Ggplot2](./biox-rbootcamp.github.io/assets/lectures/Lab3_graphics/Lab3_graphics.html)  |  |
+| 9 | Th |  | [Plotting with ggplot](https://drive.google.com/file/d/1BBNvt2EWtZnixHbGxnXg-vbivP7Iu0EI/view?usp=sharing) | [Lab 9: ggplot2](./biox-rbootcamp.github.io/assets/lectures/Lab3_graphics/Lab3_graphics.html)  |  |
 | 10 | M | Mixtures | [Mixtures Lecture](https://drive.google.com/file/d/1aXFkzL1tWYLnAf5PKkwMGvai6NUaHrnb/view?usp=sharing)  |  |  |  |
 | 11 | W |  | Permutation tests |  |  |  |
 | 12 | Th |  | Bootstrap |  |  |  |

@@ -4,17 +4,17 @@ layout: cme195
 
 # [](#homework) Homework
 
-- Lab 1: Installing R and using R-studio [link]()
-- Lab 2: Basic R syntax [link]()
-- [Lab 3](assignments/homework_FA2018.nb.html): Using Rmarkdown and review of the material
-- [Lab 4](): 
-- Lab 5:
-- Lab 6: 
-- Lab 7:
+- [Lab 1](./assets/lectures/Lecture1_Intro.html): Installing R and using R-studio
+- [Lab 2](./assets/lectures/Lab1-setup/Lec1_Exercises.nb.html): Basic R syntax
+- [Lab 3](./assets/lectures/Lab1_setup/Lecture1_Intro2Markdown.html): Using Rmarkdown and review of the material [Lab Exercise Template](./assets/lectures/Lab1-setup/template-exerciseweek1.Rmd)
+- [Lab 4](./assets/lectures/Labs-Week2/session4_Exercises.nb.html): Tidyverse
+- [Lab 5](./biox-rbootcamp.github.io/assets/lectures/session5.html): Probability Models Part I [Lab Exercise Template](./biox-rbootcamp.github.io/assets/lectures/session5.Rmd)
+- [Lab 6](./biox-rbootcamp.github.io/assets/lectures/session6.html):  Probability Models Part II [Lab Exercise Template](./biox-rbootcamp.github.io/assets/lectures/session6.Rmd)
+- [Lab 7](./biox-rbootcamp.github.io/assets/lectures/Lab2_simulations/Lab2_simulations.html): Simulations
 - Lab 8: 
-- Lab 9:
+- [Lab 9](./biox-rbootcamp.github.io/assets/lectures/Lab3_graphics/Lab3_graphics.html): ggplot2
 - Lab 10:
-- Lab 11: Installing R and using R-studio
+- Lab 11: 
 - Lab 12: 
 - Lab 13:
 - Lab 14: 
@@ -24,7 +24,7 @@ layout: cme195
 - Lab 18: 
 - Lab 19:
 - Lab 20:
-- Lab 21: Installing R and using R-studio
+- Lab 21: 
 - Lab 22: 
 - Lab 23:
 - Lab 24: 
