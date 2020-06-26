@@ -4,7 +4,7 @@ layout: cme195
 
 # [](#schedule) Schedule
 
-| Session | Day | Topic | Material/ Link to video | Lab | Slides| Further Material for the discussion |
+| Session | Day | Weekly Topic | Material/ Link to video | Lab | Slides| Further Material for the discussion |
 |-|-|-|-|-|-|-|
 | 1 | M | Getting Started: R basics| [R installation](./installation) + Course introduction | [Introductory Slides](./assets/lectures/Lecture1_Intro.html)|  |  | 
 | 2 | W | | [Lecture:  Introduction to the R syntax: vectors, matrices, functions, concatenation, etc.](https://www.youtube.com/watch?v=iffR3fWv4xw&list=PLOU2XLYxmsIK9qQfztXeybpHvru-TrqAP) | [Lab 2: Swirl](./assets/lectures/Lab1-setup/Lec1_Exercises.nb.html) | [Slides: The R-syntax](./assets/lectures/Lecture1_IntroCoding.html)| |
@@ -15,18 +15,18 @@ layout: cme195
 | 7 | M | Simulations | [Lecture: Simulations]() | [Lab 7: Simulations](./biox-rbootcamp.github.io/assets/lectures/Lab2_simulations/Lab2_simulations.html)  | Lab 7 |  |
 | 8 | W |  | Lecture: Basic visualization tools  [a)Histograms](https://www.youtube.com/watch?v=UaXYRf6qtEg) [b) QQplots](https://www.youtube.com/watch?v=5F62EwMF26c) [c) Boxplots](https://www.youtube.com/watch?v=Hh-Pd23OmVo) [d)Scatter plots](https://www.youtube.com/watch?v=dmJzInKpuRE) [e)Plots to avoid](https://www.youtube.com/watch?v=p-dYnSbBTa8) | Lab 8|  |  |
 | 9 | Th |  | [Lecture:  Plotting with ggplot](https://drive.google.com/file/d/1BBNvt2EWtZnixHbGxnXg-vbivP7Iu0EI/view?usp=sharing) | [Lab 9: ggplot2](./biox-rbootcamp.github.io/assets/lectures/Lab3_graphics/Lab3_graphics.html)  |  |
-| 10 | M | Mixtures | [Lecture: Mixtures ](https://drive.google.com/file/d/1aXFkzL1tWYLnAf5PKkwMGvai6NUaHrnb/view?usp=sharing)  | Lab 10 |  |  |
+| 10 | M | Mixtures and Bootstrap tests | [Lecture: Mixtures ](https://drive.google.com/file/d/1aXFkzL1tWYLnAf5PKkwMGvai6NUaHrnb/view?usp=sharing)  | Lab 10 |  |  |
 | 11 | W |  | Permutation tests | [Lecture: Permutation tests]()  | Lab 11 |  |
 | 12 | Th |  | Bootstrap | [Lecture: The Bootstrap]()  |  Lab 12 |  |
 | 13 | M | Clustering | [Lecture: Kmeans and density based clustering](https://drive.google.com/file/d/1ekIRX3Fi_TWMnwJhTeW4RrXslfot_sVE/view?usp=sharing) | Lab 13 |  |  |
 | 14 | W |  | Choosing the number of clusters | [Lecture: Clustering in practice]() | Lab 14 |  |
 | 15 | Th |  | Hierarchical Clustering  | [Lecture: HC]() | Lab 15  |  |
-| 16 | M | Testing + Intro to RNA Seq | [Lecture: Testing + multiple hypothesis testing]() | Lab 16 |  |  |
-| 17 | W |  | Linear regression | [Lecture: Regression]() | Lab 17 |  |
-| 18 | Th |  | GLMs | [Lecture: GLM]() |  Lab 18 |  |
+| 16 | M | Testing + Stats modeling| [Lecture: Testing + multiple hypothesis testing]() | Lab 16 |  |  |
+| 17 | W |  | [Lecture: Regression]() | Lab 17 |  |
+| 18 | Th |  |[Lecture: GLM]() |  Lab 18 |  |
 | 19 | M |  Multivariate analysis | [Lecture: Multivariate analysis overview](https://drive.google.com/file/d/1BBNvt2EWtZnixHbGxnXg-vbivP7Iu0EI/view?usp=sharing)  | Lab 19 |  |  |
-| 20 | W |  | SVD | [Lecture: SVD]() | Lab 20|  |
-| 21 | Th |  | Correlations and tests of associations | [Lecture: Correlations]() |Lab 21  |  |
+| 20 | W |  |  [Lecture: SVD]() | Lab 20|  |
+| 21 | Th |  | [Lecture: Correlations]() |Lab 21  |  |
 | 22 | M | Networks | [Lecture: Friedman-Rafsky test ]()  | Lab 22 |  |
 | 23 | W |  | [Lecture: TBD]() | Lab 23 |  |  |
 | 24 | Th | | [Lecture: TBD]() | Lab 24 |  |  |
