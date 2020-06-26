@@ -22,14 +22,14 @@ layout: cme195
 | 14 | W |  | Choosing the number of clusters |  |  |  |
 | 15 | Th |  | Hierarchical Clustering |  |  |  |
 | 16 | M | Testing + Intro to RNA Seq | Testing + multiple hypothesis testing |  |  |  |
-| 17 | W |  | Linear regression |  |  |  |
-| 18 | Th |  | GLMs |  |  |  |
-| 19 | M | [Multivariate analysis](https://drive.google.com/file/d/1BBNvt2EWtZnixHbGxnXg-vbivP7Iu0EI/view?usp=sharing) | PCA |  |  |  |
-| 20 | W |  | SVD |  |  |  |
-| 21 | Th |  | Correlations and tests of associations |  |  |  |
-| 22 | M | Networks | Friedman-Rafsky test |  |  |  |
-| 23 | W |  |  |  |  |  |
-| 24 | Th |  |  |  |  |  |
+| 17 | W |  | Linear regression | [Lecture: Regression]() |  |  |
+| 18 | Th |  | GLMs | [Lecture: GLM]() |  |  |
+| 19 | M | [Lecture: Multivariate analysis](https://drive.google.com/file/d/1BBNvt2EWtZnixHbGxnXg-vbivP7Iu0EI/view?usp=sharing) | PCA |  |  |  |
+| 20 | W |  | SVD | [Lecture: SVD]() |  |  |
+| 21 | Th |  | Correlations and tests of associations | [Lecture: Correlations]() |  |  |
+| 22 | M | Networks | Friedman-Rafsky test |[Networks lecture]()  |  |  |
+| 23 | W |  TBD | [Lecture: TBD]() |  |  |  |
+| 24 | Th | TBD | [Lecture: TBD]() |  |  |  |
 
 
 ## [](#tut) Introductory Tutorials
