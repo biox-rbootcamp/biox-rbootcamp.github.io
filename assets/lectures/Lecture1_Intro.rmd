@@ -50,9 +50,9 @@ knitr::opts_chunk$set(
 The bootcamp will run for 8 weeks: 06/29-08/23/2020
 
 - Lectures: Monday, Wednesday, Thursday 10:00 AM - 11:00 AM
-- Office hours: Mon 4PM 
-- Class website: https://cme195.github.io/
-- Questions/Communication: cdonnat@stanford.edu
+- Office hours: Mon 2 - 3 PM, Tue 3 - 4 PM, Wed 3 - 4 PM, and Thu 4 - 5 PM (Others by appointment)
+- Class website: https://biox-rbootcamp.github.io/
+- Questions/Communication: cdonnat[at]stanford.edu / jameszli[at]stanford.edu
 
 </br>
 
@@ -107,11 +107,15 @@ This is a short course, so you will not learn everything about R.
 
 - Exploratory data analysis (EDA)
 
-- Elements of statistics: modeling, predicting and testing.
+- Mixture Models
 
-- Some R tools for supervised & unsupervised learning.
+- Clustering
 
-- Generating R Markdown reports for efficient communication.
+- Testing
+
+- Multivariate Analysis
+
+- Network & Trees
 
 
 # The R language

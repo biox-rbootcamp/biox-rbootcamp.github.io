@@ -13,41 +13,67 @@
 
 
 <style type="text/css">
-div.sourceCode { overflow-x: auto; }
-table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
-  margin: 0; padding: 0; vertical-align: baseline; border: none; }
-table.sourceCode { width: 100%; line-height: 100%; }
-td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
-td.sourceCode { padding-left: 5px; }
-code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
-code > span.dt { color: #902000; } /* DataType */
-code > span.dv { color: #40a070; } /* DecVal */
-code > span.bn { color: #40a070; } /* BaseN */
-code > span.fl { color: #40a070; } /* Float */
-code > span.ch { color: #4070a0; } /* Char */
-code > span.st { color: #4070a0; } /* String */
-code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
-code > span.ot { color: #007020; } /* Other */
-code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
-code > span.fu { color: #06287e; } /* Function */
-code > span.er { color: #ff0000; font-weight: bold; } /* Error */
-code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
-code > span.cn { color: #880000; } /* Constant */
-code > span.sc { color: #4070a0; } /* SpecialChar */
-code > span.vs { color: #4070a0; } /* VerbatimString */
-code > span.ss { color: #bb6688; } /* SpecialString */
-code > span.im { } /* Import */
-code > span.va { color: #19177c; } /* Variable */
-code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
-code > span.op { color: #666666; } /* Operator */
-code > span.bu { } /* BuiltIn */
-code > span.ex { } /* Extension */
-code > span.pp { color: #bc7a00; } /* Preprocessor */
-code > span.at { color: #7d9029; } /* Attribute */
-code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
-code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
-code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
-code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+a.sourceLine { display: inline-block; line-height: 1.25; }
+a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
+a.sourceLine:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+a.sourceLine { text-indent: -1em; padding-left: 1em; }
+}
+pre.numberSource a.sourceLine
+  { position: relative; left: -4em; }
+pre.numberSource a.sourceLine::before
+  { content: attr(data-line-number);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; pointer-events: all; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {  }
+@media screen {
+a.sourceLine::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
 </style>
 
 <link rel="stylesheet" href="libs/reveal.js-3.3.0.1/css/theme/simple.css" id="theme">
@@ -505,15 +531,15 @@ document.getElementsByTagName('head')[0].appendChild(style);
 <li><p>Basics of coding in R</p></li>
 </ul>
 </section>
-<section><section id="course-objectives-organization" class="titleslide slide level1"><h1>Course Objectives &amp; Organization</h1></section><section id="course-logistics" class="slide level2">
+<section><section id="course-objectives-organization" class="title-slide slide level1"><h1>Course Objectives &amp; Organization</h1></section><section id="course-logistics" class="slide level2">
 <h2>Course Logistics</h2>
 <p></br></p>
 <p>The bootcamp will run for 8 weeks: 06/29-08/23/2020</p>
 <ul>
 <li>Lectures: Monday, Wednesday, Thursday 10:00 AM - 11:00 AM</li>
-<li>Office hours: Mon 4PM</li>
-<li>Class website: <a href="https://cme195.github.io/" class="uri">https://cme195.github.io/</a></li>
-<li>Questions/Communication: <a href="mailto:cdonnat@stanford.edu">cdonnat@stanford.edu</a></li>
+<li>Office hours: Mon 2 - 3 PM, Tue 3 - 4 PM, Wed 3 - 4 PM, and Thu 4 - 5 PM (Others by appointment)</li>
+<li>Class website: <a href="https://biox-rbootcamp.github.io/" class="uri">https://biox-rbootcamp.github.io/</a></li>
+<li>Questions/Communication: cdonnat[at]stanford.edu / jameszli[at]stanford.edu</li>
 </ul>
 <p></br></p>
 <p>No Grading but:</p>
@@ -555,29 +581,24 @@ document.getElementsByTagName('head')[0].appendChild(style);
 <li><p>Processing and transforming data with <code>dplyr</code>.</p></li>
 <li><p>Visualizing data with <code>ggplot2</code>.</p></li>
 <li><p>Exploratory data analysis (EDA)</p></li>
-<li><p>Elements of statistics: modeling, predicting and testing.</p></li>
-<li><p>Some R tools for supervised &amp; unsupervised learning.</p></li>
-<li><p>Generating R Markdown reports for efficient communication.</p></li>
+<li><p>Mixture Models</p></li>
+<li><p>Clustering</p></li>
+<li><p>Testing</p></li>
+<li><p>Multivariate Analysis</p></li>
+<li><p>Network &amp; Trees</p></li>
 </ul>
 </section></section>
-<section><section id="the-r-language" class="titleslide slide level1"><h1>The R language</h1></section><section id="what-is-r" class="slide level2">
+<section><section id="the-r-language" class="title-slide slide level1"><h1>The R language</h1></section><section id="what-is-r" class="slide level2">
 <h2>What is R?</h2>
 <ul>
 <li><p>R was created by Rob Gentleman and Ross Ihaka in 1994; it is based on the S language developed at Bell Labs by John Chambers (Stanford Statistics).</p></li>
 <li><p>It is <strong>an open-source language and environment</strong> for statistical computing and graphics.</p></li>
 </ul>
-<p><img src="Lecture1-figure/r_word_cloud.png", height="500", width="750"></img></p>
+<p>&lt;img src=“./Lecture1-figure/r_word_cloud.png”, height=“500”, width=“750”&gt;</img></p>
 </section><section id="section" class="slide level2">
 <h2></h2>
 <ul>
-<li class="fragment">R offers:
-<ul>
-<li class="fragment">A simple and effective programming language.</li>
-<li class="fragment">A data handling and storage facility.</li>
-<li class="fragment">A suite of libraries for matrix computations.</li>
-<li class="fragment">A large collection of tools for data analysis.</li>
-<li class="fragment">Facilities for generating high-quality graphics and data display.</li>
-</ul></li>
+<li class="fragment">R offers: + A simple and effective programming language. + A data handling and storage facility. + A suite of libraries for matrix computations. + A large collection of tools for data analysis. + Facilities for generating high-quality graphics and data display.</li>
 </ul>
 <p></br></p>
 <ul>
@@ -586,8 +607,7 @@ document.getElementsByTagName('head')[0].appendChild(style);
 </section><section id="who-uses-r" class="slide level2">
 <h2>Who uses R?</h2>
 <p>Traditionally, academics and researchers. However, recently R has expanded also to industry and enterprise market. Worldwide usage on log-scale:</p>
-<p><img src="Lecture1-figure/language_popularity.png", height="500", width="1000",
-class="center"></img></p>
+<p>&lt;img src=“./Lecture1-figure/language_popularity.png”, height=“500”, width=“1000”, class=“center”&gt;</img></p>
 <p>Source: <a href="http://pypl.github.io/PYPL.html" class="uri">http://pypl.github.io/PYPL.html</a></p>
 <p>The PYPL Index is created by analyzing how often language tutorials are searched on Google (generated using raw data from Google Trends).</p>
 </section><section id="why-should-you-learn-r" class="slide level2">
@@ -633,12 +653,12 @@ class="center"></img></p>
 </section><section id="what-makes-r-good-1" class="slide level2">
 <h2>What makes R good?</h2>
 <p>As of September 29, there are 13,083 packages on <a href="https://cran.r-project.org/web/packages/index.html">CRAN</a>, 1,560 on <a href="https://www.bioconductor.org/">Bioconductor</a>, and many others on <a href="https://github.com/trending/r?since=weekly">github</a>)</p>
-<p><img src="Lecture1-figure/cran_packages.png", height="600", width="800"></img></p>
+<p>&lt;img src=“./Lecture1-figure/cran_packages.png”, height=“600”, width=“800”&gt;</img></p>
 <p>Source: <a href="http://blog.revolutionanalytics.com/2017/01/cran-10000.html">http://blog.revolutionanalytics.com/</a></p>
 </section><section id="textbook" class="slide level2">
 <h2>“Textbook”</h2>
 <p>We will use <em>R for Data Science</em> as a primary reference. Other resources are listed on the website/</p>
-<p><img src="Lecture1-figure/r_textbook.png", height="600"></img></p>
+<p>&lt;img src=“./Lecture1-figure/r_textbook.png”, height=“600”&gt;</img></p>
 <p><small2>Freely available at: <a href="http://r4ds.had.co.nz/" class="uri">http://r4ds.had.co.nz/</a> </small2></p>
 </section><section id="other-useful-resources-for-learning-r" class="slide level2">
 <h2>Other useful resources for learning R</h2>
@@ -649,7 +669,7 @@ class="center"></img></p>
 <li><p><code>Data Camp</code> courses for data science, R, python and more (<a href="https://www.datacamp.com/courses" class="uri">https://www.datacamp.com/courses</a>)</p></li>
 </ul>
 </section></section>
-<section><section id="setting-up-an-r-environment" class="titleslide slide level1"><h1>Setting up an R environment</h1></section><section id="installing-r" class="slide level2">
+<section><section id="setting-up-an-r-environment" class="title-slide slide level1"><h1>Setting up an R environment</h1></section><section id="installing-r" class="slide level2">
 <h2>Installing R</h2>
 <p></br></p>
 <p>R is open sources and cross platform (Linux, Mac, Windows).</p>
@@ -659,22 +679,24 @@ class="center"></img></p>
 <p>Each year a new version of R is available, and 2-3 minor releases. You should update your software regularly.</p>
 </section><section id="running-r-code" class="slide level2">
 <h2>Running R code</h2>
-<div class="left" ,="" style="width: 65%;">
-<p>Interpreter mode:</p>
-<ul>
-<li>open a terminal and launch R by calling “R” (or open an R console).</li>
-<li>type R commands interactively in the command line, pressing <code>Enter</code> to execute.</li>
-<li>use <code>q()</code> to quit R.</li>
-</ul>
-<p>Scripting mode:</p>
-<ul>
-<li>write a text file containing all commands you want to run</li>
-<li>save your script as an R script file (e.g. “myscript.R”)</li>
-<li>execute your code from the terminal by calling “Rscript myscript.R”</li>
-</ul>
+<div class="left", style="width: 65%;"> 
+
+Interpreter mode:
+
+- open a terminal and launch R by calling "R" (or open an R console).
+- type R commands interactively in the command line, pressing `Enter` to execute.
+- use `q()` to quit R.
+
+Scripting mode:
+
+- write a text file containing all commands you want to run
+- save your script as an R script file (e.g. "myscript.R") 
+- execute your code from the terminal by calling "Rscript myscript.R"
+
 </div>
-<div class="right" ,="" style="width: 35%;">
-<p><img src="Lecture1-figure/RGUI.png", height="350", width="400"></img> <img src="Lecture1-figure/terminal.png", height="350", width="400"></img></p>
+<div class="right", style="width: 35%;"> 
+<img src="./Lecture1-figure/RGUI.png", height="350", width="400"></img> 
+<img src="./Lecture1-figure/terminal.png", height="350", width="400"></img> 
 </div>
 </section><section id="r-editors" class="slide level2">
 <h2>R editors</h2>
@@ -688,23 +710,23 @@ class="center"></img></p>
 <h2>Installing RStudio</h2>
 <p>RStudio is open-source and cross-platform (Linux, Mac, Windows).<br />
 Download and install the latest version for your OS from <a href="https://www.rstudio.com/products/rstudio/download/#download">the official website</a>.</p>
-<p><img src="Lecture1-figure/RStudio_window.png",  width="1000"></img></p>
+<p>&lt;img src=“./Lecture1-figure/RStudio_window.png”, width=“1000”&gt;</img></p>
 </section><section id="rstudio-window" class="slide level2">
 <h2>RStudio window</h2>
-<p><img src="Lecture1-figure/rstudio-editor.png",  width="1000"></img></p>
+<p>&lt;img src=“./Lecture1-figure/rstudio-editor.png”, width=“1000”&gt;</img></p>
 </section><section id="rstudio-preferences" class="slide level2">
 <h2>RStudio preferences</h2>
-<p><img src="Lecture1-figure/RStudio_preferences.png", width="1000"></img></p>
+<p>&lt;img src=“./Lecture1-figure/RStudio_preferences.png”, width=“1000”&gt;</img></p>
 </section><section id="rstudio-layout" class="slide level2">
 <h2>RStudio layout</h2>
-<p><img src="Lecture1-figure/RStudio_layout.png", width="1000"></img></p>
+<p>&lt;img src=“./Lecture1-figure/RStudio_layout.png”, width=“1000”&gt;</img></p>
 </section><section id="rstudio-apprearance" class="slide level2">
 <h2>RStudio apprearance</h2>
-<p><img src="Lecture1-figure/RStudio_appearances.png", width="1000"></img></p>
+<p>&lt;img src=“./Lecture1-figure/RStudio_appearances.png”, width=“1000”&gt;</img></p>
 <p>More on RStudio cuztomization can be found <a href="https://support.rstudio.com/hc/en-us/articles/200549016-Customizing-RStudio">here</a></p>
 </section><section id="r-document-types" class="slide level2">
 <h2>R document types</h2>
-<p><img src="Lecture1-figure/RStudio_documents.png", width="1000"></img></p>
+<p>&lt;img src=“./Lecture1-figure/RStudio_documents.png”, width=“1000”&gt;</img></p>
 </section><section id="r-document-types-1" class="slide level2">
 <h2>R document types</h2>
 <ul>
@@ -735,57 +757,57 @@ Download and install the latest version for your OS from <a href="https://www.rs
 <ul>
 <li>From CRAN:</li>
 </ul>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># install.packages(&quot;Package Name&quot;), e.g. </span>
-<span class="kw">install.packages</span>(<span class="st">&quot;glmnet&quot;</span>) </code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="co"># install.packages(&quot;Package Name&quot;), e.g. </span></a>
+<a class="sourceLine" id="cb1-2" data-line-number="2"><span class="kw">install.packages</span>(<span class="st">&quot;glmnet&quot;</span>) </a></code></pre></div>
 <ul>
 <li>From Bioconductor:</li>
 </ul>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># First, load Bioconductor script. You need to have an R version &gt;=3.3.0. </span>
-<span class="kw">source</span>(<span class="st">&quot;https://bioconductor.org/biocLite.R&quot;</span>) 
-
-<span class="co"># Then you can install packages with:  biocLite(&quot;Package Name&quot;), e.g. </span>
-<span class="kw">biocLite</span>(<span class="st">&quot;limma&quot;</span>) </code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" data-line-number="1"><span class="co"># First, load Bioconductor script. You need to have an R version &gt;=3.3.0. </span></a>
+<a class="sourceLine" id="cb2-2" data-line-number="2"><span class="kw">source</span>(<span class="st">&quot;https://bioconductor.org/biocLite.R&quot;</span>) </a>
+<a class="sourceLine" id="cb2-3" data-line-number="3"></a>
+<a class="sourceLine" id="cb2-4" data-line-number="4"><span class="co"># Then you can install packages with:  biocLite(&quot;Package Name&quot;), e.g. </span></a>
+<a class="sourceLine" id="cb2-5" data-line-number="5"><span class="kw">biocLite</span>(<span class="st">&quot;limma&quot;</span>) </a></code></pre></div>
 <ul>
 <li>From github:</li>
 </ul>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># You need to first install a package &quot;devtools&quot; from CRAN </span>
-<span class="kw">install.packages</span>(<span class="st">&quot;devtools&quot;</span>) 
-
-<span class="co"># Load the &quot;devtools&quot; package </span>
-<span class="kw">library</span>(devtools) 
-
-<span class="co"># Then you can install a package from some user&#39;s reporsitory, e.g. </span>
-<span class="kw">install_github</span>(<span class="st">&quot;twitter/AnomalyDetection&quot;</span>) 
-
-<span class="co"># or using install_git(&quot;url&quot;), e.g. </span>
-<span class="kw">install_git</span>(<span class="st">&quot;https://github.com/twitter/AnomalyDetection&quot;</span>) </code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" data-line-number="1"><span class="co"># You need to first install a package &quot;devtools&quot; from CRAN </span></a>
+<a class="sourceLine" id="cb3-2" data-line-number="2"><span class="kw">install.packages</span>(<span class="st">&quot;devtools&quot;</span>) </a>
+<a class="sourceLine" id="cb3-3" data-line-number="3"></a>
+<a class="sourceLine" id="cb3-4" data-line-number="4"><span class="co"># Load the &quot;devtools&quot; package </span></a>
+<a class="sourceLine" id="cb3-5" data-line-number="5"><span class="kw">library</span>(devtools) </a>
+<a class="sourceLine" id="cb3-6" data-line-number="6"></a>
+<a class="sourceLine" id="cb3-7" data-line-number="7"><span class="co"># Then you can install a package from some user&#39;s reporsitory, e.g. </span></a>
+<a class="sourceLine" id="cb3-8" data-line-number="8"><span class="kw">install_github</span>(<span class="st">&quot;twitter/AnomalyDetection&quot;</span>) </a>
+<a class="sourceLine" id="cb3-9" data-line-number="9"></a>
+<a class="sourceLine" id="cb3-10" data-line-number="10"><span class="co"># or using install_git(&quot;url&quot;), e.g. </span></a>
+<a class="sourceLine" id="cb3-11" data-line-number="11"><span class="kw">install_git</span>(<span class="st">&quot;https://github.com/twitter/AnomalyDetection&quot;</span>) </a></code></pre></div>
 </section><section id="where-are-r-packages-stored" class="slide level2">
 <h2>Where are R packages stored?</h2>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Get library locations containing R packages </span>
-<span class="kw">.libPaths</span>()</code></pre></div>
-<pre><code>## [1] &quot;/Library/Frameworks/R.framework/Versions/3.6/Resources/library&quot;</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Get the info on all the packages installed </span>
-<span class="kw">installed.packages</span>()[<span class="dv">1</span><span class="op">:</span><span class="dv">5</span>, <span class="dv">1</span><span class="op">:</span><span class="dv">3</span>]</code></pre></div>
-<pre><code>##           Package     LibPath                                                          Version 
-## abind     &quot;abind&quot;     &quot;/Library/Frameworks/R.framework/Versions/3.6/Resources/library&quot; &quot;1.4-5&quot; 
-## ade4      &quot;ade4&quot;      &quot;/Library/Frameworks/R.framework/Versions/3.6/Resources/library&quot; &quot;1.7-15&quot;
-## animation &quot;animation&quot; &quot;/Library/Frameworks/R.framework/Versions/3.6/Resources/library&quot; &quot;2.6&quot;   
-## ape       &quot;ape&quot;       &quot;/Library/Frameworks/R.framework/Versions/3.6/Resources/library&quot; &quot;5.3&quot;   
-## arm       &quot;arm&quot;       &quot;/Library/Frameworks/R.framework/Versions/3.6/Resources/library&quot; &quot;1.11-1&quot;</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Get all packages currently loaded in the R environment </span>
-<span class="kw">search</span>() </code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" data-line-number="1"><span class="co"># Get library locations containing R packages </span></a>
+<a class="sourceLine" id="cb4-2" data-line-number="2"><span class="kw">.libPaths</span>()</a></code></pre></div>
+<pre><code>## [1] &quot;/home/jameszli/R/x86_64-pc-linux-gnu-library/3.6&quot; &quot;/usr/local/lib/R/site-library&quot;                    &quot;/usr/lib/R/site-library&quot;                          &quot;/usr/lib/R/library&quot;</code></pre>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" data-line-number="1"><span class="co"># Get the info on all the packages installed </span></a>
+<a class="sourceLine" id="cb6-2" data-line-number="2"><span class="kw">installed.packages</span>()[<span class="dv">1</span><span class="op">:</span><span class="dv">5</span>, <span class="dv">1</span><span class="op">:</span><span class="dv">3</span>]</a></code></pre></div>
+<pre><code>##             Package       LibPath                                            Version
+## fastDummies &quot;fastDummies&quot; &quot;/home/jameszli/R/x86_64-pc-linux-gnu-library/3.6&quot; &quot;1.6.1&quot;
+## naniar      &quot;naniar&quot;      &quot;/home/jameszli/R/x86_64-pc-linux-gnu-library/3.6&quot; &quot;0.5.1&quot;
+## rafalib     &quot;rafalib&quot;     &quot;/home/jameszli/R/x86_64-pc-linux-gnu-library/3.6&quot; &quot;1.0.0&quot;
+## revealjs    &quot;revealjs&quot;    &quot;/home/jameszli/R/x86_64-pc-linux-gnu-library/3.6&quot; &quot;0.9&quot;  
+## UpSetR      &quot;UpSetR&quot;      &quot;/home/jameszli/R/x86_64-pc-linux-gnu-library/3.6&quot; &quot;1.4.0&quot;</code></pre>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb8-1" data-line-number="1"><span class="co"># Get all packages currently loaded in the R environment </span></a>
+<a class="sourceLine" id="cb8-2" data-line-number="2"><span class="kw">search</span>() </a></code></pre></div>
 <pre><code>## [1] &quot;.GlobalEnv&quot;        &quot;package:stats&quot;     &quot;package:graphics&quot;  &quot;package:grDevices&quot; &quot;package:utils&quot;     &quot;package:datasets&quot;  &quot;package:methods&quot;   &quot;Autoloads&quot;         &quot;package:base&quot;</code></pre>
 </section><section id="getting-you-ready-for-lab-2" class="slide level2">
 <h2>Getting you ready for Lab 2</h2>
 <p>The swirl R package allows to learn R programming and data science very easily. You will use it in Lab 2, so here we are going to install it together. The workflow is the same as for any other R package.</p>
 <p><strong>Step 1</strong>: Open RStudio and type the following into the console:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">install.packages</span>(<span class="st">&quot;swirl&quot;</span>)</code></pre></div>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb10-1" data-line-number="1"><span class="kw">install.packages</span>(<span class="st">&quot;swirl&quot;</span>)</a></code></pre></div>
 <p>That is just for this time!!! Once swirl is installed on your machine, you can skip directly to step 2.</p>
 <p><strong>Step 2</strong>: Start swirl</p>
 <p>This is the only step that you will repeat every time you want to run swirl. First, you will load the package using the library() function. Then you will call the function that starts the magic! Type the following, pressing Enter after each line:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(<span class="st">&quot;swirl&quot;</span>)
-
-<span class="kw">swirl</span>()</code></pre></div>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb11-1" data-line-number="1"><span class="kw">library</span>(<span class="st">&quot;swirl&quot;</span>)</a>
+<a class="sourceLine" id="cb11-2" data-line-number="2"></a>
+<a class="sourceLine" id="cb11-3" data-line-number="3"><span class="kw">swirl</span>()</a></code></pre></div>
 </section><section id="getting-you-ready-for-lab-2-1" class="slide level2">
 <h2>Getting you ready for Lab 2</h2>
 <p>The first time you start swirl, you’ll be prompted to install a course. For Lab 2, we’ll ask you to go through a couple of recommended courses. See website for more information.</p>
