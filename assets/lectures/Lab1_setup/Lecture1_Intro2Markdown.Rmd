@@ -25,7 +25,7 @@ right versions of the software.
 you with a powerful interface for working with R, which includes a 
 **text editor** where you can write your code and/or notes.
 
-You should have installed R -Studio during the first discussion --- if you have, skip over to the next session. Otherwise, follow the instructions underneath.
+You should have installed R -Studio during the first discussion --- if you have, skip over to the next section. Otherwise, follow the instructions underneath.
 
 To get RStudio go to [https://rstudio.com/products/rstudio/download/#download](https://www.rstudio.com/products/rstudio/download/#download)
 and download a free version by clicking the blue button 
@@ -367,6 +367,99 @@ Note that for R notebooks, the output field in the front-matter will be
 More on R Notebooks can be found [here](https://rmarkdown.rstudio.com/r_notebooks.html).
 
 
+# Importing data
+
+## Working Directory
+
+- The **current working directory** (cmd) is the location
+which R is currently pointing to.
+
+- Whenever you try to read or save a file without specifying 
+the path explicitly, the cmd will be used by default.
+
+- When are executing code from an R markdown/notebook code chunk, 
+the cmd is **the location of the document**.
+
+- To see the current working directory use `getwd()`:
+```{r}
+getwd()   # with no arguments
+```
+
+- To change the working directory use `setwd(path_name)` 
+with a specified path as na argument:
+```{r eval = FALSE}
+setwd("path/to/directory")
+```
+
+
+## Paths and directory names
+
+- R inherits its file and folder **naming conventions from unix**, and 
+uses forward slashes for the directories, e.g. `/home/lan/folder/`
+
+- This is, because backslashes serve a different purpose; they are used as 
+escape characters to isolate special characters and stop them from being 
+immediately interpreted.
+
+- When working with R on **Windows**, you can use either: `C:/Path/To/A/File`
+or `C:\\Path\\To\\A\\File`
+
+-  Use a "`Tab`" for autocompletion to find file paths more easily. 
+
+- To avoid problems, directory names should NOT contain spaces and special characters.
+
+
+## Importing text data
+
+- **Text Files in a table format** can be read and saved 
+to a selected variable using a `read.table()` function.
+Use `?read.table` to learn more about the function.
+
+- A common text file format is a **comma delimited text file**,
+`.csv`. These files use a comma as column separators, e.g:
+
+```{r eval = FALSE}
+Year,Student,Major
+2009, John Doe,Statistics
+2009, Bart Simpson, Mathematics I
+```
+
+- To read these files use the following command:
+
+```{r eval=FALSE}
+mydata <- read.table("path/to/filename.csv", header=TRUE,  sep = ",")
+
+# read.csv() has covenient argument defaults for '.csv' files
+mydata <- read.csv("path/to/filename.csv")
+```
+
+- Optionally, use `row.names` or `col.names` arguments
+to set the row and column names.
+
+
+## Saving data
+
+To save data, you have two options:
+ 
+- Save a table as a csv documents, using:
+
+```{r, eval=FALSE}
+write.csv("path/to/filename.csv")
+```
+
+- Save a list of object as an RData file:
+```{r, eval=FALSE}
+list2save = list(obj1 = obj, obj2 = thing) ### the left hand of the inequality is the name of the object, the right hand, the object itself
+save("path/to/filename.csv", list2save)
+### To load (you'll be then able to have access to the list2save object.)
+load("path/to/filename.RData")
+### e.,g, to have access to "thing", simply call : list2save$obj2
+```
+
+- Save the whole image (all the environment)
+```{r, eval=FALSE}
+save.image("path/to/filename.RData")
+```
 # Exercises: To Complete before the discussion on Thursday!!!
 
 We will now put all the pieces of what we've seen during the week together.

@@ -85,6 +85,19 @@ Find the movies in your favourite genre by the 5 directors
 you just found. These could serve as suggestions for your next movie night!
 
 
+## Part 2: Summaries
+
+Using chain commands and the `summarise` function:
+
+a. Find the maximum number of movies that a director has been involved in.
+
+b. Find the average and median number of action movies that a director is involved in.
+
+c. Compute 5th and 95th percentile of the `gross` amount, per category.
+
+
+
+
 
 
 
