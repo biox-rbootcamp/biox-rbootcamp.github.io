@@ -27,7 +27,7 @@ install_course_github("swirldev", "R_Programming_E")
 swirl()
 ```
 
-This will initiate a series of promts:
+This will initiate a series of prompts:
 
 - Type 1 for "1: R Programming: The basics of programming in R" when prompted to install a course.
 - Type 1 for "1: R Programming" when prompted to choose a course.
@@ -78,7 +78,7 @@ data.frame(
 row of "exams". Hint: use the function `which.max()`.
 
 
-# Execise 4: Control Flow 
+# Exercise 4: Control Flow 
 
 ## Part 1.1
 
@@ -101,7 +101,7 @@ b. Print for each of the numbers x = 2, . . . 20, all numbers that divide x
 (all factors) excluding 1 and x. Hence, for 18, it should print 2 3 6 9.
 
 
-# Execise 5: Functions
+# Exercise 5: Functions
 
 ## Part 2.1
 
@@ -119,7 +119,7 @@ of times the number 12 is in that vector.
 Write a function that takes in a data.frame as an input, 
 prints out the column names, and returns its dimensions.
 
-# Execise 6: Apply family functions
+# Exercise 6: Apply family functions
 
 ## Part 1
 Below we print six first rows of the built-in dataset, `mtcars`, 
