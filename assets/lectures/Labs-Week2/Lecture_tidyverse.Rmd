@@ -1,7 +1,7 @@
 --- 
 title: 'Using tidyverse'
 subtitle: 'Week 2 Session 4'
-date: "October 4, 2018" 
+date: "Monday, July 6th 2020" 
 author: 
 - Claire Donnat
 - (based on the material by Lan Huong Nguyen)
