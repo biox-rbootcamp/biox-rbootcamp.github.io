@@ -8,9 +8,18 @@ output:
     toc_float: true
 ---
 
-# Watch the video for Session 2
+# Watch the video series for Session 2
 
-Watch the video lecture associated to Session 2 (find the link on the website) -- it will walk you through some of the basic syntax in R.
+Watch the video lecture associated to Session 2 (find the link on the website and [here](https://www.youtube.com/watch?v=iffR3fWv4xw&list=PLOU2XLYxmsIK9qQfztXeybpHvru-TrqAP)) -- these are a series of short videos that will walk you through some of the basic syntax in R. In particular, we ask that you watch the videos in that link entitled:
+
+- R [1.1](https://www.youtube.com/watch?v=iffR3fWv4xw&list=PLOU2XLYxmsIK9qQfztXeybpHvru-TrqAP&index=1), [1.2](https://www.youtube.com/watch?v=S-o-sdlzhkE&list=PLOU2XLYxmsIK9qQfztXeybpHvru-TrqAP&index=2), [1.3](https://www.youtube.com/watch?v=YhQOV27pQfg&list=PLOU2XLYxmsIK9qQfztXeybpHvru-TrqAP&index=3), [1.4](https://www.youtube.com/watch?v=GKu5tw_bIpA&list=PLOU2XLYxmsIK9qQfztXeybpHvru-TrqAP&index=4), [1.5](https://www.youtube.com/watch?v=u5hroyx0J4o&list=PLOU2XLYxmsIK9qQfztXeybpHvru-TrqAP&index=5), [1.6](https://www.youtube.com/watch?v=cR-hEUs1rRw&list=PLOU2XLYxmsIK9qQfztXeybpHvru-TrqAP&index=6), and [1.7](https://www.youtube.com/watch?v=cR-hEUs1rRw&list=PLOU2XLYxmsIK9qQfztXeybpHvru-TrqAP&index=7)
+
+- R [2.1](https://www.youtube.com/watch?v=qK1ElUMkhq0&list=PLOU2XLYxmsIK9qQfztXeybpHvru-TrqAP&index=8), R [2.3](https://www.youtube.com/watch?v=eVEx_pBEkRI&list=PLOU2XLYxmsIK9qQfztXeybpHvru-TrqAP&index=10) and R [2.4](https://www.youtube.com/watch?v=djI-yfk-DZM&list=PLOU2XLYxmsIK9qQfztXeybpHvru-TrqAP&index=11)
+
+- R [3.2](https://www.youtube.com/watch?v=WuCVs3bW-ZY&list=PLOU2XLYxmsIK9qQfztXeybpHvru-TrqAP&index=14)
+
+- R [4.1](https://www.youtube.com/watch?v=Z1wB1rHAYzQ&list=PLOU2XLYxmsIK9qQfztXeybpHvru-TrqAP&index=16)
+
 Once you're done, go through the following exercises to get more familiar with the R syntax.
 
 
