@@ -63,7 +63,7 @@ is the identity matrix.
 
 1. Create the following data frame and name it “exams”.
 
-```{r, echo = FALSE}
+```{r, echo = TRUE}
 set.seed(123)
 data.frame(
   student = c("Alice", "Sarah", "Harry", "Ron", "Kate"),
@@ -82,7 +82,7 @@ row of "exams". Hint: use the function `which.max()`.
 
 ## Part 1.1
 
-Use a for loop to:
+Use a "for"" loop to:
 
 a. Print all the letters of the Latin alphabet:`
 

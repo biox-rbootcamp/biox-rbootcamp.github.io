@@ -1,7 +1,7 @@
 ---
 title: 'Lab1: Initial Setup'
-author: "Bios 221: Modern Statistics for Modern Biology"
-date: "9/30/2019"
+author: "BioX Bootcamp"
+date: "7/01/2020"
 output: 
   html_document:
     toc: true
@@ -16,7 +16,7 @@ knitr::opts_chunk$set(echo = TRUE)
 # R and RStudio
 
 This lab will help you prepare your computer environment for the 
-practical component of BIOS221. You will learn how to install or update
+practical component of this bootcamp. You will learn how to install or update
 R and RStudio, as well as how to obtain R-packages, and makes sure you have
 right versions of the software.
 
@@ -383,3 +383,73 @@ Note that for R notebooks, the output field in the front-matter will be
 <br>
 
 More on R Notebooks can be found [here](https://rmarkdown.rstudio.com/r_notebooks.html).
+
+
+# Importing data
+
+## Working Directory
+
+- The **current working directory** (cmd) is the location
+which R is currently pointing to.
+
+- Whenever you try to read or save a file without specifying 
+the path explicitly, the cmd will be used by default.
+
+- When are executing code from an R markdown/notebook code chunk, 
+the cmd is **the location of the document**.
+
+- To see the current working directory use `getwd()`:
+```{r}
+getwd()   # with no arguments
+```
+
+- To change the working directory use `setwd(path_name)` 
+with a specified path as na argument:
+```{r eval = FALSE}
+setwd("path/to/directory")
+```
+
+
+## Paths and directory names
+
+- R inherits its file and folder **naming conventions from unix**, and 
+uses forward slashes for the directories, e.g. `/home/lan/folder/`
+
+- This is, because backslashes serve a different purpose; they are used as 
+escape characters to isolate special characters and stop them from being 
+immediately interpreted.
+
+- When working with R on **Windows**, you can use either: `C:/Path/To/A/File`
+or `C:\\Path\\To\\A\\File`
+
+-  Use a "`Tab`" for autocompletion to find file paths more easily. 
+
+- To avoid problems, directory names should NOT contain spaces and special characters.
+
+
+## Importing text data
+
+- **Text Files in a table format** can be read and saved 
+to a selected variable using a `read.table()` function.
+Use `?read.table` to learn more about the function.
+
+- A common text file format is a **comma delimited text file**,
+`.csv`. These files use a comma as column separators, e.g:
+
+```{r eval = FALSE}
+Year,Student,Major
+2009, John Doe,Statistics
+2009, Bart Simpson, Mathematics I
+```
+
+- To read these files use the following command:
+
+```{r eval=FALSE}
+mydata <- read.table("path/to/filename.csv", header=TRUE,  sep = ",")
+
+# read.csv() has covenient argument defaults for '.csv' files
+mydata <- read.csv("path/to/filename.csv")
+```
+
+- Optionally, use `row.names` or `col.names` arguments
+to set the row and column names.

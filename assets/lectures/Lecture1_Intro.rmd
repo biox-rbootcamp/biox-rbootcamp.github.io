@@ -187,19 +187,19 @@ Cons:
 
 ## What makes R good?
 
-> - R is an **interpreted language**, i.e. programs do not need to be 
+ - R is an **interpreted language**, i.e. programs do not need to be 
 compiled into machine-language instructions.
 
-> - R is **object oriented**, i.e. it can be extended to include
+- R is **object oriented**, i.e. it can be extended to include
 non-standard data structures (**objects**). A generic function can act
 differently depending on what objects you passe to it.
 
-> - R supports **matrix arithmetics**.
+ - R supports **matrix arithmetics**.
 
-> - R packages can generate **publication-quality** plots, 
+ - R packages can generate **publication-quality** plots, 
 and **interactive graphics**.
 
-> - Many **user-created R packages** contain implementations of **cutting edge statistics methods**.
+ - Many **user-created R packages** contain implementations of **cutting edge statistics methods**.
 
 
 ## What makes R good?
@@ -261,13 +261,17 @@ You should update your software regularly.
 Interpreter mode:
 
 - open a terminal and launch R by calling "R" (or open an R console).
+
 - type R commands interactively in the command line, pressing `Enter` to execute.
+
 - use `q()` to quit R.
 
 Scripting mode:
 
 - write a text file containing all commands you want to run
+
 - save your script as an R script file (e.g. "myscript.R") 
+
 - execute your code from the terminal by calling "Rscript myscript.R"
 
 </div>
