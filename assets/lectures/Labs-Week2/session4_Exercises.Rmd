@@ -1,7 +1,7 @@
 ---
 title: "Data manipulation with tidyverse"
 subtitle: "Week 2 - Session 4"
-date: "July 6th, 20120"
+date: "July 6th, 2020"
 output: 
   html_notebook:
     toc: true
@@ -17,17 +17,35 @@ knitr::opts_chunk$set(
 ```
 
 
-```{r, warning=FALSE, message=FALSE, eco=FALSE}
+```{r, warning=FALSE, message=FALSE, echo=TRUE}
 library(tidyverse)
 ```
-# Watch the video for Session 4.
+# Watch the video for Session 4
 
 
-Watch the video lecture associated to this Session (find the link on the website).
-Once you're done, go through the following exercises.
+Watch the video lecture associated to this [session](https://www.youtube.com/watch?v=4aNBdl_qcBc).
+
+
+Once you're done:
+
+(a) Install the tidyverse package on your local machine.
+```{r, eval =FALSE}
+install.packages('tidyverse')
+```
+Tidyverse is a collection of R packages for better data cleaning, wrangling and visualization. In particular, it includes:
+
+- The dplyr and tidyr packages presented in the video, which make data handling and tidying easier.
+  
+-  The ggplot2 package for data visualization which we will get more into next week
+
+- Additional packages to handle strings, etc.
+
+(b) go through the following exercises.
 
 
 # Exercise 0: Swirl
+
+Similar to last week, we'll use the swirl package to introduce you the piping, chaining, and dplyr syntax.
 
 Walk through the Getting and Cleaning Data in the swirl package. 
 
@@ -39,7 +57,6 @@ swirl()
 ```
 
 Go through modules 1 through 3.
-
 Once you're done, prepare the following exercises which we will use in our discussion session on Monday, July 6th.
 
 

@@ -298,7 +298,7 @@ div.tocify {
 
 <h1 class="title toc-ignore">Data manipulation with tidyverse</h1>
 <h3 class="subtitle">Week 2 - Session 4</h3>
-<h4 class="date">July 6th, 20120</h4>
+<h4 class="date">July 6th, 2020</h4>
 
 </div>
 
@@ -314,12 +314,33 @@ div.tocify {
 <!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
-<div id="watch-the-video-for-session-4." class="section level1">
-<h1>Watch the video for Session 4.</h1>
-<p>Watch the video lecture associated to this Session (find the link on the website). Once you’re done, go through the following exercises.</p>
+<div id="watch-the-video-for-session-4" class="section level1">
+<h1>Watch the video for Session 4</h1>
+<p>Watch the video lecture associated to this <a href="https://www.youtube.com/watch?v=4aNBdl_qcBc">session</a>.</p>
+<p>Once you’re done:</p>
+<ol style="list-style-type: lower-alpha">
+<li>Install the tidyverse package on your local machine.</li>
+</ol>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiaW5zdGFsbC5wYWNrYWdlcygndGlkeXZlcnNlJykifQ== -->
+<pre class="r"><code>install.packages('tidyverse')</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p>Tidyverse is a collection of R packages for better data cleaning, wrangling and visualization. In particular, it includes:</p>
+<ul>
+<li><p>The dplyr and tidyr packages presented in the video, which make data handling and tidying easier.</p></li>
+<li><p>The ggplot2 package for data visualization which we will get more into next week</p></li>
+<li><p>Additional packages to handle strings, etc.</p></li>
+</ul>
+<ol start="2" style="list-style-type: lower-alpha">
+<li>go through the following exercises.</li>
+</ol>
 </div>
 <div id="exercise-0-swirl" class="section level1">
 <h1>Exercise 0: Swirl</h1>
+<p>Similar to last week, we’ll use the swirl package to introduce you the piping, chaining, and dplyr syntax.</p>
 <p>Walk through the Getting and Cleaning Data in the swirl package.</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
@@ -330,8 +351,7 @@ swirl()</code></pre>
 <!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
-<p>Go through modules 1 through 3.</p>
-<p>Once you’re done, prepare the following exercises which we will use in our discussion session on Monday, July 6th.</p>
+<p>Go through modules 1 through 3. Once you’re done, prepare the following exercises which we will use in our discussion session on Monday, July 6th.</p>
 </div>
 <div id="execise-1-data-manipulation" class="section level1">
 <h1>Execise 1: Data manipulation</h1>
@@ -340,31 +360,10 @@ swirl()</code></pre>
 <p>Load in the dataset <code>movies.csv</code> at the following http address:</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuYGBgclxudXJsIDwtIFxcaHR0cHM6Ly9yYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tL0p1YW5ldHMvbW92aWUtc3RhdHMvbWFzdGVyL21vdmllcy5jc3ZcXFxubW92aWVzIDwtIHJlYWRfY3N2KHVybClcbmBgYFxuYGBgIn0= -->
-<p><code>r</code>r url &lt;- ://raw.githubusercontent.com/Juanets/movie-stats/master/movies.csv<br />
-movies &lt;- read_csv(url)</p>
-<pre><code></code></pre>
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxudXJsIDwtIFwiaHR0cHM6Ly9yYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tL0p1YW5ldHMvbW92aWUtc3RhdHMvbWFzdGVyL21vdmllcy5jc3ZcIlxubW92aWVzIDwtIHJlYWRfY3N2KHVybClcbmBgYCJ9 -->
+<pre class="r"><code>url &lt;- &quot;https://raw.githubusercontent.com/Juanets/movie-stats/master/movies.csv&quot;
+movies &lt;- read_csv(url)</code></pre>
 <!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiUGFyc2VkIHdpdGggY29sdW1uIHNwZWNpZmljYXRpb246XG5jb2xzKFxuICBidWRnZXQgPSBjb2xfZG91YmxlKCksXG4gIGNvbXBhbnkgPSBjb2xfY2hhcmFjdGVyKCksXG4gIGNvdW50cnkgPSBjb2xfY2hhcmFjdGVyKCksXG4gIGRpcmVjdG9yID0gY29sX2NoYXJhY3RlcigpLFxuICBnZW5yZSA9IGNvbF9jaGFyYWN0ZXIoKSxcbiAgZ3Jvc3MgPSBjb2xfZG91YmxlKCksXG4gIG5hbWUgPSBjb2xfY2hhcmFjdGVyKCksXG4gIHJhdGluZyA9IGNvbF9jaGFyYWN0ZXIoKSxcbiAgcmVsZWFzZWQgPSBjb2xfY2hhcmFjdGVyKCksXG4gIHJ1bnRpbWUgPSBjb2xfaW50ZWdlcigpLFxuICBzY29yZSA9IGNvbF9kb3VibGUoKSxcbiAgc3RhciA9IGNvbF9jaGFyYWN0ZXIoKSxcbiAgdm90ZXMgPSBjb2xfaW50ZWdlcigpLFxuICB3cml0ZXIgPSBjb2xfY2hhcmFjdGVyKCksXG4gIHllYXIgPSBjb2xfaW50ZWdlcigpXG4pXG4ifQ== -->
-<pre><code>Parsed with column specification:
-cols(
-  budget = col_double(),
-  company = col_character(),
-  country = col_character(),
-  director = col_character(),
-  genre = col_character(),
-  gross = col_double(),
-  name = col_character(),
-  rating = col_character(),
-  released = col_character(),
-  runtime = col_integer(),
-  score = col_double(),
-  star = col_character(),
-  votes = col_integer(),
-  writer = col_character(),
-  year = col_integer()
-)</code></pre>
-<!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <ol style="list-style-type: lower-alpha">
@@ -392,7 +391,7 @@ cols(
 </div>
 </div>
 
-<div id="rmd-source-code">LS0tCnRpdGxlOiAiRGF0YSBtYW5pcHVsYXRpb24gd2l0aCB0aWR5dmVyc2UiCnN1YnRpdGxlOiAiV2VlayAyIC0gU2Vzc2lvbiA0IgpkYXRlOiAiSnVseSA2dGgsIDIwMTIwIgpvdXRwdXQ6IAogIGh0bWxfbm90ZWJvb2s6CiAgICB0b2M6IHRydWUKICAgIHRvY19mbG9hdDogdHJ1ZQogICAgZGZfcHJpbnQ6IHBhZ2VkCi0tLQoKYGBge3IgZ2xvYmFsX29wdGlvbnMsIGVjaG8gPSBGQUxTRSwgaW5jbHVkZSA9IEZBTFNFfQpvcHRpb25zKHdpZHRoID0gODApCmtuaXRyOjpvcHRzX2NodW5rJHNldCgKICB3YXJuaW5nID0gRkFMU0UsIG1lc3NhZ2UgPSBGQUxTRSwKICBjYWNoZSA9IEZBTFNFLCB0aWR5ID0gRkFMU0UsIHNpemUgPSAic21hbGwiKQpgYGAKCgpgYGB7ciwgd2FybmluZz1GQUxTRSwgbWVzc2FnZT1GQUxTRSwgZWNvPUZBTFNFfQpsaWJyYXJ5KHRpZHl2ZXJzZSkKYGBgCiMgV2F0Y2ggdGhlIHZpZGVvIGZvciBTZXNzaW9uIDQuCgoKV2F0Y2ggdGhlIHZpZGVvIGxlY3R1cmUgYXNzb2NpYXRlZCB0byB0aGlzIFNlc3Npb24gKGZpbmQgdGhlIGxpbmsgb24gdGhlIHdlYnNpdGUpLgpPbmNlIHlvdSdyZSBkb25lLCBnbyB0aHJvdWdoIHRoZSBmb2xsb3dpbmcgZXhlcmNpc2VzLgoKCiMgRXhlcmNpc2UgMDogU3dpcmwKCldhbGsgdGhyb3VnaCB0aGUgR2V0dGluZyBhbmQgQ2xlYW5pbmcgRGF0YSBpbiB0aGUgc3dpcmwgcGFja2FnZS4gCgpgYGB7ciwgd2FybmluZz1GQUxTRSwgbWVzc2FnZT1GQUxTRSwgZXZhbD1GQUxTRX0KbGlicmFyeShzd2lybCkKc3dpcmw6Omluc3RhbGxfY291cnNlKCJHZXR0aW5nIGFuZCBDbGVhbmluZyBEYXRhIikKc3dpcmwoKQoKYGBgCgpHbyB0aHJvdWdoIG1vZHVsZXMgMSB0aHJvdWdoIDMuCgpPbmNlIHlvdSdyZSBkb25lLCBwcmVwYXJlIHRoZSBmb2xsb3dpbmcgZXhlcmNpc2VzIHdoaWNoIHdlIHdpbGwgdXNlIGluIG91ciBkaXNjdXNzaW9uIHNlc3Npb24gb24gTW9uZGF5LCBKdWx5IDZ0aC4KCgojIEV4ZWNpc2UgMTogRGF0YSBtYW5pcHVsYXRpb24KCiMjIFBhcnQgMTogYGRwbHlyYCB2ZXJicwoKTG9hZCBpbiB0aGUgZGF0YXNldCBgbW92aWVzLmNzdmAgYXQgdGhlIGZvbGxvd2luZyBodHRwIGFkZHJlc3M6CgpgYGB7cn0KdXJsIDwtICJodHRwczovL3Jhdy5naXRodWJ1c2VyY29udGVudC5jb20vSnVhbmV0cy9tb3ZpZS1zdGF0cy9tYXN0ZXIvbW92aWVzLmNzdiIKbW92aWVzIDwtIHJlYWRfY3N2KHVybCkKYGBgCgoKYS4gRmluZCBhIHN1YnNldCBvZiB0aGUgbW92aWVzIHByb2R1Y2VkIGFmdGVyIDIwMTAuIApTYXZlIHRoZSBzdWJzZXQgaW4gJ21vdmllcy5zdWInIHZhcmlhYmxlLgoKYi4gS2VlcCBjb2x1bW5zICduYW1lJywgJ2RpcmVjdG9yJywgJ3llYXInLCAnY291bnRyeScsICdnZW5yZScsICdidWRnZXQnLCAnZ3Jvc3MnLCAnc2NvcmUnCmluIHRoZSAnbW92aWVzLnN1YicuCgpjLiBGaW5kIHRoZSBwcm9maXQgZm9yIGVhY2ggbW92aWUgaW4gJ21vdmllcy5zdWInIGFzIGEgZnJhY3Rpb24gb2YgaXRzIGJ1ZGdldC4KQ29udmVydCAnYnVkZ2V0JyBhbmQgJ2dyb3NzJyBjb2x1bW5zIG1pbGxpb24gZG9sbGFyIHVuaXRzIGZvdW5kZWQgdG8gdGhlIGZpcnN0IGRlY2ltYWwgcG9pbnQuClVzZSBgcm91bmQoKWAgdG8gcm91bmQgbnVtYmVycy4KCmQuIENvdW50IHRoZSBudW1iZXIgb2YgbW92aWVzIGluICdtb3ZpZXMuc3ViJyBwcm9kdWNlZCBieSBlYWNoIGdlbnJlLAphbmQgb3JkZXIgdGhlbSBpbiB0aGUgZGVzY2VuZGluZyBjb3VudCBvcmRlci4KCmUuIE5vdyBncm91cCBtb3ZpZXMgaW4gJ21vdmllcy5zdWInIGJ5IGNvdW50cmllcyBhbmQgZ2VucmUuClRoZW4sIGNvdW50IHRoZSBudW1iZXIgb2YgbW92aWVzIGluIGVhY2ggZ3JvdXAgYW5kIHRoZSBjb3JyZXNwb25kaW5nIAptZWRpYW4gZnJhY3Rpb25hbCBwcm9maXQsIHRoZSBtZWFuIGFuZCBzdGFuZGFyZCBkZXZpYXRpb24gb2YgCnRoZSBtb3ZpZSBzY29yZSBmb3IgZWFjaCBncm91cC4KCgojIyBQYXJ0IDI6IENoYWluaW5nCgpVc2luZyBjaGFpbmluZyBhbmQgcGlwZXMsIGZvciBlYWNoIGdlbnJlIGZpbmQgdGhlIHRocmVlIGRpcmVjdG9ycyB0aGUKdG9wIG1lYW4gbW92aWUgc2NvcmVzIHJlY2VpdmVkIGZvciB0aGUgbW92aWVzIHByb2R1Y2VkIGFmdGVyIDIwMDAsCmFmdGVyIGZpbHRlcmluZyBvdXQgdGhlIGRpcmVjdG9ycyB3aXRoIGZld2VyIHRoYW4gNSBtb3ZpZXMgaW4gdG90YWwuCkhpbnQ6IFVzZSBgdG9wX24oKWAgZnVuY3Rpb24gdG8gc2VsZWN0IHRvcCBuIGZyb20gZWFjaCBncm91cC4KCkZpbmQgdGhlIG1vdmllcyBpbiB5b3VyIGZhdm91cml0ZSBnZW5yZSBieSB0aGUgNSBkaXJlY3RvcnMKeW91IGp1c3QgZm91bmQuIFRoZXNlIGNvdWxkIHNlcnZlIGFzIHN1Z2dlc3Rpb25zIGZvciB5b3VyIG5leHQgbW92aWUgbmlnaHQhCgoKIyMgUGFydCAyOiBTdW1tYXJpZXMKClVzaW5nIGNoYWluIGNvbW1hbmRzIGFuZCB0aGUgYHN1bW1hcmlzZWAgZnVuY3Rpb246CgphLiBGaW5kIHRoZSBtYXhpbXVtIG51bWJlciBvZiBtb3ZpZXMgdGhhdCBhIGRpcmVjdG9yIGhhcyBiZWVuIGludm9sdmVkIGluLgoKYi4gRmluZCB0aGUgYXZlcmFnZSBhbmQgbWVkaWFuIG51bWJlciBvZiBhY3Rpb24gbW92aWVzIHRoYXQgYSBkaXJlY3RvciBpcyBpbnZvbHZlZCBpbi4KCmMuIENvbXB1dGUgNXRoIGFuZCA5NXRoIHBlcmNlbnRpbGUgb2YgdGhlIGBncm9zc2AgYW1vdW50LCBwZXIgY2F0ZWdvcnkuCgoKCgoKCgoKCg==</div>
+<div id="rmd-source-code">LS0tCnRpdGxlOiAiRGF0YSBtYW5pcHVsYXRpb24gd2l0aCB0aWR5dmVyc2UiCnN1YnRpdGxlOiAiV2VlayAyIC0gU2Vzc2lvbiA0IgpkYXRlOiAiSnVseSA2dGgsIDIwMjAiCm91dHB1dDogCiAgaHRtbF9ub3RlYm9vazoKICAgIHRvYzogdHJ1ZQogICAgdG9jX2Zsb2F0OiB0cnVlCiAgICBkZl9wcmludDogcGFnZWQKLS0tCgpgYGB7ciBnbG9iYWxfb3B0aW9ucywgZWNobyA9IEZBTFNFLCBpbmNsdWRlID0gRkFMU0V9Cm9wdGlvbnMod2lkdGggPSA4MCkKa25pdHI6Om9wdHNfY2h1bmskc2V0KAogIHdhcm5pbmcgPSBGQUxTRSwgbWVzc2FnZSA9IEZBTFNFLAogIGNhY2hlID0gRkFMU0UsIHRpZHkgPSBGQUxTRSwgc2l6ZSA9ICJzbWFsbCIpCmBgYAoKCmBgYHtyLCB3YXJuaW5nPUZBTFNFLCBtZXNzYWdlPUZBTFNFLCBlY2hvPVRSVUV9CmxpYnJhcnkodGlkeXZlcnNlKQpgYGAKIyBXYXRjaCB0aGUgdmlkZW8gZm9yIFNlc3Npb24gNAoKCldhdGNoIHRoZSB2aWRlbyBsZWN0dXJlIGFzc29jaWF0ZWQgdG8gdGhpcyBbc2Vzc2lvbl0oaHR0cHM6Ly93d3cueW91dHViZS5jb20vd2F0Y2g/dj00YU5CZGxfcWNCYykuCgoKT25jZSB5b3UncmUgZG9uZToKCihhKSBJbnN0YWxsIHRoZSB0aWR5dmVyc2UgcGFja2FnZSBvbiB5b3VyIGxvY2FsIG1hY2hpbmUuCmBgYHtyLCBldmFsID1GQUxTRX0KaW5zdGFsbC5wYWNrYWdlcygndGlkeXZlcnNlJykKYGBgClRpZHl2ZXJzZSBpcyBhIGNvbGxlY3Rpb24gb2YgUiBwYWNrYWdlcyBmb3IgYmV0dGVyIGRhdGEgY2xlYW5pbmcsIHdyYW5nbGluZyBhbmQgdmlzdWFsaXphdGlvbi4gSW4gcGFydGljdWxhciwgaXQgaW5jbHVkZXM6CgotIFRoZSBkcGx5ciBhbmQgdGlkeXIgcGFja2FnZXMgcHJlc2VudGVkIGluIHRoZSB2aWRlbywgd2hpY2ggbWFrZSBkYXRhIGhhbmRsaW5nIGFuZCB0aWR5aW5nIGVhc2llci4KICAKLSAgVGhlIGdncGxvdDIgcGFja2FnZSBmb3IgZGF0YSB2aXN1YWxpemF0aW9uIHdoaWNoIHdlIHdpbGwgZ2V0IG1vcmUgaW50byBuZXh0IHdlZWsKCi0gQWRkaXRpb25hbCBwYWNrYWdlcyB0byBoYW5kbGUgc3RyaW5ncywgZXRjLgoKKGIpIGdvIHRocm91Z2ggdGhlIGZvbGxvd2luZyBleGVyY2lzZXMuCgoKIyBFeGVyY2lzZSAwOiBTd2lybAoKU2ltaWxhciB0byBsYXN0IHdlZWssIHdlJ2xsIHVzZSB0aGUgc3dpcmwgcGFja2FnZSB0byBpbnRyb2R1Y2UgeW91IHRoZSBwaXBpbmcsIGNoYWluaW5nLCBhbmQgZHBseXIgc3ludGF4LgoKV2FsayB0aHJvdWdoIHRoZSBHZXR0aW5nIGFuZCBDbGVhbmluZyBEYXRhIGluIHRoZSBzd2lybCBwYWNrYWdlLiAKCmBgYHtyLCB3YXJuaW5nPUZBTFNFLCBtZXNzYWdlPUZBTFNFLCBldmFsPUZBTFNFfQpsaWJyYXJ5KHN3aXJsKQpzd2lybDo6aW5zdGFsbF9jb3Vyc2UoIkdldHRpbmcgYW5kIENsZWFuaW5nIERhdGEiKQpzd2lybCgpCgpgYGAKCkdvIHRocm91Z2ggbW9kdWxlcyAxIHRocm91Z2ggMy4KT25jZSB5b3UncmUgZG9uZSwgcHJlcGFyZSB0aGUgZm9sbG93aW5nIGV4ZXJjaXNlcyB3aGljaCB3ZSB3aWxsIHVzZSBpbiBvdXIgZGlzY3Vzc2lvbiBzZXNzaW9uIG9uIE1vbmRheSwgSnVseSA2dGguCgoKIyBFeGVjaXNlIDE6IERhdGEgbWFuaXB1bGF0aW9uCgojIyBQYXJ0IDE6IGBkcGx5cmAgdmVyYnMKCkxvYWQgaW4gdGhlIGRhdGFzZXQgYG1vdmllcy5jc3ZgIGF0IHRoZSBmb2xsb3dpbmcgaHR0cCBhZGRyZXNzOgoKYGBge3J9CnVybCA8LSAiaHR0cHM6Ly9yYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tL0p1YW5ldHMvbW92aWUtc3RhdHMvbWFzdGVyL21vdmllcy5jc3YiCm1vdmllcyA8LSByZWFkX2Nzdih1cmwpCmBgYAoKCmEuIEZpbmQgYSBzdWJzZXQgb2YgdGhlIG1vdmllcyBwcm9kdWNlZCBhZnRlciAyMDEwLiAKU2F2ZSB0aGUgc3Vic2V0IGluICdtb3ZpZXMuc3ViJyB2YXJpYWJsZS4KCmIuIEtlZXAgY29sdW1ucyAnbmFtZScsICdkaXJlY3RvcicsICd5ZWFyJywgJ2NvdW50cnknLCAnZ2VucmUnLCAnYnVkZ2V0JywgJ2dyb3NzJywgJ3Njb3JlJwppbiB0aGUgJ21vdmllcy5zdWInLgoKYy4gRmluZCB0aGUgcHJvZml0IGZvciBlYWNoIG1vdmllIGluICdtb3ZpZXMuc3ViJyBhcyBhIGZyYWN0aW9uIG9mIGl0cyBidWRnZXQuCkNvbnZlcnQgJ2J1ZGdldCcgYW5kICdncm9zcycgY29sdW1ucyBtaWxsaW9uIGRvbGxhciB1bml0cyBmb3VuZGVkIHRvIHRoZSBmaXJzdCBkZWNpbWFsIHBvaW50LgpVc2UgYHJvdW5kKClgIHRvIHJvdW5kIG51bWJlcnMuCgpkLiBDb3VudCB0aGUgbnVtYmVyIG9mIG1vdmllcyBpbiAnbW92aWVzLnN1YicgcHJvZHVjZWQgYnkgZWFjaCBnZW5yZSwKYW5kIG9yZGVyIHRoZW0gaW4gdGhlIGRlc2NlbmRpbmcgY291bnQgb3JkZXIuCgplLiBOb3cgZ3JvdXAgbW92aWVzIGluICdtb3ZpZXMuc3ViJyBieSBjb3VudHJpZXMgYW5kIGdlbnJlLgpUaGVuLCBjb3VudCB0aGUgbnVtYmVyIG9mIG1vdmllcyBpbiBlYWNoIGdyb3VwIGFuZCB0aGUgY29ycmVzcG9uZGluZyAKbWVkaWFuIGZyYWN0aW9uYWwgcHJvZml0LCB0aGUgbWVhbiBhbmQgc3RhbmRhcmQgZGV2aWF0aW9uIG9mIAp0aGUgbW92aWUgc2NvcmUgZm9yIGVhY2ggZ3JvdXAuCgoKIyMgUGFydCAyOiBDaGFpbmluZwoKVXNpbmcgY2hhaW5pbmcgYW5kIHBpcGVzLCBmb3IgZWFjaCBnZW5yZSBmaW5kIHRoZSB0aHJlZSBkaXJlY3RvcnMgdGhlCnRvcCBtZWFuIG1vdmllIHNjb3JlcyByZWNlaXZlZCBmb3IgdGhlIG1vdmllcyBwcm9kdWNlZCBhZnRlciAyMDAwLAphZnRlciBmaWx0ZXJpbmcgb3V0IHRoZSBkaXJlY3RvcnMgd2l0aCBmZXdlciB0aGFuIDUgbW92aWVzIGluIHRvdGFsLgpIaW50OiBVc2UgYHRvcF9uKClgIGZ1bmN0aW9uIHRvIHNlbGVjdCB0b3AgbiBmcm9tIGVhY2ggZ3JvdXAuCgpGaW5kIHRoZSBtb3ZpZXMgaW4geW91ciBmYXZvdXJpdGUgZ2VucmUgYnkgdGhlIDUgZGlyZWN0b3JzCnlvdSBqdXN0IGZvdW5kLiBUaGVzZSBjb3VsZCBzZXJ2ZSBhcyBzdWdnZXN0aW9ucyBmb3IgeW91ciBuZXh0IG1vdmllIG5pZ2h0IQoKCiMjIFBhcnQgMjogU3VtbWFyaWVzCgpVc2luZyBjaGFpbiBjb21tYW5kcyBhbmQgdGhlIGBzdW1tYXJpc2VgIGZ1bmN0aW9uOgoKYS4gRmluZCB0aGUgbWF4aW11bSBudW1iZXIgb2YgbW92aWVzIHRoYXQgYSBkaXJlY3RvciBoYXMgYmVlbiBpbnZvbHZlZCBpbi4KCmIuIEZpbmQgdGhlIGF2ZXJhZ2UgYW5kIG1lZGlhbiBudW1iZXIgb2YgYWN0aW9uIG1vdmllcyB0aGF0IGEgZGlyZWN0b3IgaXMgaW52b2x2ZWQgaW4uCgpjLiBDb21wdXRlIDV0aCBhbmQgOTV0aCBwZXJjZW50aWxlIG9mIHRoZSBgZ3Jvc3NgIGFtb3VudCwgcGVyIGNhdGVnb3J5LgoKCgoKCgoKCgo=</div>
 
 
 </div>
