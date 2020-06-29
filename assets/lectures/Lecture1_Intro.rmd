@@ -128,20 +128,20 @@ the S language developed at Bell Labs by John Chambers (Stanford Statistics).
 - It is **an open-source language and environment** for statistical computing 
 and graphics.
 
-<img src="./Lecture1-figure/r_word_cloud.png", height="500", width="750"></img> 
+<img src="/Users/cdonnat/Dropbox/biox-rbootcamp.github.io/assets/lectures/Lecture1-figure/r_word_cloud.png", height="500", width="750"></img> 
 
 ##
 
-> - R offers:
->       + A simple and effective programming language.
->       + A data handling and storage facility.
->       + A suite of libraries for matrix computations.
->       + A large collection of tools for data analysis.
->       + Facilities for generating high-quality graphics and data display.
+ - R offers:
+       + A simple and effective programming language.
+       + A data handling and storage facility.
+       + A suite of libraries for matrix computations.
+       + A large collection of tools for data analysis.
+       + Facilities for generating high-quality graphics and data display.
 
 </br>
 
-> - R is **highly extensible**, but remains 
+ - R is **highly extensible**, but remains 
 **a fully planned and coherent system**, rather than an incremental
 accumulation of specific and inflexible tools.
 
@@ -151,7 +151,7 @@ accumulation of specific and inflexible tools.
 Traditionally, academics and researchers. However, recently R has expanded also 
 to industry and enterprise market. Worldwide usage on log-scale:
 
-<img src="./Lecture1-figure/language_popularity.png", height="500", width="1000",
+<img src="/Users/cdonnat/Dropbox/biox-rbootcamp.github.io/assets/lectures/Lecture1-figure/language_popularity.png", height="500", width="1000",
 class="center"></img> 
 
 Source: http://pypl.github.io/PYPL.html
