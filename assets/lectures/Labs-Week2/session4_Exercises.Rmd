@@ -25,6 +25,8 @@ library(tidyverse)
 
 Watch the video lecture associated to this [session](https://www.youtube.com/watch?v=4aNBdl_qcBc).
 
+You can find additional information on tidyverse and the piping information at the following [link](https://rafalab.github.io/dsbook/tidyverse.html).
+
 
 Once you're done:
 
@@ -60,22 +62,81 @@ Go through modules 1 through 3.
 Once you're done, prepare the following exercises which we will use in our discussion session on Monday, July 6th.
 
 
-# Execise 1: Data manipulation
+# Exercise 1: Movies Dataset
 
-## Part 1: `dplyr` verbs
+## Part 0: Loading the data
 
 Load in the dataset `movies.csv` at the following http address:
 
-```{r}
+```{r, echo=TRUE}
+library(tidyverse)
 url <- "https://raw.githubusercontent.com/Juanets/movie-stats/master/movies.csv"
 movies <- read_csv(url)
 ```
 
+Since this is the first real dataset that you are handling, let's try to go through the usual inspection that you'd carry through whenever you will be presented with a dataset
 
-a. Find a subset of the movies produced after 2010. 
+What is the size of your dataset? What are the types of the different variables?
+
+Type in `names(movies)`. This should print out the names of the different columns in your dataset.
+
+## Part 1: Easing into `dplyr` verbs
+
+a. Using the `tally()` function, count the number of entries in your dataset.
+
+b. Using the `count` function, count the number of distinct movies in the dataset.
+`count()` is similar but calls group_by() before and ungroup() after. It will allow you to group the entries by movie name, and thus, to count the number of unique movies.
+
+Your code should look something like below.
+
+```{r, eval=FALSE}
+movies %>% 
+  count(my_column)
+```
+
+c. Now, we will focus on building a summary table for the movie stars in this dataset.
+   i. Using the `filter` function, keep only the columns "budget", "actor", "runtime", "gross", "votes" and "year". Name this subsetted dataframe movies_sub.
+   
+   Your code should look something like:
+
+```{r, eval=FALSE}
+movies_sub = movies %>% 
+  select(column1, column2,...)
+```
+ 
+  ii. Add a column that counts how many movies each actor appears in and name it "actor_n"
+    Your code should look something like:
+
+```{r, eval=FALSE}
+movies_sub = add_count(movies_sub, stars, name="actor_n")
+```
+  
+   iii. Using the `group_by` and the `summarize_all` function, group the movies by actor and give the mean of each column. Keep the result in a table called actors.
+   
+   Your code should look something like:
+
+```{r, eval=FALSE}
+actors = movies_sub %>%
+           group_by(grouping_column) %>%
+           summarise_all(mean)
+```
+ 
+ iv. Using the `filter` function, keep only the actors that have a mean score above 7. Your code should look something like:
+
+```{r, eval=FALSE}
+actors = actors %>%
+          filter(filtering_criterion)
+```
+  
+  v. Finally, using the `top_n` function, display the top 10 actors with the highest average votes. Are these the same as the top 10 actors in terms of the highest budget film?
+   
+
+## Part 2: Using `dplyr` verbs (with less guiding!)
+
+a. Select the movies produced after 2010. 
 Save the subset in 'movies.sub' variable.
 
-b. Keep columns 'name', 'director', 'year', 'country', 'genre', 'budget', 'gross', 'score'
+b. Keep only the columns 'name', 'director', 'year', 'country', 'genre', 'budget', 'gross', 'score'
 in the 'movies.sub'.
 
 c. Find the profit for each movie in 'movies.sub' as a fraction of its budget.
@@ -91,7 +152,7 @@ median fractional profit, the mean and standard deviation of
 the movie score for each group.
 
 
-## Part 2: Chaining
+## Part 3: Chaining
 
 Using chaining and pipes, for each genre find the three directors the
 top mean movie scores received for the movies produced after 2000,
@@ -102,15 +163,17 @@ Find the movies in your favourite genre by the 5 directors
 you just found. These could serve as suggestions for your next movie night!
 
 
-## Part 2: Summaries
+## Part 4: Summaries
 
 Using chain commands and the `summarise` function:
 
-a. Find the maximum number of movies that a director has been involved in.
+a. Find the average and median number of movies that a director has been involved in.
 
-b. Find the average and median number of action movies that a director is involved in.
+b. Find the maximum number of __action__ movies that a director is involved in.
 
-c. Compute 5th and 95th percentile of the `gross` amount, per category.
+c. Compute 5th and 95th percentile of the `gross` amount, per movie genre.
+
+d. Is budget associated to success? To answer this question, create an additional column  to your dataset using the `mutate` and `rank` function, corresponding to the rank of each movie in terms of buget. Call it `rk`. The rank should be descending, so that the rank 1 is the movie with highest budget. Select the top 100 movies with highest vote, and compute their mean and median rank in terms of budget.
 
 
 

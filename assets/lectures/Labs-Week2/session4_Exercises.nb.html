@@ -317,6 +317,7 @@ div.tocify {
 <div id="watch-the-video-for-session-4" class="section level1">
 <h1>Watch the video for Session 4</h1>
 <p>Watch the video lecture associated to this <a href="https://www.youtube.com/watch?v=4aNBdl_qcBc">session</a>.</p>
+<p>You can find additional information on tidyverse and the piping information at the following <a href="https://rafalab.github.io/dsbook/tidyverse.html">link</a>.</p>
 <p>Once you’re done:</p>
 <ol style="list-style-type: lower-alpha">
 <li>Install the tidyverse package on your local machine.</li>
@@ -353,45 +354,139 @@ swirl()</code></pre>
 <!-- rnb-text-begin -->
 <p>Go through modules 1 through 3. Once you’re done, prepare the following exercises which we will use in our discussion session on Monday, July 6th.</p>
 </div>
-<div id="execise-1-data-manipulation" class="section level1">
-<h1>Execise 1: Data manipulation</h1>
-<div id="part-1-dplyr-verbs" class="section level2">
-<h2>Part 1: <code>dplyr</code> verbs</h2>
+<div id="exercise-1-movies-dataset" class="section level1">
+<h1>Exercise 1: Movies Dataset</h1>
+<div id="part-0-loading-the-data" class="section level2">
+<h2>Part 0: Loading the data</h2>
 <p>Load in the dataset <code>movies.csv</code> at the following http address:</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxudXJsIDwtIFwiaHR0cHM6Ly9yYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tL0p1YW5ldHMvbW92aWUtc3RhdHMvbWFzdGVyL21vdmllcy5jc3ZcIlxubW92aWVzIDwtIHJlYWRfY3N2KHVybClcbmBgYCJ9 -->
-<pre class="r"><code>url &lt;- &quot;https://raw.githubusercontent.com/Juanets/movie-stats/master/movies.csv&quot;
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGlicmFyeSh0aWR5dmVyc2UpXG51cmwgPC0gXCJodHRwczovL3Jhdy5naXRodWJ1c2VyY29udGVudC5jb20vSnVhbmV0cy9tb3ZpZS1zdGF0cy9tYXN0ZXIvbW92aWVzLmNzdlwiXG5tb3ZpZXMgPC0gcmVhZF9jc3YodXJsKVxuYGBgIn0= -->
+<pre class="r"><code>library(tidyverse)
+url &lt;- &quot;https://raw.githubusercontent.com/Juanets/movie-stats/master/movies.csv&quot;
 movies &lt;- read_csv(url)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiUGFyc2VkIHdpdGggY29sdW1uIHNwZWNpZmljYXRpb246XG5jb2xzKFxuICBidWRnZXQgPSBcdTAwMWJbMzJtY29sX2RvdWJsZSgpXHUwMDFiWzM5bSxcbiAgY29tcGFueSA9IFx1MDAxYlszMW1jb2xfY2hhcmFjdGVyKClcdTAwMWJbMzltLFxuICBjb3VudHJ5ID0gXHUwMDFiWzMxbWNvbF9jaGFyYWN0ZXIoKVx1MDAxYlszOW0sXG4gIGRpcmVjdG9yID0gXHUwMDFiWzMxbWNvbF9jaGFyYWN0ZXIoKVx1MDAxYlszOW0sXG4gIGdlbnJlID0gXHUwMDFiWzMxbWNvbF9jaGFyYWN0ZXIoKVx1MDAxYlszOW0sXG4gIGdyb3NzID0gXHUwMDFiWzMybWNvbF9kb3VibGUoKVx1MDAxYlszOW0sXG4gIG5hbWUgPSBcdTAwMWJbMzFtY29sX2NoYXJhY3RlcigpXHUwMDFiWzM5bSxcbiAgcmF0aW5nID0gXHUwMDFiWzMxbWNvbF9jaGFyYWN0ZXIoKVx1MDAxYlszOW0sXG4gIHJlbGVhc2VkID0gXHUwMDFiWzMxbWNvbF9jaGFyYWN0ZXIoKVx1MDAxYlszOW0sXG4gIHJ1bnRpbWUgPSBcdTAwMWJbMzJtY29sX2RvdWJsZSgpXHUwMDFiWzM5bSxcbiAgc2NvcmUgPSBcdTAwMWJbMzJtY29sX2RvdWJsZSgpXHUwMDFiWzM5bSxcbiAgc3RhciA9IFx1MDAxYlszMW1jb2xfY2hhcmFjdGVyKClcdTAwMWJbMzltLFxuICB2b3RlcyA9IFx1MDAxYlszMm1jb2xfZG91YmxlKClcdTAwMWJbMzltLFxuICB3cml0ZXIgPSBcdTAwMWJbMzFtY29sX2NoYXJhY3RlcigpXHUwMDFiWzM5bSxcbiAgeWVhciA9IFx1MDAxYlszMm1jb2xfZG91YmxlKClcdTAwMWJbMzltXG4pXG4ifQ== -->
+<pre><code>Parsed with column specification:
+cols(
+  budget = [32mcol_double()[39m,
+  company = [31mcol_character()[39m,
+  country = [31mcol_character()[39m,
+  director = [31mcol_character()[39m,
+  genre = [31mcol_character()[39m,
+  gross = [32mcol_double()[39m,
+  name = [31mcol_character()[39m,
+  rating = [31mcol_character()[39m,
+  released = [31mcol_character()[39m,
+  runtime = [32mcol_double()[39m,
+  score = [32mcol_double()[39m,
+  star = [31mcol_character()[39m,
+  votes = [32mcol_double()[39m,
+  writer = [31mcol_character()[39m,
+  year = [32mcol_double()[39m
+)</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p>Since this is the first real dataset that you are handling, let’s try to go through the usual inspection that you’d carry through whenever you will be presented with a dataset</p>
+<p>What is the size of your dataset? What are the types of the different variables?</p>
+<p>Type in <code>names(movies)</code>. This should print out the names of the different columns in your dataset.</p>
+</div>
+<div id="part-1-easing-into-dplyr-verbs" class="section level2">
+<h2>Part 1: Easing into <code>dplyr</code> verbs</h2>
+<ol style="list-style-type: lower-alpha">
+<li><p>Using the <code>tally()</code> function, count the number of entries in your dataset.</p></li>
+<li><p>Using the <code>count</code> function, count the number of distinct movies in the dataset. <code>count()</code> is similar but calls group_by() before and ungroup() after. It will allow you to group the entries by movie name, and thus, to count the number of unique movies.</p></li>
+</ol>
+<p>Your code should look something like below.</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjpbIm1vdmllcyAlPiUgIiwiICBjb3VudChteV9jb2x1bW4pIl19 -->
+<pre class="r"><code>movies %&gt;% 
+  count(my_column)</code></pre>
 <!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
+<ol start="3" style="list-style-type: lower-alpha">
+<li>Now, we will focus on building a summary table for the movie stars in this dataset.</li>
+<li>Using the <code>filter</code> function, keep only the columns “budget”, “actor”, “runtime”, “gross”, “votes” and “year”. Name this subsetted dataframe movies_sub.</li>
+</ol>
+<p>Your code should look something like:</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjpbIm1vdmllc19zdWIgPSBtb3ZpZXMgJT4lICIsIiAgc2VsZWN0KGNvbHVtbjEsIGNvbHVtbjIsLi4uKSJdfQ== -->
+<pre class="r"><code>movies_sub = movies %&gt;% 
+  select(column1, column2,...)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<ol start="2" style="list-style-type: lower-roman">
+<li>Add a column that counts how many movies each actor appears in and name it “actor_n” Your code should look something like:</li>
+</ol>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoibW92aWVzX3N1YiA9IGFkZF9jb3VudChtb3ZpZXNfc3ViLCBzdGFycywgbmFtZT1cImFjdG9yX25cIikifQ== -->
+<pre class="r"><code>movies_sub = add_count(movies_sub, stars, name=&quot;actor_n&quot;)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<ol start="3" style="list-style-type: lower-roman">
+<li>Using the <code>group_by</code> and the <code>summarize_all</code> function, group the movies by actor and give the mean of each column. Keep the result in a table called actors.</li>
+</ol>
+<p>Your code should look something like:</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjpbImFjdG9ycyA9IG1vdmllc19zdWIgJT4lIiwiICAgICAgICAgICBncm91cF9ieShncm91cGluZ19jb2x1bW4pICU+JSIsIiAgICAgICAgICAgc3VtbWFyaXNlX2FsbChtZWFuKSJdfQ== -->
+<pre class="r"><code>actors = movies_sub %&gt;%
+           group_by(grouping_column) %&gt;%
+           summarise_all(mean)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<ol start="4" style="list-style-type: lower-roman">
+<li>Using the <code>filter</code> function, keep only the actors that have a mean score above 7. Your code should look something like:</li>
+</ol>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjpbImFjdG9ycyA9IGFjdG9ycyAlPiUiLCIgICAgICAgICAgZmlsdGVyKGZpbHRlcmluZ19jcml0ZXJpb24pIl19 -->
+<pre class="r"><code>actors = actors %&gt;%
+          filter(filtering_criterion)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<ol start="22" style="list-style-type: lower-alpha">
+<li>Finally, using the <code>top_n</code> function, display the top 10 actors with the highest average votes. Are these the same as the top 10 actors in terms of the highest budget film?</li>
+</ol>
+</div>
+<div id="part-2-using-dplyr-verbs-with-less-guiding" class="section level2">
+<h2>Part 2: Using <code>dplyr</code> verbs (with less guiding!)</h2>
 <ol style="list-style-type: lower-alpha">
-<li><p>Find a subset of the movies produced after 2010. Save the subset in ‘movies.sub’ variable.</p></li>
-<li><p>Keep columns ‘name’, ‘director’, ‘year’, ‘country’, ‘genre’, ‘budget’, ‘gross’, ‘score’ in the ‘movies.sub’.</p></li>
+<li><p>Select the movies produced after 2010. Save the subset in ‘movies.sub’ variable.</p></li>
+<li><p>Keep only the columns ‘name’, ‘director’, ‘year’, ‘country’, ‘genre’, ‘budget’, ‘gross’, ‘score’ in the ‘movies.sub’.</p></li>
 <li><p>Find the profit for each movie in ‘movies.sub’ as a fraction of its budget. Convert ‘budget’ and ‘gross’ columns million dollar units founded to the first decimal point. Use <code>round()</code> to round numbers.</p></li>
 <li><p>Count the number of movies in ‘movies.sub’ produced by each genre, and order them in the descending count order.</p></li>
 <li><p>Now group movies in ‘movies.sub’ by countries and genre. Then, count the number of movies in each group and the corresponding median fractional profit, the mean and standard deviation of the movie score for each group.</p></li>
 </ol>
 </div>
-<div id="part-2-chaining" class="section level2">
-<h2>Part 2: Chaining</h2>
+<div id="part-3-chaining" class="section level2">
+<h2>Part 3: Chaining</h2>
 <p>Using chaining and pipes, for each genre find the three directors the top mean movie scores received for the movies produced after 2000, after filtering out the directors with fewer than 5 movies in total. Hint: Use <code>top_n()</code> function to select top n from each group.</p>
 <p>Find the movies in your favourite genre by the 5 directors you just found. These could serve as suggestions for your next movie night!</p>
 </div>
-<div id="part-2-summaries" class="section level2">
-<h2>Part 2: Summaries</h2>
+<div id="part-4-summaries" class="section level2">
+<h2>Part 4: Summaries</h2>
 <p>Using chain commands and the <code>summarise</code> function:</p>
 <ol style="list-style-type: lower-alpha">
-<li><p>Find the maximum number of movies that a director has been involved in.</p></li>
-<li><p>Find the average and median number of action movies that a director is involved in.</p></li>
-<li><p>Compute 5th and 95th percentile of the <code>gross</code> amount, per category.</p></li>
+<li><p>Find the average and median number of movies that a director has been involved in.</p></li>
+<li><p>Find the maximum number of <strong>action</strong> movies that a director is involved in.</p></li>
+<li><p>Compute 5th and 95th percentile of the <code>gross</code> amount, per movie genre.</p></li>
+<li><p>Is budget associated to success? To answer this question, create an additional column to your dataset using the <code>mutate</code> and <code>rank</code> function, corresponding to the rank of each movie in terms of buget. Call it <code>rk</code>. The rank should be descending, so that the rank 1 is the movie with highest budget. Select the top 100 movies with highest vote, and compute their mean and median rank in terms of budget.</p></li>
 </ol>
 <!-- rnb-text-end -->
 </div>
 </div>
 
-<div id="rmd-source-code">LS0tCnRpdGxlOiAiRGF0YSBtYW5pcHVsYXRpb24gd2l0aCB0aWR5dmVyc2UiCnN1YnRpdGxlOiAiV2VlayAyIC0gU2Vzc2lvbiA0IgpkYXRlOiAiSnVseSA2dGgsIDIwMjAiCm91dHB1dDogCiAgaHRtbF9ub3RlYm9vazoKICAgIHRvYzogdHJ1ZQogICAgdG9jX2Zsb2F0OiB0cnVlCiAgICBkZl9wcmludDogcGFnZWQKLS0tCgpgYGB7ciBnbG9iYWxfb3B0aW9ucywgZWNobyA9IEZBTFNFLCBpbmNsdWRlID0gRkFMU0V9Cm9wdGlvbnMod2lkdGggPSA4MCkKa25pdHI6Om9wdHNfY2h1bmskc2V0KAogIHdhcm5pbmcgPSBGQUxTRSwgbWVzc2FnZSA9IEZBTFNFLAogIGNhY2hlID0gRkFMU0UsIHRpZHkgPSBGQUxTRSwgc2l6ZSA9ICJzbWFsbCIpCmBgYAoKCmBgYHtyLCB3YXJuaW5nPUZBTFNFLCBtZXNzYWdlPUZBTFNFLCBlY2hvPVRSVUV9CmxpYnJhcnkodGlkeXZlcnNlKQpgYGAKIyBXYXRjaCB0aGUgdmlkZW8gZm9yIFNlc3Npb24gNAoKCldhdGNoIHRoZSB2aWRlbyBsZWN0dXJlIGFzc29jaWF0ZWQgdG8gdGhpcyBbc2Vzc2lvbl0oaHR0cHM6Ly93d3cueW91dHViZS5jb20vd2F0Y2g/dj00YU5CZGxfcWNCYykuCgoKT25jZSB5b3UncmUgZG9uZToKCihhKSBJbnN0YWxsIHRoZSB0aWR5dmVyc2UgcGFja2FnZSBvbiB5b3VyIGxvY2FsIG1hY2hpbmUuCmBgYHtyLCBldmFsID1GQUxTRX0KaW5zdGFsbC5wYWNrYWdlcygndGlkeXZlcnNlJykKYGBgClRpZHl2ZXJzZSBpcyBhIGNvbGxlY3Rpb24gb2YgUiBwYWNrYWdlcyBmb3IgYmV0dGVyIGRhdGEgY2xlYW5pbmcsIHdyYW5nbGluZyBhbmQgdmlzdWFsaXphdGlvbi4gSW4gcGFydGljdWxhciwgaXQgaW5jbHVkZXM6CgotIFRoZSBkcGx5ciBhbmQgdGlkeXIgcGFja2FnZXMgcHJlc2VudGVkIGluIHRoZSB2aWRlbywgd2hpY2ggbWFrZSBkYXRhIGhhbmRsaW5nIGFuZCB0aWR5aW5nIGVhc2llci4KICAKLSAgVGhlIGdncGxvdDIgcGFja2FnZSBmb3IgZGF0YSB2aXN1YWxpemF0aW9uIHdoaWNoIHdlIHdpbGwgZ2V0IG1vcmUgaW50byBuZXh0IHdlZWsKCi0gQWRkaXRpb25hbCBwYWNrYWdlcyB0byBoYW5kbGUgc3RyaW5ncywgZXRjLgoKKGIpIGdvIHRocm91Z2ggdGhlIGZvbGxvd2luZyBleGVyY2lzZXMuCgoKIyBFeGVyY2lzZSAwOiBTd2lybAoKU2ltaWxhciB0byBsYXN0IHdlZWssIHdlJ2xsIHVzZSB0aGUgc3dpcmwgcGFja2FnZSB0byBpbnRyb2R1Y2UgeW91IHRoZSBwaXBpbmcsIGNoYWluaW5nLCBhbmQgZHBseXIgc3ludGF4LgoKV2FsayB0aHJvdWdoIHRoZSBHZXR0aW5nIGFuZCBDbGVhbmluZyBEYXRhIGluIHRoZSBzd2lybCBwYWNrYWdlLiAKCmBgYHtyLCB3YXJuaW5nPUZBTFNFLCBtZXNzYWdlPUZBTFNFLCBldmFsPUZBTFNFfQpsaWJyYXJ5KHN3aXJsKQpzd2lybDo6aW5zdGFsbF9jb3Vyc2UoIkdldHRpbmcgYW5kIENsZWFuaW5nIERhdGEiKQpzd2lybCgpCgpgYGAKCkdvIHRocm91Z2ggbW9kdWxlcyAxIHRocm91Z2ggMy4KT25jZSB5b3UncmUgZG9uZSwgcHJlcGFyZSB0aGUgZm9sbG93aW5nIGV4ZXJjaXNlcyB3aGljaCB3ZSB3aWxsIHVzZSBpbiBvdXIgZGlzY3Vzc2lvbiBzZXNzaW9uIG9uIE1vbmRheSwgSnVseSA2dGguCgoKIyBFeGVjaXNlIDE6IERhdGEgbWFuaXB1bGF0aW9uCgojIyBQYXJ0IDE6IGBkcGx5cmAgdmVyYnMKCkxvYWQgaW4gdGhlIGRhdGFzZXQgYG1vdmllcy5jc3ZgIGF0IHRoZSBmb2xsb3dpbmcgaHR0cCBhZGRyZXNzOgoKYGBge3J9CnVybCA8LSAiaHR0cHM6Ly9yYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tL0p1YW5ldHMvbW92aWUtc3RhdHMvbWFzdGVyL21vdmllcy5jc3YiCm1vdmllcyA8LSByZWFkX2Nzdih1cmwpCmBgYAoKCmEuIEZpbmQgYSBzdWJzZXQgb2YgdGhlIG1vdmllcyBwcm9kdWNlZCBhZnRlciAyMDEwLiAKU2F2ZSB0aGUgc3Vic2V0IGluICdtb3ZpZXMuc3ViJyB2YXJpYWJsZS4KCmIuIEtlZXAgY29sdW1ucyAnbmFtZScsICdkaXJlY3RvcicsICd5ZWFyJywgJ2NvdW50cnknLCAnZ2VucmUnLCAnYnVkZ2V0JywgJ2dyb3NzJywgJ3Njb3JlJwppbiB0aGUgJ21vdmllcy5zdWInLgoKYy4gRmluZCB0aGUgcHJvZml0IGZvciBlYWNoIG1vdmllIGluICdtb3ZpZXMuc3ViJyBhcyBhIGZyYWN0aW9uIG9mIGl0cyBidWRnZXQuCkNvbnZlcnQgJ2J1ZGdldCcgYW5kICdncm9zcycgY29sdW1ucyBtaWxsaW9uIGRvbGxhciB1bml0cyBmb3VuZGVkIHRvIHRoZSBmaXJzdCBkZWNpbWFsIHBvaW50LgpVc2UgYHJvdW5kKClgIHRvIHJvdW5kIG51bWJlcnMuCgpkLiBDb3VudCB0aGUgbnVtYmVyIG9mIG1vdmllcyBpbiAnbW92aWVzLnN1YicgcHJvZHVjZWQgYnkgZWFjaCBnZW5yZSwKYW5kIG9yZGVyIHRoZW0gaW4gdGhlIGRlc2NlbmRpbmcgY291bnQgb3JkZXIuCgplLiBOb3cgZ3JvdXAgbW92aWVzIGluICdtb3ZpZXMuc3ViJyBieSBjb3VudHJpZXMgYW5kIGdlbnJlLgpUaGVuLCBjb3VudCB0aGUgbnVtYmVyIG9mIG1vdmllcyBpbiBlYWNoIGdyb3VwIGFuZCB0aGUgY29ycmVzcG9uZGluZyAKbWVkaWFuIGZyYWN0aW9uYWwgcHJvZml0LCB0aGUgbWVhbiBhbmQgc3RhbmRhcmQgZGV2aWF0aW9uIG9mIAp0aGUgbW92aWUgc2NvcmUgZm9yIGVhY2ggZ3JvdXAuCgoKIyMgUGFydCAyOiBDaGFpbmluZwoKVXNpbmcgY2hhaW5pbmcgYW5kIHBpcGVzLCBmb3IgZWFjaCBnZW5yZSBmaW5kIHRoZSB0aHJlZSBkaXJlY3RvcnMgdGhlCnRvcCBtZWFuIG1vdmllIHNjb3JlcyByZWNlaXZlZCBmb3IgdGhlIG1vdmllcyBwcm9kdWNlZCBhZnRlciAyMDAwLAphZnRlciBmaWx0ZXJpbmcgb3V0IHRoZSBkaXJlY3RvcnMgd2l0aCBmZXdlciB0aGFuIDUgbW92aWVzIGluIHRvdGFsLgpIaW50OiBVc2UgYHRvcF9uKClgIGZ1bmN0aW9uIHRvIHNlbGVjdCB0b3AgbiBmcm9tIGVhY2ggZ3JvdXAuCgpGaW5kIHRoZSBtb3ZpZXMgaW4geW91ciBmYXZvdXJpdGUgZ2VucmUgYnkgdGhlIDUgZGlyZWN0b3JzCnlvdSBqdXN0IGZvdW5kLiBUaGVzZSBjb3VsZCBzZXJ2ZSBhcyBzdWdnZXN0aW9ucyBmb3IgeW91ciBuZXh0IG1vdmllIG5pZ2h0IQoKCiMjIFBhcnQgMjogU3VtbWFyaWVzCgpVc2luZyBjaGFpbiBjb21tYW5kcyBhbmQgdGhlIGBzdW1tYXJpc2VgIGZ1bmN0aW9uOgoKYS4gRmluZCB0aGUgbWF4aW11bSBudW1iZXIgb2YgbW92aWVzIHRoYXQgYSBkaXJlY3RvciBoYXMgYmVlbiBpbnZvbHZlZCBpbi4KCmIuIEZpbmQgdGhlIGF2ZXJhZ2UgYW5kIG1lZGlhbiBudW1iZXIgb2YgYWN0aW9uIG1vdmllcyB0aGF0IGEgZGlyZWN0b3IgaXMgaW52b2x2ZWQgaW4uCgpjLiBDb21wdXRlIDV0aCBhbmQgOTV0aCBwZXJjZW50aWxlIG9mIHRoZSBgZ3Jvc3NgIGFtb3VudCwgcGVyIGNhdGVnb3J5LgoKCgoKCgoKCgo=</div>
+<div id="rmd-source-code">LS0tCnRpdGxlOiAiRGF0YSBtYW5pcHVsYXRpb24gd2l0aCB0aWR5dmVyc2UiCnN1YnRpdGxlOiAiV2VlayAyIC0gU2Vzc2lvbiA0IgpkYXRlOiAiSnVseSA2dGgsIDIwMjAiCm91dHB1dDogCiAgaHRtbF9ub3RlYm9vazoKICAgIHRvYzogdHJ1ZQogICAgdG9jX2Zsb2F0OiB0cnVlCiAgICBkZl9wcmludDogcGFnZWQKLS0tCgpgYGB7ciBnbG9iYWxfb3B0aW9ucywgZWNobyA9IEZBTFNFLCBpbmNsdWRlID0gRkFMU0V9Cm9wdGlvbnMod2lkdGggPSA4MCkKa25pdHI6Om9wdHNfY2h1bmskc2V0KAogIHdhcm5pbmcgPSBGQUxTRSwgbWVzc2FnZSA9IEZBTFNFLAogIGNhY2hlID0gRkFMU0UsIHRpZHkgPSBGQUxTRSwgc2l6ZSA9ICJzbWFsbCIpCmBgYAoKCmBgYHtyLCB3YXJuaW5nPUZBTFNFLCBtZXNzYWdlPUZBTFNFLCBlY2hvPVRSVUV9CmxpYnJhcnkodGlkeXZlcnNlKQpgYGAKIyBXYXRjaCB0aGUgdmlkZW8gZm9yIFNlc3Npb24gNAoKCldhdGNoIHRoZSB2aWRlbyBsZWN0dXJlIGFzc29jaWF0ZWQgdG8gdGhpcyBbc2Vzc2lvbl0oaHR0cHM6Ly93d3cueW91dHViZS5jb20vd2F0Y2g/dj00YU5CZGxfcWNCYykuCgpZb3UgY2FuIGZpbmQgYWRkaXRpb25hbCBpbmZvcm1hdGlvbiBvbiB0aWR5dmVyc2UgYW5kIHRoZSBwaXBpbmcgaW5mb3JtYXRpb24gYXQgdGhlIGZvbGxvd2luZyBbbGlua10oaHR0cHM6Ly9yYWZhbGFiLmdpdGh1Yi5pby9kc2Jvb2svdGlkeXZlcnNlLmh0bWwpLgoKCk9uY2UgeW91J3JlIGRvbmU6CgooYSkgSW5zdGFsbCB0aGUgdGlkeXZlcnNlIHBhY2thZ2Ugb24geW91ciBsb2NhbCBtYWNoaW5lLgpgYGB7ciwgZXZhbCA9RkFMU0V9Cmluc3RhbGwucGFja2FnZXMoJ3RpZHl2ZXJzZScpCmBgYApUaWR5dmVyc2UgaXMgYSBjb2xsZWN0aW9uIG9mIFIgcGFja2FnZXMgZm9yIGJldHRlciBkYXRhIGNsZWFuaW5nLCB3cmFuZ2xpbmcgYW5kIHZpc3VhbGl6YXRpb24uIEluIHBhcnRpY3VsYXIsIGl0IGluY2x1ZGVzOgoKLSBUaGUgZHBseXIgYW5kIHRpZHlyIHBhY2thZ2VzIHByZXNlbnRlZCBpbiB0aGUgdmlkZW8sIHdoaWNoIG1ha2UgZGF0YSBoYW5kbGluZyBhbmQgdGlkeWluZyBlYXNpZXIuCiAgCi0gIFRoZSBnZ3Bsb3QyIHBhY2thZ2UgZm9yIGRhdGEgdmlzdWFsaXphdGlvbiB3aGljaCB3ZSB3aWxsIGdldCBtb3JlIGludG8gbmV4dCB3ZWVrCgotIEFkZGl0aW9uYWwgcGFja2FnZXMgdG8gaGFuZGxlIHN0cmluZ3MsIGV0Yy4KCihiKSBnbyB0aHJvdWdoIHRoZSBmb2xsb3dpbmcgZXhlcmNpc2VzLgoKCiMgRXhlcmNpc2UgMDogU3dpcmwKClNpbWlsYXIgdG8gbGFzdCB3ZWVrLCB3ZSdsbCB1c2UgdGhlIHN3aXJsIHBhY2thZ2UgdG8gaW50cm9kdWNlIHlvdSB0aGUgcGlwaW5nLCBjaGFpbmluZywgYW5kIGRwbHlyIHN5bnRheC4KCldhbGsgdGhyb3VnaCB0aGUgR2V0dGluZyBhbmQgQ2xlYW5pbmcgRGF0YSBpbiB0aGUgc3dpcmwgcGFja2FnZS4gCgpgYGB7ciwgd2FybmluZz1GQUxTRSwgbWVzc2FnZT1GQUxTRSwgZXZhbD1GQUxTRX0KbGlicmFyeShzd2lybCkKc3dpcmw6Omluc3RhbGxfY291cnNlKCJHZXR0aW5nIGFuZCBDbGVhbmluZyBEYXRhIikKc3dpcmwoKQoKYGBgCgpHbyB0aHJvdWdoIG1vZHVsZXMgMSB0aHJvdWdoIDMuCk9uY2UgeW91J3JlIGRvbmUsIHByZXBhcmUgdGhlIGZvbGxvd2luZyBleGVyY2lzZXMgd2hpY2ggd2Ugd2lsbCB1c2UgaW4gb3VyIGRpc2N1c3Npb24gc2Vzc2lvbiBvbiBNb25kYXksIEp1bHkgNnRoLgoKCiMgRXhlcmNpc2UgMTogTW92aWVzIERhdGFzZXQKCiMjIFBhcnQgMDogTG9hZGluZyB0aGUgZGF0YQoKTG9hZCBpbiB0aGUgZGF0YXNldCBgbW92aWVzLmNzdmAgYXQgdGhlIGZvbGxvd2luZyBodHRwIGFkZHJlc3M6CgpgYGB7ciwgZWNobz1UUlVFfQpsaWJyYXJ5KHRpZHl2ZXJzZSkKdXJsIDwtICJodHRwczovL3Jhdy5naXRodWJ1c2VyY29udGVudC5jb20vSnVhbmV0cy9tb3ZpZS1zdGF0cy9tYXN0ZXIvbW92aWVzLmNzdiIKbW92aWVzIDwtIHJlYWRfY3N2KHVybCkKYGBgCgpTaW5jZSB0aGlzIGlzIHRoZSBmaXJzdCByZWFsIGRhdGFzZXQgdGhhdCB5b3UgYXJlIGhhbmRsaW5nLCBsZXQncyB0cnkgdG8gZ28gdGhyb3VnaCB0aGUgdXN1YWwgaW5zcGVjdGlvbiB0aGF0IHlvdSdkIGNhcnJ5IHRocm91Z2ggd2hlbmV2ZXIgeW91IHdpbGwgYmUgcHJlc2VudGVkIHdpdGggYSBkYXRhc2V0CgpXaGF0IGlzIHRoZSBzaXplIG9mIHlvdXIgZGF0YXNldD8gV2hhdCBhcmUgdGhlIHR5cGVzIG9mIHRoZSBkaWZmZXJlbnQgdmFyaWFibGVzPwoKVHlwZSBpbiBgbmFtZXMobW92aWVzKWAuIFRoaXMgc2hvdWxkIHByaW50IG91dCB0aGUgbmFtZXMgb2YgdGhlIGRpZmZlcmVudCBjb2x1bW5zIGluIHlvdXIgZGF0YXNldC4KCiMjIFBhcnQgMTogRWFzaW5nIGludG8gYGRwbHlyYCB2ZXJicwoKYS4gVXNpbmcgdGhlIGB0YWxseSgpYCBmdW5jdGlvbiwgY291bnQgdGhlIG51bWJlciBvZiBlbnRyaWVzIGluIHlvdXIgZGF0YXNldC4KCmIuIFVzaW5nIHRoZSBgY291bnRgIGZ1bmN0aW9uLCBjb3VudCB0aGUgbnVtYmVyIG9mIGRpc3RpbmN0IG1vdmllcyBpbiB0aGUgZGF0YXNldC4KYGNvdW50KClgIGlzIHNpbWlsYXIgYnV0IGNhbGxzIGdyb3VwX2J5KCkgYmVmb3JlIGFuZCB1bmdyb3VwKCkgYWZ0ZXIuIEl0IHdpbGwgYWxsb3cgeW91IHRvIGdyb3VwIHRoZSBlbnRyaWVzIGJ5IG1vdmllIG5hbWUsIGFuZCB0aHVzLCB0byBjb3VudCB0aGUgbnVtYmVyIG9mIHVuaXF1ZSBtb3ZpZXMuCgpZb3VyIGNvZGUgc2hvdWxkIGxvb2sgc29tZXRoaW5nIGxpa2UgYmVsb3cuCgpgYGB7ciwgZXZhbD1GQUxTRX0KbW92aWVzICU+JSAKICBjb3VudChteV9jb2x1bW4pCmBgYAoKYy4gTm93LCB3ZSB3aWxsIGZvY3VzIG9uIGJ1aWxkaW5nIGEgc3VtbWFyeSB0YWJsZSBmb3IgdGhlIG1vdmllIHN0YXJzIGluIHRoaXMgZGF0YXNldC4KICAgaS4gVXNpbmcgdGhlIGBmaWx0ZXJgIGZ1bmN0aW9uLCBrZWVwIG9ubHkgdGhlIGNvbHVtbnMgImJ1ZGdldCIsICJhY3RvciIsICJydW50aW1lIiwgImdyb3NzIiwgInZvdGVzIiBhbmQgInllYXIiLiBOYW1lIHRoaXMgc3Vic2V0dGVkIGRhdGFmcmFtZSBtb3ZpZXNfc3ViLgogICAKICAgWW91ciBjb2RlIHNob3VsZCBsb29rIHNvbWV0aGluZyBsaWtlOgoKYGBge3IsIGV2YWw9RkFMU0V9Cm1vdmllc19zdWIgPSBtb3ZpZXMgJT4lIAogIHNlbGVjdChjb2x1bW4xLCBjb2x1bW4yLC4uLikKYGBgCiAKICBpaS4gQWRkIGEgY29sdW1uIHRoYXQgY291bnRzIGhvdyBtYW55IG1vdmllcyBlYWNoIGFjdG9yIGFwcGVhcnMgaW4gYW5kIG5hbWUgaXQgImFjdG9yX24iCiAgICBZb3VyIGNvZGUgc2hvdWxkIGxvb2sgc29tZXRoaW5nIGxpa2U6CgpgYGB7ciwgZXZhbD1GQUxTRX0KbW92aWVzX3N1YiA9IGFkZF9jb3VudChtb3ZpZXNfc3ViLCBzdGFycywgbmFtZT0iYWN0b3JfbiIpCmBgYAogIAogICBpaWkuIFVzaW5nIHRoZSBgZ3JvdXBfYnlgIGFuZCB0aGUgYHN1bW1hcml6ZV9hbGxgIGZ1bmN0aW9uLCBncm91cCB0aGUgbW92aWVzIGJ5IGFjdG9yIGFuZCBnaXZlIHRoZSBtZWFuIG9mIGVhY2ggY29sdW1uLiBLZWVwIHRoZSByZXN1bHQgaW4gYSB0YWJsZSBjYWxsZWQgYWN0b3JzLgogICAKICAgWW91ciBjb2RlIHNob3VsZCBsb29rIHNvbWV0aGluZyBsaWtlOgoKYGBge3IsIGV2YWw9RkFMU0V9CmFjdG9ycyA9IG1vdmllc19zdWIgJT4lCiAgICAgICAgICAgZ3JvdXBfYnkoZ3JvdXBpbmdfY29sdW1uKSAlPiUKICAgICAgICAgICBzdW1tYXJpc2VfYWxsKG1lYW4pCmBgYAogCiBpdi4gVXNpbmcgdGhlIGBmaWx0ZXJgIGZ1bmN0aW9uLCBrZWVwIG9ubHkgdGhlIGFjdG9ycyB0aGF0IGhhdmUgYSBtZWFuIHNjb3JlIGFib3ZlIDcuIFlvdXIgY29kZSBzaG91bGQgbG9vayBzb21ldGhpbmcgbGlrZToKCmBgYHtyLCBldmFsPUZBTFNFfQphY3RvcnMgPSBhY3RvcnMgJT4lCiAgICAgICAgICBmaWx0ZXIoZmlsdGVyaW5nX2NyaXRlcmlvbikKYGBgCiAgCiAgdi4gRmluYWxseSwgdXNpbmcgdGhlIGB0b3BfbmAgZnVuY3Rpb24sIGRpc3BsYXkgdGhlIHRvcCAxMCBhY3RvcnMgd2l0aCB0aGUgaGlnaGVzdCBhdmVyYWdlIHZvdGVzLiBBcmUgdGhlc2UgdGhlIHNhbWUgYXMgdGhlIHRvcCAxMCBhY3RvcnMgaW4gdGVybXMgb2YgdGhlIGhpZ2hlc3QgYnVkZ2V0IGZpbG0/CiAgIAoKIyMgUGFydCAyOiBVc2luZyBgZHBseXJgIHZlcmJzICh3aXRoIGxlc3MgZ3VpZGluZyEpCgphLiBTZWxlY3QgdGhlIG1vdmllcyBwcm9kdWNlZCBhZnRlciAyMDEwLiAKU2F2ZSB0aGUgc3Vic2V0IGluICdtb3ZpZXMuc3ViJyB2YXJpYWJsZS4KCmIuIEtlZXAgb25seSB0aGUgY29sdW1ucyAnbmFtZScsICdkaXJlY3RvcicsICd5ZWFyJywgJ2NvdW50cnknLCAnZ2VucmUnLCAnYnVkZ2V0JywgJ2dyb3NzJywgJ3Njb3JlJwppbiB0aGUgJ21vdmllcy5zdWInLgoKYy4gRmluZCB0aGUgcHJvZml0IGZvciBlYWNoIG1vdmllIGluICdtb3ZpZXMuc3ViJyBhcyBhIGZyYWN0aW9uIG9mIGl0cyBidWRnZXQuCkNvbnZlcnQgJ2J1ZGdldCcgYW5kICdncm9zcycgY29sdW1ucyBtaWxsaW9uIGRvbGxhciB1bml0cyBmb3VuZGVkIHRvIHRoZSBmaXJzdCBkZWNpbWFsIHBvaW50LgpVc2UgYHJvdW5kKClgIHRvIHJvdW5kIG51bWJlcnMuCgpkLiBDb3VudCB0aGUgbnVtYmVyIG9mIG1vdmllcyBpbiAnbW92aWVzLnN1YicgcHJvZHVjZWQgYnkgZWFjaCBnZW5yZSwKYW5kIG9yZGVyIHRoZW0gaW4gdGhlIGRlc2NlbmRpbmcgY291bnQgb3JkZXIuCgplLiBOb3cgZ3JvdXAgbW92aWVzIGluICdtb3ZpZXMuc3ViJyBieSBjb3VudHJpZXMgYW5kIGdlbnJlLgpUaGVuLCBjb3VudCB0aGUgbnVtYmVyIG9mIG1vdmllcyBpbiBlYWNoIGdyb3VwIGFuZCB0aGUgY29ycmVzcG9uZGluZyAKbWVkaWFuIGZyYWN0aW9uYWwgcHJvZml0LCB0aGUgbWVhbiBhbmQgc3RhbmRhcmQgZGV2aWF0aW9uIG9mIAp0aGUgbW92aWUgc2NvcmUgZm9yIGVhY2ggZ3JvdXAuCgoKIyMgUGFydCAzOiBDaGFpbmluZwoKVXNpbmcgY2hhaW5pbmcgYW5kIHBpcGVzLCBmb3IgZWFjaCBnZW5yZSBmaW5kIHRoZSB0aHJlZSBkaXJlY3RvcnMgdGhlCnRvcCBtZWFuIG1vdmllIHNjb3JlcyByZWNlaXZlZCBmb3IgdGhlIG1vdmllcyBwcm9kdWNlZCBhZnRlciAyMDAwLAphZnRlciBmaWx0ZXJpbmcgb3V0IHRoZSBkaXJlY3RvcnMgd2l0aCBmZXdlciB0aGFuIDUgbW92aWVzIGluIHRvdGFsLgpIaW50OiBVc2UgYHRvcF9uKClgIGZ1bmN0aW9uIHRvIHNlbGVjdCB0b3AgbiBmcm9tIGVhY2ggZ3JvdXAuCgpGaW5kIHRoZSBtb3ZpZXMgaW4geW91ciBmYXZvdXJpdGUgZ2VucmUgYnkgdGhlIDUgZGlyZWN0b3JzCnlvdSBqdXN0IGZvdW5kLiBUaGVzZSBjb3VsZCBzZXJ2ZSBhcyBzdWdnZXN0aW9ucyBmb3IgeW91ciBuZXh0IG1vdmllIG5pZ2h0IQoKCiMjIFBhcnQgNDogU3VtbWFyaWVzCgpVc2luZyBjaGFpbiBjb21tYW5kcyBhbmQgdGhlIGBzdW1tYXJpc2VgIGZ1bmN0aW9uOgoKYS4gRmluZCB0aGUgYXZlcmFnZSBhbmQgbWVkaWFuIG51bWJlciBvZiBtb3ZpZXMgdGhhdCBhIGRpcmVjdG9yIGhhcyBiZWVuIGludm9sdmVkIGluLgoKYi4gRmluZCB0aGUgbWF4aW11bSBudW1iZXIgb2YgX19hY3Rpb25fXyBtb3ZpZXMgdGhhdCBhIGRpcmVjdG9yIGlzIGludm9sdmVkIGluLgoKYy4gQ29tcHV0ZSA1dGggYW5kIDk1dGggcGVyY2VudGlsZSBvZiB0aGUgYGdyb3NzYCBhbW91bnQsIHBlciBtb3ZpZSBnZW5yZS4KCmQuIElzIGJ1ZGdldCBhc3NvY2lhdGVkIHRvIHN1Y2Nlc3M/IFRvIGFuc3dlciB0aGlzIHF1ZXN0aW9uLCBjcmVhdGUgYW4gYWRkaXRpb25hbCBjb2x1bW4gIHRvIHlvdXIgZGF0YXNldCB1c2luZyB0aGUgYG11dGF0ZWAgYW5kIGByYW5rYCBmdW5jdGlvbiwgY29ycmVzcG9uZGluZyB0byB0aGUgcmFuayBvZiBlYWNoIG1vdmllIGluIHRlcm1zIG9mIGJ1Z2V0LiBDYWxsIGl0IGBya2AuIFRoZSByYW5rIHNob3VsZCBiZSBkZXNjZW5kaW5nLCBzbyB0aGF0IHRoZSByYW5rIDEgaXMgdGhlIG1vdmllIHdpdGggaGlnaGVzdCBidWRnZXQuIFNlbGVjdCB0aGUgdG9wIDEwMCBtb3ZpZXMgd2l0aCBoaWdoZXN0IHZvdGUsIGFuZCBjb21wdXRlIHRoZWlyIG1lYW4gYW5kIG1lZGlhbiByYW5rIGluIHRlcm1zIG9mIGJ1ZGdldC4KCgoKCgoKCgoK</div>
 
 
 </div>
