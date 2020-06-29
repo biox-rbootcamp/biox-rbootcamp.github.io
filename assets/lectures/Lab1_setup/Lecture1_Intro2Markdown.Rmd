@@ -12,6 +12,15 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+# Watch the video for Rstudio
+
+The purpose of this lab is to familiarize yourself with Rmarkdown -- an extremely useful tool to generate reports.
+
+Start by watching the videos associated to this lecture:
+
+a) [The basics of Rmarkdown](https://www.youtube.com/watch?v=tKUufzpoHDE)
+b) [A more comprehensive Rmarkdown video](https://www.youtube.com/watch?v=MGWtn5-CFFI)
+c) [Importing data](https://www.youtube.com/watch?v=qK1ElUMkhq0&list=PLOU2XLYxmsIK9qQfztXeybpHvru-TrqAP&index=8) -- you should already have watched this one for the previous discussion.
 
 # R and RStudio
 
@@ -369,6 +378,8 @@ More on R Notebooks can be found [here](https://rmarkdown.rstudio.com/r_notebook
 
 # Importing data
 
+We have seen how we can generate reports, our environment is set up and we know how ww will keep track of all the data analysis that we do using Rmarkdown --- all we need to import an actual dataset! Let us now see how we can import and save data.
+
 ## Working Directory
 
 - The **current working directory** (cmd) is the location
@@ -395,7 +406,7 @@ setwd("path/to/directory")
 ## Paths and directory names
 
 - R inherits its file and folder **naming conventions from unix**, and 
-uses forward slashes for the directories, e.g. `/home/lan/folder/`
+uses forward slashes for the directories, e.g. `/home/cdonnat/folder/`
 
 - This is, because backslashes serve a different purpose; they are used as 
 escape characters to isolate special characters and stop them from being 
