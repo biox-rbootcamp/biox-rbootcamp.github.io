@@ -155,9 +155,7 @@ Use an `apply` family function to return the number of weeks left from each day 
 Note: you can calculate the difference between Date objects.
 
 ```{r}
-ny2019 <- as.Date("2019-01-01", format = "%Y-%m-%d")
-ny2018 <- as.Date("2018-01-01", format = "%Y-%m-%d")
-ny2019-ny2018
+as.Date("2019-01-01", format = "%Y-%m-%d") - as.Date("2018-01-01", format = "%Y-%m-%d")
 ```
 
 
