@@ -62,14 +62,14 @@ Once you're done, prepare the following exercises which we will go over during t
 
 1. Create the following 5 by 5 matrix and store it as variable X.
 ```{r echo = FALSE, eval = TRUE}
-matrix(1:30, nrow = 5, byrow = FALSE)
+matrix(1:25, nrow = 5, byrow = FALSE)
 ```
 
 2. Create a matrix Y by adding an independent Gaussian noise (random numbers) with mean 0 and standard deviation 1 to each entry of X. Hint: use the `rnorm` function.
 
 3. Find the inverse of Y. Hint: use the `solve` function.
 
-4. Show numerically that the matrix product of Y and its inverse is the identity matrix. Hint: use the `%*%` operator.
+4. Show numerically that the matrix product of Y and its inverse is the identity matrix. Hint: use the `%*%` matrix multiplication operator.
 
 
 # Exercise 3: Data frames
@@ -151,5 +151,13 @@ y2018_sample
 ```
 
 Use an `apply` family function to return the number of weeks left from each day in `y2018_sample` to the New Year, 2019/01/01.
+
+Note: you can calculate the difference between Date objects.
+
+```{r}
+ny2019 <- as.Date("2019-01-01", format = "%Y-%m-%d")
+ny2018 <- as.Date("2018-01-01", format = "%Y-%m-%d")
+ny2019-ny2018
+```
 
 
