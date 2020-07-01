@@ -16,7 +16,15 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Watch the video for Session 5
 
-Watch the video lecture associated to Session 5 (find the link on the website) – it will walk you through concepts on random variable (RV), null distribution, and probability distributions.
+
+Probability and random variables are an essential component of data analysis, as they allow us to model noise, error and uncertainty in the data. The next two lectures will thus focus on giving you the basics of probability theory.
+
+
+1. Watch the video lecture associated to Session 5 (find the links on the website) – it will walk you through concepts on random variable (RV), null distribution, and probability distributions.
+
+2. You can complement this set of video lectures by reading [the following chapter on random variables](https://rafalab.github.io/dsbook/random-variables.html).
+
+
 
 ## Random Variable Exercises
 
@@ -31,6 +39,9 @@ x <- unlist( read.csv(filename) )
 ```
 
 `x` represents the weights for the entire population
+
+
+Run the previous chunk of code to load the data and answer the following questions:
 
 1. What is the average of these weights?
 
