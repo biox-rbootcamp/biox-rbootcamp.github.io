@@ -9,7 +9,7 @@ output:
 ---
 
 
-## Goal
+## Goal and Video
 
 The goal of this lab is to become familiar with the grammar of graphics 
 philosophy implemented in the `R` package `ggplot2`.
@@ -17,9 +17,9 @@ philosophy implemented in the `R` package `ggplot2`.
 Work through this lab by running all the R code to your computer and making sure 
 that you understand the input and the output. 
 
-Begin by watching the lecture on vizualization (link on the website): this will provide you with an introduction to the importance of plotting and give you an overview of the different plotting functions with ggplot2.
+Begin by watching the [lecture on vizualization](https://drive.google.com/file/d/1BBNvt2EWtZnixHbGxnXg-vbivP7Iu0EI/view?usp=sharing): this will provide you with an introduction to the importance of plotting and give you an overview of the different plotting functions with ggplot2. This is a considerably longer video than what we've seen so far, so prepare ample time!
 
-Once you're done, go through the following lab which we will discuss on Monday.
+Once you're done, go through the following lab which we will discuss on Thursday.
 
 
 ## Getting Started
@@ -78,7 +78,7 @@ speed up some of the plotting (feel free to try out the computations and plots
 we see subsequently with the full dataset `births`.)
 
 ```{r births}
-data("births2006.smpl", package = "nutshell")
+load("~/Downloads/births2006.smpl.rda")
 
 births <- mutate(births2006.smpl,
   WEEKEND = ifelse(DOB_WK %in% c(1, 7), "Weekend", "Weekday"),
@@ -91,12 +91,6 @@ births_small <- births[ sample(nrow(births), 40000), ]
 head(births_small)
 ```
 
-To find out about what data each column of `births2006.smpl` dataset, 
-holds, you can run the line below in your console:
-
-```{r findout, eval = FALSE}
-help("births2006.smpl", package = "nutshell")
-```
 
 ## Plot initialization & `geom`'s
 
@@ -148,7 +142,7 @@ Note that this doesn't actually plot anything (just like if you wrote
 `junk <- 7` doesn't output anything until you run `junk`.
 What happens here when you run `ppp`? 
 
-The number ofbirths per day of the week can be shown easily in a barplot,
+The number of births per day of the week can be shown easily in a barplot,
 so let's use that. To create a geometric object layer for a **barplot we use the 
 function `geom_bar()`**. In order for it to know what part of the data we want
 to actually plot, we need to give an aesthetic. We can do this by declaring 
@@ -525,10 +519,7 @@ ggplot(dat, aes(col = patient, x = treatment, y = ESR1)) +
 
 ## Questions
 
-Answer the following questions on [Canvas](https://canvas.stanford.edu) 
-in quiz "Quiz 2: Graphics". You may NOT work with other students to answer 
-the questions on Canvas. You will need a Stanford ID to log in to Canvas.
-The questions will be in random order on Canvas.
+Answer the following questions.
 
 From the plot of the parathyroid data, answer the following. 
 
@@ -544,7 +535,7 @@ Make your own plot of VDR versus CASR.  (That is CASR, not CALR).
 **Quiz question 4** : Which patient has the highest recorded level of CASR?
 
 **Quiz question 5** : Which of the following pairs of patients seem to be well
-separated in this plot (i.e., for which two patients you can draw a line on 
+separated in this plot (i.e., for which two patients you can draw a line on 
 the plot that perfectly separates them)?
 
 **Quiz question 6** : You need to know which pairs of patients are well 
@@ -570,7 +561,9 @@ has "values" as one of the arguments ____(..., values = (...)).
 
 **Quiz question 12** : What do Themes do in ggplot2?
   
-## CpG Islands
+## CpG Islands: Optional
+
+This part is a little more involved. Feel free to read through if that is of interest to you.
 
 
 
