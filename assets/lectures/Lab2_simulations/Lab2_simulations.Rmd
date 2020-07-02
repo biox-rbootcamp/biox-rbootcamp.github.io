@@ -6,19 +6,43 @@ output:
   html_document:
     toc: true
     toc_float: true
+    code_folding: hide
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+## The road so far
+
+The focus this week will be on using simulations and plots to understand the behavior of the data.
+
+
+After getting more comfortable using R, we've began exploring some of the basic ingredients in Data analysis, in particular focusing on the notion of probability distributions. These, as we've seen last week, are essential in modeling the uncertainty and inherent noise or variability in the data. The later is a key component in data analysis and statistical inference: not only do we want to make accurate predictions, or find patterns in the data, we also want to characterize how confident we feel about our results. In other words, we need to find a distribution for our model.
+
+Now, while for extremely simple models, we can obtain formula to compute the quantiles and understand the behavior of a statistic (e.g, the mean), finding explicit characterizations of our uncertainty is not always easy nor achievable. This is where simulations come in: we don't need to derive by hand and find a closed form expression for the way the data behaves, we can simply simulate it! Simulations thus hold a key importance in data analysis, and we are going to see today how all these probability models that you have seen last week are useful.
 
 ## Goal
 
 In this lab, we'll learn how to simulate data with R using random number generators and we will also use Bioconductor for the first time. 
 
-The goal is to work through this lab by running all the R code/ Then you will execute all code chunks sequentially. We encourage you to take advantage of the interactivity by modifying commands and seeing how the output changes.
+The goal is to work through this lab by running all the R code. Then you will execute all code chunks sequentially. We encourage you to take advantage of the interactivity by modifying commands and seeing how the output changes. Finally, you'll complete a small exercise on your own to understand in depth the power of simulations.
 
+
+
+
+
+## Videos for the lecture
+
+Watch the following videos to illustrate how and why simulations are such an important facette of Data Analysis:
+
+- This [first video](https://www.youtube.com/watch?v=Xfdg0xqFjts) will give you a concrete example: suppose that we want to investigate the relationship between sample size and mean, but we don't know the probability law associated to the sample mean. We can thus use simulations to try to infer this law.
+
+- This [second video](https://www.youtube.com/watch?v=HLFqrY4QU9Q) illustrates the Central Limit Theorem that you have seen last week using a simulation approach.
+
+- This last [video](https://www.youtube.com/watch?v=tvv4IA8PEzw) goes over (one more time after last week!) the different ways to generate random samples and models.
+
+Once you're done, have a look at the following lab, run the code and go through the questions. We will go through it together during the discussion, so that you can ask any of the questions that might have arisen as you were trying  the different functions by yourself. We will also correct the final exercise during the discussion.
 
 ## Getting Started
 
@@ -27,11 +51,11 @@ In the previous classes you learned about many distributions, for example you le
 
 R can generate numbers from all known distributions. In particular, we know how to generate random discrete data using the specialized R functions tailored for each type of distribution. We use the functions that start with an r as in ``rXXXX``, where ``XXXX`` could be ``pois`` or ``binom``. If we need a theoretical computation of a probability under one of these models, we use the functions ``dXXXX``, such as ``dbinom``, which computes the probabilities of events in the discrete binomial distribution, and ``dnorm``, which computes the probability density function for the continuous normal distribution. When computing tail probabilities such as $\Pr(X \leq a)$ it is convenient to use the cumulative distribution functions, which are called ``pXXXX``.
 
-When you want to use random numbers in a project, a potential complication is that each time you run it you get a different result. Alas, there is help. The random numbers that your computer produces are not really random, they only look like they were random, but in fact depend on a setting in your computer's random number generator which is called the __seed__ (for this reason they are also sometimes called __pseudorandom numbers__). That way you can exactly reproduce the results of a simulation or algorithm, even if it uses "random" numbers.
+__The importance of the seed__ When you want to use random numbers in a project, a potential complication is that each time you run it you get a different result. Alas, there is help. The random numbers that your computer produces are not really random, they only look like they were random, but in fact depend on a setting in your computer's random number generator which is called the __seed__ (for this reason they are also sometimes called __pseudorandom numbers__). That way you can exactly reproduce the results of a simulation or algorithm, even if it uses "random" numbers.
 
 Compare for instance the following output:
 
-```{r rpois}
+```{r rpois, eval=FALSE}
 sample_from_poisson = rpois(n = 10, lambda = 5)
 sample_from_poisson[1:3]
 mean(sample_from_poisson)
@@ -43,7 +67,7 @@ what we call the sampling distribution of the mean of 10
 Poisson random variables.
 
 Now try:
-```{r seed}
+```{r seed, eval=FALSE}
 set.seed(19720505)
 sample_from_poisson = rpois(10, 5)
 sample_from_poisson[1:3]
@@ -55,36 +79,37 @@ sample_from_poisson[1:3]
 mean(sample_from_poisson)
 ```
 
-Now let us turn to ``dpois`` and ``ppois``. What is the probability that a random variable with Poisson distribution with mean 5 is equal to 5?
+__A first simple use case:__ Now let us turn to ``dpois`` and ``ppois``. __What is the probability that a random variable with Poisson distribution with mean 5 is equal to 5?__
+
 
 We could figure this out by simulation again, e.g. we could draw 10000 samples from the above distribution and count how often we got a 5 on average:
-```{r}
+```{r, eval=FALSE}
 set.seed(1)
 sample_from_poisson = rpois(10000, 5)
 mean(sample_from_poisson==5)
 ```
 
 Or in this case we can get an exact answer:
-```{r}
+```{r, eval=FALSE}
 dpois(5,5)
 ```
 
 What is the probability that the same random variable is less or equal to 5?
 
-```{r}
+```{r, eval=FALSE}
 mean(sample_from_poisson <= 5)
 ```
 
 Using ``ppois``:
 
-```{r}
+```{r, eval=FALSE}
 ppois(5,5)
 ```
 
 Can you get the same result using only ``dpois`` instead of ``ppois``?
 
 
-## Using ``apply``-family functions
+## Using ``apply``-family functions for fast simulations
 
 We will now try to make ourselves familiar with some continuous distributions, namely the [Exponential](https://en.wikipedia.org/wiki/Exponential_distribution) and [Gamma](https://en.wikipedia.org/wiki/Gamma_distribution) distributions.
 
@@ -102,7 +127,7 @@ set.seed(0xdada)
 x1 = replicate(num_replicates, {
     sum(rexp(n = nexps, rate = rate))
 }) # end of replicate
-head(x1)
+#head(x1)
 ```
 
 To see whether the result is plausible, we can make a histogram of the simulation result and compare it to what we (in this case happen to) know is the truth.
@@ -188,9 +213,9 @@ identical(x1, x2)
 
 ## Monte Carlo simulation
 
-We show how to compute the probability of simple events using simulation.
+We show how to compute the probability of simple events using simulation. Monte Carlo simulations are simply simulations that allow you to include your uncertainty about the actual value of a parameter:  they perform risk analysis by building models of possible results by substituting a range of values—a probability distribution—for any factor that has inherent uncertainty. 
 
-Suppose we rolled two fair dice. What is the probability that their sum is at least 7? We will approach this by simulating many throws of two fair dice, and then computing the fraction of those trials whose sum is at least 7. It will be convenient to write a function that simulates the trials and returns TRUE if the sum is at least 7 (we call this an event), and FALSE otherwise.
+__Practical Use Case__ Suppose we rolled two fair dice. What is the probability that their sum is at least 7? We will approach this by simulating many throws of two fair dice, and then computing the fraction of those trials whose sum is at least 7. It will be convenient to write a function that simulates the trials and returns TRUE if the sum is at least 7 (we call this an event), and FALSE otherwise.
 
 
 ```{r setup-event}
@@ -204,7 +229,7 @@ isEvent = function(numDice, numSides, targetValue, numTrials){
 
 Now that we have our function, we are ready to do the Monte Carlo. 
 
-```{r event-seed}
+```{r event-seed, eval=FALSE}
 set.seed(0)
 #try 5 trials
 outcomes = isEvent(2, 6, 7, 5)
@@ -213,7 +238,7 @@ mean(outcomes)
 
 This is far from the theoretical answer of $\frac{21}{36}=0.58333$. Now try with 10,000 trials:
 
-```{r trials}
+```{r trials, eval=FALSE}
 set.seed(0)
 outcomes = isEvent(2, 6, 7, 10000)
 mean(outcomes)
@@ -246,7 +271,7 @@ library("Biostrings")
 Celegans
 ```
 
-Let us explore this object:
+__Data Exploration__ Let us explore this object:
 
 ```{r}
 seqnames(Celegans)
@@ -283,16 +308,18 @@ lfM
 ```
 
 Let us do a sanity check:
-```{r}
+```{r, eval=FALSE}
 sum(lfM) == length(Celegans$chrM)
 ```
 
 After normalization we get:
 
-```{r}
+```{r, eval=FALSE}
 lfM / sum(lfM)
 ```
-Could this have come from a uniform distribution on the 4 letters?
+
+
+__ Testing the uniform hypothesis with simulations__ The question that we now want to answer is: could this have come from a uniform distribution on the 4 letters?
 
 We can create a random (each letter with equal probability) sequence of the same length as the *C. elegans* chromosome M:
 
@@ -307,9 +334,9 @@ length(Celegans$chrM) / 4
 ```
 
 
-Is the _C.elegans_ data consistent with such a model? We're going to compute a statistic that measures how close two multionial outputs are to each other. We'll take the average squared difference between expected (`e`) and observed (`o`) counts, scaled by `e`. We will call the function `oestat`:
+Is the _C.elegans_ data consistent with such a model? We're going to compute a statistic that measures how close two multinomial outputs are to each other. We'll take the average squared difference between expected (`e`) and observed (`o`) counts, scaled by `e`. We will call the function `oestat`:
 
-```{r celegans-oestat}
+```{r celegans-oestat, eval=FALSE}
 oestat = function(o, e){
   sum( (e-o)^2/e )
 }
@@ -319,7 +346,7 @@ oe
 
 Is this larger than what randomness could explain? We already saw above a set of typical counts we could expect under the null model: But we need a whole set (distribution) of values. We compute these using the replicate function (which as you might recall evaluates a function many times). Try running the following
 
-```{r, celegans-replicate}
+```{r, celegans-replicate, eval=FALSE}
 set.seed(1)
 B = 10000
 n = length(Celegans$chrM)
@@ -358,7 +385,7 @@ compute_power = function(n, sigma, numTrials){
 
 How many samples do we need? Let's try 3 and 4 samples:
 
-```{r compute_power-solution}
+```{r compute_power-solution, eval=FALSE}
 set.seed(0)
 compute_power(3, 0.5, 10000)
 compute_power(4, 0.5, 10000) # So it looks like 4 samples will do it.
