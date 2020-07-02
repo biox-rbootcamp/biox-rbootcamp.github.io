@@ -22,7 +22,7 @@ data science interactively.
 - [Data Science with R](https://robust-tools.djnavarro.net/) by Danielle Navarro
 - [Variance explained blog](http://varianceexplained.org/) by David Robinson,
 a data scientist at Stack Overflow.
-- [RYOUWITHME] (https://rladiessydney.org/courses/ryouwithme/) a course by R-Ladies Sydney
+- [RYOUWITHME](https://rladiessydney.org/courses/ryouwithme/) a course by R-Ladies Sydney
 - Stack exchange [post](http://stats.stackexchange.com/questions/138/free-resources-for-learning-r).
  with more R related links
 
