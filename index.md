@@ -13,18 +13,15 @@ No prior knowledge of R or of statistics is required. This is not a graded class
 
 ## [](#announcements) Announcements
 
-**TO DO for session 1 (Monday, June 29th):** Not applicable. We will install R and get familiar with the Rstudio interface during the discussion.
+**Solution for Lab 2 and Lab 3 are posted!**
 
-**TO DO for session 2 (Wednesday, July 1st):** 
+**Please complete the [feedback survey](https://docs.google.com/forms/d/e/1FAIpQLScZU8TX7CzOJzZcGrJRlXspjaKNwempqzHdofRJfkYOHGZIFg/viewform?usp=sf_link) for first week if you haven't.**
 
-* Watch the video lectures for the session 
-* Complete the swirl exercises 
-* Complete Lab 2 **prior to the discussion.**
-
-**TO DO for session 3 (Thursday, July 2nd):** 
+**TO DO for session 4 (Monday, July 6th):** 
 
 * Watch the video lectures for the session 
-* Complete Lab 3 **prior to the discussion.**
+* Complete Lab 4 **prior to the discussion.**
+
 
 ## [](#logistics) Logistics
 
