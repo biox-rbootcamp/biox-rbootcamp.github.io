@@ -1,22 +1,50 @@
 ---
-title: "Lecture 4: Exercises"
-date: October 9th, 2018
-output: 
+title: "Basic R  Plots"
+output:
   html_notebook:
-    toc: true
-    toc_float: true
     df_print: kable
+    toc: yes
+    toc_float: yes
+  pdf_document:
+    toc: yes
+date: "July 22nd, 2020"
 ---
 
-```{r, message=FALSE, warning=FALSE}
+```{r}
 library(tidyverse)
 ```
 
+## Goal
 
-# Exercise 1: Customized scatter plot 
+The purpose of this lab is to introduce you to the most basic plotting R commands. These will provide you with very simple ways of diagnosing issues in the data, looking for patterns, etc. The functions presented in this lab will be the basics of plotting --- we will see in the next lab how to create better, publication-ready figures: the syntax is sometimes a little trickier, and although we'll try to use these better figures in the analysis as much as we can (and it's a good practice to just get accustomed to these commands), it's good to know the basics as well.
 
-You will try to recreate a [plot](https://www.economist.com/sites/default/files/imagecache/1280-width/images/2016/07/blogs/graphic-detail/20160723_woc155_1.png) from an Economist article
+
+## Video
+
+Watch the following videos to give you an idea of the most standard ways of visualizing data with R.
+
+- a) [Histograms](https://www.youtube.com/watch?v=UaXYRf6qtEg) 
+
+- b) [QQplots](https://www.youtube.com/watch?v=5F62EwMF26c) 
+
+- c) [Boxplots](https://www.youtube.com/watch?v=Hh-Pd23OmVo) 
+
+- d) [Scatter plots](https://www.youtube.com/watch?v=dmJzInKpuRE)
+
+- e) [Plots to avoid](https://www.youtube.com/watch?v=p-dYnSbBTa8) 
+
+
+Once you're done, go through the following lab to start applying these different visualization functions.
+
+# Recreating a Customized scatter plot 
+
+
+
+In this lab, you will try to recreate a [plot](https://www.economist.com/sites/default/files/imagecache/1280-width/images/2016/07/blogs/graphic-detail/20160723_woc155_1.png) from an Economist article
 showing the relationship between well-being and financial inclusion.
+
+![](https://www.economist.com/sites/default/files/imagecache/1280-width/images/2016/07/blogs/graphic-detail/20160723_woc155_1.png)
+
 
 You can find the accompanying article at this [link](http://www.economist.com/blogs/graphicdetail/2016/07/daily-chart-13)
 
@@ -24,8 +52,7 @@ The data for the exercises `EconomistData.csv` can be downloaded from
 the class github repository.
 
 ```{r}
-url <- paste0("https://raw.githubusercontent.com/cme195/cme195.github.io/",
-              "master/assets/data/EconomistData.csv")
+url <- paste0("https://raw.githubusercontent.com/biox-rbootcamp/biox-rbootcamp.github.io/master/assets/data/EconomistData.csv")
 dat <- read_csv(url)
 ```
 
@@ -38,27 +65,33 @@ head(dat)
 the x axis corresponds to percent of people over the age of 15 with a 
 bank account (the `Percent.of.15plus.with.bank.account` column)
 and the y axis corresponds to the current SEDA score `SEDA.Current.level`.
-1. Color all points blue.
-1. Color points according to the `Region` variable.
-1. Overlay a fitted smoothing trend on top of the scatter plot. Try to
-change the span argument in `geom_smooth` to a low value and see what happens.
-1. Overlay a regression line on top of the scatter plot 
-Hint: use `geom_smooth` with an appropriate method argument. 
-1. Facet the previous plot by `Region`.
+2. Color all points blue.
+3. Color points according to the `Region` variable.
+4. Overlay a regression line on top of the scatter plot 
+5. Plot a visualization where you overlay a fitted smoothing trend on top of the scatter plot. (hint: try the function scatter.smooth)
+6. Do the same previous plot --- but for one  `Region` at a time. Plot them in a grid using the par(mfrow=c(2,2)) command.
 
-# Exercise 2: Distribution of categorical variables
+# Distribution of categorical variables
 
 1. Generate a bar plot showing the number of countries included in the
 dataset from each `Region`.
-1. Rotate the plot so the bars are horizontal
+2. Rotate the plot so the bars are horizontal
 
 
-# Exercise 3: Distribution of continuous variables
+# Distribution of continuous variables
 
 1. Create boxplots of SEDA scores, `SEDA.Current.level` separately 
 for each `Region`.
-1. Overlay points on top of the box plots
-1. The points you added are on top of each other, in order to distinguish 
+2. Overlay points on top of the box plots
+3. The points you added are on top of each other, in order to distinguish 
 them jitter each point by a little bit in the horizontal direction.
-1. Now substitute your boxplot with a violin plot.
+4. Now substitute your boxplot with a violin plot
+
+```{r}
+library(vioplot)
+vioplot(x1, x2, x3, names=c("4 cyl", "6 cyl", "8 cyl"),
+   col="gold")
+title("Violin Plots of Miles Per Gallon")
+
+```
 

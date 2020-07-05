@@ -1,7 +1,7 @@
 ---
 title: "Graphics and visualization"
 author: "Week 3"
-date: "07/13/2030"
+date: "07/15/2030-07/16/2020"
 output: 
   html_document:
     toc: true
@@ -12,17 +12,39 @@ output:
 ## Goal and Video
 
 The goal of this lab is to become familiar with the grammar of graphics 
-philosophy implemented in the `R` package `ggplot2`.
-
-Work through this lab by running all the R code to your computer and making sure 
-that you understand the input and the output. 
-
-Begin by watching the [lecture on vizualization](https://drive.google.com/file/d/1BBNvt2EWtZnixHbGxnXg-vbivP7Iu0EI/view?usp=sharing): this will provide you with an introduction to the importance of plotting and give you an overview of the different plotting functions with ggplot2. This is a considerably longer video than what we've seen so far, so prepare ample time!
-
-Once you're done, go through the following lab which we will discuss on Thursday.
+philosophy implemented in the `R` package `ggplot2`. This is a newer version than basic R plots. However, it is a more powerful tool, and completely beginner friendly, so we won't go through the basic R-plots and will get you accustomed right away to this particular way of making plots. 
+To do for __Wednesday__:
 
 
-## Getting Started
+* Begin by watching the  first part of the [lecture on data visualization](https://drive.google.com/file/d/1BBNvt2EWtZnixHbGxnXg-vbivP7Iu0EI/view?usp=sharing) (0 to 56 min -- we will watch the rest for Thursday) : this will provide you with an introduction to the importance of plotting and give you an overview of the different plotting functions with ggplot2. We will work through this lab during our discussion sessions on Wednesday and Thursday.
+
+ 
+* Complement the lecture by reading this [chapter on the ggplot grammar](https://rafalab.github.io/dsbook/ggplot2.html)
+ 
+* If you are very unfamiliar with any plotting commands, you can also read the following introductory chapter on [data visualization](https://rafalab.github.io/dsbook/introduction-to-data-visualization.html) and watch the following series of very short youtube videos. Most of them use basic R code, but the arguments and the logic behind the plot is similar with ggplot2, so these are a good way of introducing the types of plots that you'll require: 
+
+   + a) [Histograms](https://www.youtube.com/watch?v=UaXYRf6qtEg) 
+   
+   + b) [QQplots](https://www.youtube.com/watch?v=5F62EwMF26c) 
+   
+   + c) [Boxplots](https://www.youtube.com/watch?v=Hh-Pd23OmVo) 
+   
+   + d) [Scatter plots](https://www.youtube.com/watch?v=dmJzInKpuRE) 
+   
+   + e) [Plots to avoid](https://www.youtube.com/watch?v=p-dYnSbBTa8) 
+       
+   + f) [On qplot-- wrapper for very simple plots with ggplot2](https://www.youtube.com/watch?v=eclAMC_WY4U)
+ 
+* Work through the first part of this lab by running all the R code to your computer and making sure that you understand the input and the output. 
+
+To do for __Thursday__:
+
+* Finish the [video lecture](https://drive.google.com/file/d/1BBNvt2EWtZnixHbGxnXg-vbivP7Iu0EI/view?usp=sharing)
+
+* Go through the rest of the labs (appropriate sections).
+
+
+## Getting Started 
 
 We will be going through some of the topics from the `ggplot2` documentation
 website, [docs.ggplot2.org](http://docs.ggplot2.org). You should keep that website open as 
@@ -38,7 +60,7 @@ In order to learn how to use `ggplot2`, we will use a few datasets
 available through the `nutshell`, `parathyroidSE`, `EnsDb.Hsapiens.v86` packages.
 
 The code below checks if all packages required for today's lab are available,
-and installs any missing ones. Note that (in the 'Lab2_graphics.Rmd' file) 
+and installs any missing ones. Note that (in the template file) 
 the chunk declaration includes the following options: 
 `message = FALSE, warning = FALSE, results = "hide"`. 
 These R Markdown settings let you suppress messages and warnings which would 
@@ -64,7 +86,7 @@ library("Biostrings")
 First, we will use a data set about births in the USA in 2006. You can read more 
 about this in the *"R in a Nutshell, 2nd edition"* book which is freely available 
 as a PDF file online.  This is convenient since you can follow the same methods 
-in that book (except translating into the grammar of graphics to make plots).
+in that book (except translating into the grammar of graphics to make plots). You can download the dataset [here](https://biox-rbootcamp.github.io/biox-rbootcamp.github.io/assets/data/births2006.smpl.rda) from the course's website.
 
 First, we load the dataset and add two new variables: 
 one to encode whether the day falls on a weekend or whether it is a weekday,
@@ -92,7 +114,7 @@ head(births_small)
 ```
 
 
-## Plot initialization & `geom`'s
+## Plot initialization & `geom`'s (Wednesday)
 
 > ggplot2 is a plotting system for R, based on the grammar of graphics. 
 It takes care of many of the fiddly details that make plotting a hassle 
@@ -197,7 +219,7 @@ Now we see that about 1/2 as many C-sections were on weekends as there were on
 a typical weekday, whereas there were about 3/4 as many vaginal births on 
 weekends as there were on weekdays.
 
-## Facets
+## Facets (Wednesday)
 
 Let's continue looking at the birth data on a day to day basis.  We might 
 conjecture that older women are less likely to take a *tocolytic* since they 
@@ -260,7 +282,7 @@ ggplot(dplyr::filter(births, !(DMETH_REC %in% "Unknown"))) +
   labs(title = "Births in USA 2006", fill="Birth\nOrder")
 ```
 
-## Statistics
+## Statistics (Wednesday)
 
 It's often useful to transform your data before plotting, and that's what 
 statistical transformations do.
@@ -349,8 +371,8 @@ to the rectangular bins used so far
 ```{r birth_weight_hex}
 ppp2 + geom_hex(bins = 30) + stat_smooth(aes(col = SEX))
 ```
-
-## Scales
+ 
+## Scales (Wednesday)
 
 Scales control the mapping between data and aesthetics. Going back to the 2d 
 distribution of birthweight versus weight gain by mothers, it is difficult to 
@@ -402,7 +424,7 @@ ppp3 + scale_size(range=c(3, 6)) + scale_color_brewer(palette = "Set1") +
 Note that, while shapes are discrete, colors and sizes can both be scaled 
 continuously.
 
-## Quantile-quantile plot
+## Quantile-quantile plot  (Wednesday)
 
 Remember that in the the power calculations section from the last lab,
 we defined a statistic estimating the deviation of the
@@ -446,7 +468,7 @@ $Chi^2_3$ (df = 1 * (4-1) = 3) using a q-q plot:
 
 
 
-## Parathyroid Example
+## Parathyroid Example (Wednesday)
 
 We will use the ``parathyroidGenesSE`` package in ``R``.  Load the data and 
 read the experimental information and the abstract.
@@ -517,7 +539,7 @@ ggplot(dat, aes(col = patient, x = treatment, y = ESR1)) +
   facet_grid( . ~ time)
 ```
 
-## Questions
+## Questions (Thursday)
 
 Answer the following questions.
 
@@ -561,11 +583,9 @@ has "values" as one of the arguments ____(..., values = (...)).
 
 **Quiz question 12** : What do Themes do in ggplot2?
   
-## CpG Islands: Optional
+## CpG Islands (Thursday)
 
-This part is a little more involved. Feel free to read through if that is of interest to you.
-
-
+Let's walk through a last example.
 
 ```{r setup2, message = FALSE, warning = FALSE, results = 'hide'}
 pkgs_needed <- c("BSgenome.Hsapiens.UCSC.hg19", "Gviz")
@@ -759,4 +779,65 @@ df <- rbind(
 ggplot(df, aes(x = score, fill = region)) +
   geom_histogram(alpha = 0.5, color = "black", position = "identity")
 ```
+
+
+
+
+## In class-exercise (Thursday)
+
+
+We will walk through the following exercise in class. Feel free to have a look beforehand, but we will solve it in groups during the Thursday session.
+
+
+### Exercise 1: Customized scatter plot 
+
+You will try to recreate a [plot](https://www.economist.com/sites/default/files/imagecache/1280-width/images/2016/07/blogs/graphic-detail/20160723_woc155_1.png) from an Economist article
+showing the relationship between well-being and financial inclusion.
+
+![](https://www.economist.com/sites/default/files/imagecache/1280-width/images/2016/07/blogs/graphic-detail/20160723_woc155_1.png)
+
+You can find the accompanying article at this [link](http://www.economist.com/blogs/graphicdetail/2016/07/daily-chart-13)
+
+The data for the exercises `EconomistData.csv` can be downloaded from 
+the class github repository.
+
+```{r}
+library(tidyverse)
+url <- paste0("https://raw.githubusercontent.com/biox-rbootcamp/biox-rbootcamp.github.io/master/assets/data/EconomistData.csv")
+dat <- read_csv(url)
+```
+
+```{r}
+head(dat)
+```
+
+
+1. Create a scatter plot similar to the one in the article, where 
+the x axis corresponds to percent of people over the age of 15 with a 
+bank account (the `Percent.of.15plus.with.bank.account` column)
+and the y axis corresponds to the current SEDA score `SEDA.Current.level`.
+2. Color all points blue.
+3. Color points according to the `Region` variable.
+4. Overlay a fitted smoothing trend on top of the scatter plot. Try to
+change the span argument in `geom_smooth` to a low value and see what happens.
+5. Overlay a regression line on top of the scatter plot 
+Hint: use `geom_smooth` with an appropriate method argument. 
+6. Facet the previous plot by `Region`.
+
+### Exercise 2: Distribution of categorical variables
+
+1. Generate a bar plot showing the number of countries included in the
+dataset from each `Region`.
+2. Rotate the plot so the bars are horizontal
+
+
+### Exercise 3: Distribution of continuous variables
+
+1. Create boxplots of SEDA scores, `SEDA.Current.level` separately 
+for each `Region`.
+2. Overlay points on top of the box plots
+3. The points you added are on top of each other, in order to distinguish 
+them jitter each point by a little bit in the horizontal direction.
+4. Now substitute your boxplot with a violin plot.
+
 
