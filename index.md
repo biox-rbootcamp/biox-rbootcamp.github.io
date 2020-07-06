@@ -25,11 +25,11 @@ No prior knowledge of R or of statistics is required. This is not a graded class
 
 **Office hour change (Monday, July 6th):** 
 
-James' office  hours will be at 3pm
+James' office hours will be at 3 PM.
 
 **Special Office Hours R-session (Tuesday, July 7th):** 
 
-James will hold a special session to go over the fundamentals of R.
+James will hold a special session to go over the fundamentals of R at 3 PM.
 
 
 ## [](#logistics) Logistics
@@ -47,7 +47,7 @@ James will hold a special session to go over the fundamentals of R.
 **Office hours:** 
 * Mon 2 - 3 PM, Tue 3 - 4 PM, Wed 3 - 4 PM, and Thu 4 - 5 PM
 * Others by appointment (please email James)
-* Zoom Meeting ID: 490 875 5281
+* Zoom Meeting ID: 490 875 5281 (password sent via email)
 
 **Communication:** 
 Please direct your questions on class materials and assignments to Claire (cdonnat at stanford dot edu) and cc James (jameszli at stanford dot edu)
@@ -90,5 +90,15 @@ Here are a couple of cheatsheets with basic R commands:
 [Short R-reference card](https://cran.r-project.org/doc/contrib/Short-refcard.pdf)
 
 [R cheatsheet](http://nicolascampione.weebly.com/uploads/1/9/4/1/19411255/r_cheat_sheet.pdf)
+
+Here are a couple of cheatsheets with data import, transformation, visualization, and rmarkdown:
+
+[Data Import](https://github.com/rstudio/cheatsheets/raw/master/data-import.pdf)
+
+[Data Transformation (dplyr)](https://github.com/rstudio/cheatsheets/raw/master/data-transformation.pdf)
+
+[Data Visualization (ggplot2)](https://github.com/rstudio/cheatsheets/raw/master/data-visualization-2.1.pdf)
+
+[Rmarkdown](https://github.com/rstudio/cheatsheets/raw/master/rmarkdown-2.0.pdf)
 
 
