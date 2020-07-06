@@ -100,7 +100,7 @@ hist(avgs)
 10. In practice we do not know $\sigma$(`popsd(y)`) which is why we can’t use the CLT directly. This is because we see a sample and not the entire distribution. We also can’t use `popsd(avgs)` because to construct averages, we have to take 10,000 samples and this is never practical. We usually just get one sample. Instead we have to estimate `popsd(y)`. As described, what we use is the sample standard deviation. Set the seed at 1, using the `replicate` function, create 10,000 samples of 25 and now, instead of the sample average, keep the standard deviation. Look at the distribution of the sample standard deviations. It is a random variable. The real population SD is about 4.5. What proportion of the sample SDs are below 3.5?
 
 
-## CLT in Practice Exercises
+## CLT in Practice Exercises (Optional)
 
 We will be using the following dataset for the next set of exercises:
 
