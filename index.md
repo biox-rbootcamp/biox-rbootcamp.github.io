@@ -23,6 +23,15 @@ No prior knowledge of R or of statistics is required. This is not a graded class
 * Complete Lab 4 **prior to the discussion.**
 
 
+**Office hour change (Monday, July 6th):** 
+
+James' office  hours will be at 3pm
+
+**Special Office Hours R-session (Tuesday, July 7th):** 
+
+James will hold a special session to go over the fundamentals of R.
+
+
 ## [](#logistics) Logistics
 
 * Location: Zoom Meeting ID: 995 9177 8894 (password sent via email)
@@ -69,4 +78,17 @@ _Objectives:_ getting familiar with R, Rstudio, R markdown, and basic statistics
 
 ["R for Data Science"](http://r4ds.had.co.nz/)
 by Garrett Grolemund and Hadley Wickham.
+
+
+
+## [](#resources) R-cheatsheets
+
+Here are a couple of cheatsheets with basic R commands:
+
+[Base R Vector](https://rstudio.com/wp-content/uploads/2016/10/r-cheat-sheet-3.pdf)
+
+[Short R-reference card](https://cran.r-project.org/doc/contrib/Short-refcard.pdf)
+
+[R cheatsheet](http://nicolascampione.weebly.com/uploads/1/9/4/1/19411255/r_cheat_sheet.pdf)
+
 
