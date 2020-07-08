@@ -1549,8 +1549,8 @@ dat &lt;- read.csv(filename) </code></pre>
 <li><p>Use <code>dplyr</code> to create a vector <span class="math inline">\(y\)</span> with the body weight of all males on the high fat (<code>hf</code>) diet. What is this population’s average?</p></li>
 <li><p>Now use the <code>rafalib</code> package and use the <code>popsd</code> function to compute the population standard deviation.</p></li>
 <li><p>Set the seed at 1. Take a random sample <span class="math inline">\(Y\)</span> of size 25 from <span class="math inline">\(y\)</span>. What is the sample average?</p></li>
-<li><p>What is the difference in absolute value between <span class="math inline">\(\bar{y} - \bar{x}\)</span> and <span class="math inline">\(\bar{X}-\bar{Y}\)</span>?</p></li>
-<li><p>Repeat the above for females. Make sure to set the seed to 1 before each sample call. What is the difference in absolute value between <span class="math inline">\(\bar{y} - \bar{x}\)</span> and <span class="math inline">\(\bar{X}-\bar{Y}\)</span>?</p></li>
+<li><p>What is the difference in absolute value between <span class="math inline">\(\bar{y} - \bar{x}\)</span> and <span class="math inline">\(\bar{X}-\bar{Y}\)</span>? Note: <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span> are the sampled vectors defined before, <span class="math inline">\(x\)</span> and <span class="math inline">\(y\)</span> represent the population vectors.</p></li>
+<li><p>Repeat the above for females. Make sure to set the seed to 1 before each sample call. What is the difference in absolute value between <span class="math inline">\(\bar{y} - \bar{x}\)</span> and <span class="math inline">\(\bar{X}-\bar{Y}\)</span>? Note: <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span> are the sampled vectors defined before, <span class="math inline">\(x\)</span> and <span class="math inline">\(y\)</span> represent the population vectors.</p></li>
 <li><p>For the females, our sample estimates were closer to the population difference than with males. What is a possible explanation for this?</p>
 <ol style="list-style-type: lower-alpha">
 <li>The population variance of the females is smaller than that of the males; thus, the sample variable has less variability.</li>
@@ -1564,16 +1564,16 @@ dat &lt;- read.csv(filename) </code></pre>
 <h2>CLT Exercises</h2>
 <p>We will be using the same dataset <code>dat</code> as above.</p>
 <ol style="list-style-type: decimal">
-<li><p>(Conceptual) If a list of numbers has a distribution that is well approximated by the normal distribution, what proportion of these numbers are within one standard deviation away from the list’s average?</p></li>
-<li><p>(Conceptual) What proportion of these numbers are within two standard deviations away from the list’s average?</p></li>
-<li><p>(Conceptual) What proportion of these numbers are within three standard deviations away from the list’s average?</p></li>
+<li><p>(Conceptual) If a list of numbers has a distribution that is well approximated by the normal distribution, what proportion of these numbers are within one standard deviation away from the list’s average? (Optional: how do you show this in R?)</p></li>
+<li><p>(Conceptual) What proportion of these numbers are within two standard deviations away from the list’s average? (Optional: how do you show this in R?)</p></li>
+<li><p>(Conceptual) What proportion of these numbers are within three standard deviations away from the list’s average? (Optional: how do you show this in R?)</p></li>
 <li><p>Define y to be the weights of males on the control diet. What proportion of the mice are within one standard deviation away from the average weight (remember to use popsd for the population sd)?</p></li>
 <li><p>What proportion of these numbers are within two standard deviations away from the list’s average?</p></li>
 <li><p>What proportion of these numbers are within three standard deviations away from the list’s average?</p></li>
 </ol>
 <p>Note that the numbers for the normal distribution and our weights are relatively close. Also, notice that we are indirectly comparing quantiles of the normal distribution to quantiles of the mouse weight distribution.</p>
 <ol start="7" style="list-style-type: decimal">
-<li>Here we are going to use the function replicate to learn about the distribution of random variables. All the above exercises relate to the normal distribution as an approximation of the distribution of a fixed list of numbers or a population. We have not yet discussed probability in these exercises. If the distribution of a list of numbers is approximately normal, then if we pick a number at random from this distribution, it will follow a normal distribution. However, it is important to remember that stating that some quantity has a distribution does not necessarily imply this quantity is random. Also, keep in mind that this is not related to the central limit theorem. The central limit applies to averages of random variables. Let’s explore this concept. <br><br> We will now take a sample of size 25 from the population of males on the chow diet. The average of this sample is our random variable. We will use the replicate to observe 10,000 realizations of this random variable. Set the seed at 1, generate these 10,000 averages. Make a histogram and qq-plot of these 10,000 numbers against the normal distribution. <br><br> We can see that, as predicted by the CLT, the distribution of the random variable is very well approximated by the normal distribution. What is the average of the distribution of the sample average?</li>
+<li>Here we are going to use the function replicate to learn about the distribution of random variables. All the above exercises relate to the normal distribution as an approximation of the distribution of a fixed list of numbers or a population. We have not yet discussed probability in these exercises. If the distribution of a list of numbers is approximately normal, then if we pick a number at random from this distribution, it will follow a normal distribution. However, it is important to remember that stating that some quantity has a distribution does not necessarily imply this quantity is random. Also, keep in mind that this is not related to the central limit theorem. The central limit applies to averages of random variables. Let’s explore this concept. <br><br> We will now take a sample of size 25 from the population of males on the chow diet. The average of this sample is our random variable. We will use the replicate to observe 10,000 realizations of this random variable. Set the seed at 1, generate these 10,000 averages. Make a histogram of these 10,000 numbers against the normal distribution using <code>hist()</code>. <br><br> We can see that, as predicted by the CLT, the distribution of the random variable is very well approximated by the normal distribution. What is the average of the distribution of the sample average?</li>
 </ol>
 <pre class="r"><code>library(dplyr)
 y &lt;- filter(dat, Sex==&quot;M&quot; &amp; Diet==&quot;chow&quot;) %&gt;% select(Bodyweight) %&gt;% unlist
@@ -1581,7 +1581,7 @@ avgs &lt;- replicate(10000, mean( sample(y, 25)))
 hist(avgs)</code></pre>
 <ol start="8" style="list-style-type: decimal">
 <li><p>What is the standard deviation of the distribution of sample averages?</p></li>
-<li><p>According to the CLT, the answer to exercise 7 should be the same as <code>mean(y)</code>. You should be able to confirm that these two numbers are very close. Which of the following does the CLT tell us should be close to your answer to exercise 10?</p>
+<li><p>According to the CLT, the answer to exercise 7 should be the same as <code>mean(y)</code>. You should be able to confirm that these two numbers are very close. Which of the following does the CLT tell us should be close to your answer to exercise 8?</p>
 <ol style="list-style-type: lower-alpha">
 <li><code>popsd(y)</code></li>
 <li><code>popsd(avgs)</code>/<code>sqrt(25)</code></li>

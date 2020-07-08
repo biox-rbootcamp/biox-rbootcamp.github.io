@@ -48,9 +48,9 @@ dat <- na.omit(dat)
 
 6. Set the seed at 1. Take a random sample $Y$ of size 25 from $y$. What is the sample average?
 
-7. What is the difference in absolute value between $\bar{y} - \bar{x}$ and $\bar{X}-\bar{Y}$?
+7. What is the difference in absolute value between $\bar{y} - \bar{x}$ and $\bar{X}-\bar{Y}$? Note: $X$ and $Y$ are the sampled vectors defined before, $x$ and $y$ represent the population vectors.
 
-8. Repeat the above for females. Make sure to set the seed to 1 before each sample call. What is the difference in absolute value between $\bar{y} - \bar{x}$ and $\bar{X}-\bar{Y}$?
+8. Repeat the above for females. Make sure to set the seed to 1 before each sample call. What is the difference in absolute value between $\bar{y} - \bar{x}$ and $\bar{X}-\bar{Y}$? Note: $X$ and $Y$ are the sampled vectors defined before, $x$ and $y$ represent the population vectors.
 
 9. For the females, our sample estimates were closer to the population difference than with males. What is a possible explanation for this?
     a. The population variance of the females is smaller than that of the males; thus, the sample variable has less variability.
@@ -62,11 +62,11 @@ dat <- na.omit(dat)
 
 We will be using the same dataset `dat` as above.
 
-1. (Conceptual) If a list of numbers has a distribution that is well approximated by the normal distribution, what proportion of these numbers are within one standard deviation away from the list’s average?
+1. (Conceptual) If a list of numbers has a distribution that is well approximated by the normal distribution, what proportion of these numbers are within one standard deviation away from the list’s average? (Optional: how do you show this in R?)
 
-2. (Conceptual) What proportion of these numbers are within two standard deviations away from the list’s average?
+2. (Conceptual) What proportion of these numbers are within two standard deviations away from the list’s average? (Optional: how do you show this in R?)
 
-3. (Conceptual) What proportion of these numbers are within three standard deviations away from the list’s average?
+3. (Conceptual) What proportion of these numbers are within three standard deviations away from the list’s average? (Optional: how do you show this in R?)
 
 4. Define y to be the weights of males on the control diet. What proportion of the mice are within one standard deviation away from the average weight (remember to use popsd for the population sd)?
 
@@ -78,7 +78,7 @@ Note that the numbers for the normal distribution and our weights are relatively
 
 7. Here we are going to use the function replicate to learn about the distribution of random variables. All the above exercises relate to the normal distribution as an approximation of the distribution of a fixed list of numbers or a population. We have not yet discussed probability in these exercises. If the distribution of a list of numbers is approximately normal, then if we pick a number at random from this distribution, it will follow a normal distribution. However, it is important to remember that stating that some quantity has a distribution does not necessarily imply this quantity is random. Also, keep in mind that this is not related to the central limit theorem. The central limit applies to averages of random variables. Let’s explore this concept.
 <br><br>
-We will now take a sample of size 25 from the population of males on the chow diet. The average of this sample is our random variable. We will use the replicate to observe 10,000 realizations of this random variable. Set the seed at 1, generate these 10,000 averages. Make a histogram and qq-plot of these 10,000 numbers against the normal distribution.
+We will now take a sample of size 25 from the population of males on the chow diet. The average of this sample is our random variable. We will use the replicate to observe 10,000 realizations of this random variable. Set the seed at 1, generate these 10,000 averages. Make a histogram of these 10,000 numbers against the normal distribution using `hist()`.
 <br><br>
 We can see that, as predicted by the CLT, the distribution of the random variable is very well approximated by the normal distribution. What is the average of the distribution of the sample average?
 
@@ -91,7 +91,7 @@ hist(avgs)
 
 8. What is the standard deviation of the distribution of sample averages?
 
-9. According to the CLT, the answer to exercise 7 should be the same as `mean(y)`. You should be able to confirm that these two numbers are very close. Which of the following does the CLT tell us should be close to your answer to exercise 10?
+9. According to the CLT, the answer to exercise 7 should be the same as `mean(y)`. You should be able to confirm that these two numbers are very close. Which of the following does the CLT tell us should be close to your answer to exercise 8?
     a. `popsd(y)`
     b. `popsd(avgs)`/`sqrt(25)`
     c. `sqrt(25)` / `popsd(y)`
