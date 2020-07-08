@@ -1,0 +1,275 @@
+---
+title: "Lab 6 Solution"
+subtitle: Introduction to basic probability models Part II
+date: "July 9th, 2020"
+output:
+  pdf_document:
+    toc: yes
+    toc_depth: '2'
+  html_document:
+    number_sections: no
+    toc: yes
+    toc_depth: 2
+    toc_float: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Watch the video for Session 6
+
+Watch the video lecture associated to Session 6 (find the link on the website) – it will walk you through concepts on a) normal distribution, b) populations, samples, and estimates, and c) central limit theorem (CLT).
+
+## Populations, Samples, and Estimates Exercises
+
+We will be using the following dataset:
+
+```{r dataset}
+library(downloader) 
+url <- "https://raw.githubusercontent.com/genomicsclass/dagdata/master/inst/extdata/mice_pheno.csv"
+filename <- basename(url)
+download(url, destfile=filename)
+dat <- read.csv(filename) 
+```
+
+Remove missing values:
+
+```{r clean}
+dat <- na.omit(dat)
+```
+
+1. Use `dplyr` to create a vector $x$ with the body weight of all males on the control (`chow`) diet. What is this population’s average?
+
+```{r}
+library(dplyr)
+
+# check each column and frequency
+table(dat$Sex)
+table(dat$Diet)
+
+x <- dat %>% filter(Sex == "M", Diet == "chow") %>% select(Bodyweight) %>% unlist
+pop_avg_control <- mean(x)
+pop_avg_control
+```
+
+2. Now use the `rafalib` package and use the `popsd` function to compute the population standard deviation.
+
+```{r}
+# install.packages("rafalib")
+library(rafalib)
+popsd(x)
+```
+
+3. Set the seed at 1. Take a random sample $X$ of size 25 from $x$. What is the sample average?
+
+```{r}
+set.seed(1)
+sample_avg_control <- mean(sample(x, size = 25, replace = FALSE))
+sample_avg_control
+```
+
+4. Use `dplyr` to create a vector $y$ with the body weight of all males on the high fat (`hf`) diet. What is this population’s average?
+
+```{r}
+y <- dat %>% filter(Sex == "M", Diet == "hf") %>% select(Bodyweight) %>% unlist
+pop_avg_hf <- mean(y)
+pop_avg_hf
+
+```
+
+5. Now use the `rafalib` package and use the `popsd` function to compute the population standard deviation.
+
+```{r}
+popsd(y)
+```
+
+6. Set the seed at 1. Take a random sample $Y$ of size 25 from $y$. What is the sample average?
+
+```{r}
+set.seed(1)
+sample_avg_hf <- mean(sample(y, size = 25, replace = FALSE))
+sample_avg_hf
+```
+
+7. What is the difference in absolute value between $\bar{y} - \bar{x}$ and $\bar{X}-\bar{Y}$? Note: $X$ and $Y$ are the sampled vectors defined before, $x$ and $y$ represent the population vectors.
+
+```{r}
+abs(sample_avg_hf - sample_avg_control)
+abs(pop_avg_hf - pop_avg_control)
+```
+
+8. Repeat the above for females. Make sure to set the seed to 1 before each sample call. What is the difference in absolute value between $\bar{y} - \bar{x}$ and $\bar{X}-\bar{Y}$? Note: $X$ and $Y$ are the sampled vectors defined before, $x$ and $y$ represent the population vectors.
+
+```{r}
+x_female <- dat %>% filter(Sex == "F", Diet == "chow") %>% select(Bodyweight) %>% unlist
+pop_avg_control_female <- mean(x_female)
+pop_avg_control_female
+
+popsd(x_female)
+
+set.seed(1)
+sample_avg_control_female <- mean(sample(x_female, size = 25, replace = FALSE))
+sample_avg_control_female
+
+y_female <- dat %>% filter(Sex == "F", Diet == "hf") %>% select(Bodyweight) %>% unlist
+pop_avg_hf_female <- mean(y_female)
+pop_avg_hf_female
+
+popsd(y_female)
+
+set.seed(1)
+sample_avg_hf_female <- mean(sample(y_female, size = 25, replace = FALSE))
+sample_avg_hf_female
+
+abs(sample_avg_hf_female - sample_avg_control_female)
+abs(pop_avg_hf_female - pop_avg_control_female)
+```
+
+
+9. For the females, our sample estimates were closer to the population difference than with males. What is a possible explanation for this?
+    a. The population variance of the females is smaller than that of the males; thus, the sample variable has less variability.
+    b. Statistical estimates are more precise for females.
+    c. The sample size was larger for females.
+    d. The sample size was smaller for females.
+    
+**Answer** a and c 
+
+## CLT Exercises
+
+We will be using the same dataset `dat` as above.
+
+1. (Conceptual) If a list of numbers has a distribution that is well approximated by the normal distribution, what proportion of these numbers are within one standard deviation away from the list’s average?
+
+**Answer** 68% (to be precise 68.27%)
+
+```{r}
+pnorm(1) - (1 - pnorm(1))
+```
+
+2. (Conceptual) What proportion of these numbers are within two standard deviations away from the list’s average?
+
+**Answer** 95% (to be precise 95.45%)
+
+```{r}
+pnorm(2) - (1 - pnorm(2))
+```
+
+3. (Conceptual) What proportion of these numbers are within three standard deviations away from the list’s average?
+
+**Answer** 99.7% (to be precise 99.73%)
+
+```{r}
+pnorm(3) - (1 - pnorm(3))
+```
+
+4. Define y to be the weights of males on the control diet. What proportion of the mice are within one standard deviation away from the average weight (remember to use popsd for the population sd)?
+
+```{r}
+y <- dat %>% filter(Sex == "M", Diet == "hf") %>% select(Bodyweight) %>% unlist
+upper_bound1 <- mean(y) + popsd(y)
+lower_bound1 <- mean(y) - popsd(y)
+
+mean(y <= upper_bound1 & y >= lower_bound1)
+```
+
+5. What proportion of these numbers are within two standard deviations away from the list’s average?
+
+```{r}
+upper_bound2 <- mean(y) + 2* popsd(y)
+lower_bound2 <- mean(y) - 2* popsd(y)
+
+mean(y <= upper_bound2 & y >= lower_bound2)
+```
+
+6. What proportion of these numbers are within three standard deviations away from the list’s average?
+
+```{r}
+upper_bound3 <- mean(y) + 3* popsd(y)
+lower_bound3 <- mean(y) - 3* popsd(y)
+
+mean(y <= upper_bound3 & y >= lower_bound3)
+```
+
+Note that the numbers for the normal distribution and our weights are relatively close. Also, notice that we are indirectly comparing quantiles of the normal distribution to quantiles of the mouse weight distribution.
+
+7. Here we are going to use the function replicate to learn about the distribution of random variables. All the above exercises relate to the normal distribution as an approximation of the distribution of a fixed list of numbers or a population. We have not yet discussed probability in these exercises. If the distribution of a list of numbers is approximately normal, then if we pick a number at random from this distribution, it will follow a normal distribution. However, it is important to remember that stating that some quantity has a distribution does not necessarily imply this quantity is random. Also, keep in mind that this is not related to the central limit theorem. The central limit applies to averages of random variables. Let’s explore this concept.
+<br><br>
+We will now take a sample of size 25 from the population of males on the chow diet. The average of this sample is our random variable. We will use the replicate to observe 10,000 realizations of this random variable. Set the seed at 1, generate these 10,000 averages. Make a histogram of these 10,000 numbers against the normal distribution using `hist()`.
+<br><br>
+We can see that, as predicted by the CLT, the distribution of the random variable is very well approximated by the normal distribution. What is the average of the distribution of the sample average?
+
+```{r replicate}
+library(dplyr)
+y <- filter(dat, Sex=="M" & Diet=="chow") %>% select(Bodyweight) %>% unlist
+avgs <- replicate(10000, mean( sample(y, 25)))
+hist(avgs)
+
+mean(avgs)
+```
+
+8. What is the standard deviation of the distribution of sample averages?
+
+```{r}
+popsd(avgs)
+```
+
+9. According to the CLT, the answer to exercise 7 should be the same as `mean(y)`. You should be able to confirm that these two numbers are very close. Which of the following does the CLT tell us should be close to your answer to exercise 8?
+    a. `popsd(y)`
+    b. `popsd(avgs)`/`sqrt(25)`
+    c. `sqrt(25)` / `popsd(y)`
+    d. `popsd(y)`/`sqrt(25)`
+
+**Answer:** a
+
+10. In practice we do not know $\sigma$(`popsd(y)`) which is why we can’t use the CLT directly. This is because we see a sample and not the entire distribution. We also can’t use `popsd(avgs)` because to construct averages, we have to take 10,000 samples and this is never practical. We usually just get one sample. Instead we have to estimate `popsd(y)`. As described, what we use is the sample standard deviation. Set the seed at 1, using the `replicate` function, create 10,000 samples of 25 and now, instead of the sample average, keep the standard deviation. Look at the distribution of the sample standard deviations. It is a random variable. The real population SD is about 4.5. What proportion of the sample SDs are below 3.5?
+
+```{r}
+set.seed(1)
+SDs <- replicate(10000, sd( sample(y, 25)))
+hist(SDs)
+
+# proportion of the sample SDs below 3.5
+mean(SDs < 3.5)
+```
+
+
+## CLT in Practice Exercises (Optional)
+
+We will be using the following dataset for the next set of exercises:
+
+```{r dataCLT}
+url <- "https://raw.githubusercontent.com/genomicsclass/dagdata/master/inst/extdata/femaleMiceWeights.csv"
+filename <- "femaleMiceWeights.csv"
+if(!file.exists("femaleMiceWeights.csv")) download(url,destfile=filename)
+df <- read.csv(filename) 
+```
+
+1. For quantitative data,  we need to estimate the population standard deviation.
+<br><br>
+In several previous exercises we have illustrated statistical concepts with the unrealistic situation of having access to the entire population. In practice, we do not have access to entire populations. Instead, we obtain one random sample and need to reach conclusions analyzing that data. dat is an example of a typical simple dataset representing just one sample. We have 12 measurements for each of two populations. 
+<br><br>
+We think of X as a random sample from the population of all mice in the control diet and Y as a random sample from the population of all mice in the high fat diet.
+<br><br>
+Define the parameter $\mu_x$ as the average of the control population. We estimate this parameter with the sample average $\bar{X}$. What is the sample average?
+
+```{r filter, eval = F}
+library(dplyr)
+X <- filter(dat, Diet=="chow") %>% select(Bodyweight) %>% unlist
+Y <- filter(dat, Diet=="hf") %>% select(Bodyweight) %>% unlist
+```
+  
+
+2. We don’t know $\mu_X$ , but want to use $\bar{X}$ to understand $\mu_X$. Which of the following uses CLT to understand how well $\bar{X}$ approximates $\mu_X$ ?
+    a. $\bar{X}$ follows a normal distribution with mean 0 and standard deviation 1.
+    b. $\mu_X$ follows a normal distribution with mean $\bar{X}$ and standard deviation $\frac{\sigma_x}{\sqrt(12)}$ where $\sigma_x$ is the population standard deviation.
+    c. $\bar{X}$ follows a normal distribution with mean $\mu_X$ and standard deviation $\sigma_x$ where $\sigma_x$ is the population standard deviation.
+    d. $\bar{X}$ follows a normal distribution with mean $\mu_X$ and standard deviation $\frac{\sigma_x}{\sqrt(12)}$ where $\sigma_x$ is the population standard deviation.
+
+
+3. The result above tells us the distribution of the following random variable: $Z = \sqrt{12}\frac{\bar{X} - \mu_{X}}{\sigma_X}$. What does the CLT tell us is the mean of $Z$ (you don’t need code)?
+
+4. The result of 2 and 3 tell us that we know the distribution of the difference between our estimate and what we want to estimate, but don’t know. However, the equation involves the population standard deviation $\sigma_X$, which we don’t know. Given what we discussed, what is your estimate of $\sigma_x$?
+
+5. Use the CLT to approximate the probability that our estimate $\bar{X}$ is off by more than 5.21 ounces from $\mu_X$.
+
