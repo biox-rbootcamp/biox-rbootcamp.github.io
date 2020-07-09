@@ -1597,7 +1597,7 @@ hist(avgs)</code></pre>
 <pre class="r"><code>url &lt;- &quot;https://raw.githubusercontent.com/genomicsclass/dagdata/master/inst/extdata/femaleMiceWeights.csv&quot;
 filename &lt;- &quot;femaleMiceWeights.csv&quot;
 if(!file.exists(&quot;femaleMiceWeights.csv&quot;)) download(url,destfile=filename)
-df &lt;- read.csv(filename) </code></pre>
+dat &lt;- read.csv(filename) </code></pre>
 <ol style="list-style-type: decimal">
 <li>For quantitative data, we need to estimate the population standard deviation. <br><br> In several previous exercises we have illustrated statistical concepts with the unrealistic situation of having access to the entire population. In practice, we do not have access to entire populations. Instead, we obtain one random sample and need to reach conclusions analyzing that data. dat is an example of a typical simple dataset representing just one sample. We have 12 measurements for each of two populations. <br><br> We think of X as a random sample from the population of all mice in the control diet and Y as a random sample from the population of all mice in the high fat diet. <br><br> Define the parameter <span class="math inline">\(\mu_x\)</span> as the average of the control population. We estimate this parameter with the sample average <span class="math inline">\(\bar{X}\)</span>. What is the sample average?</li>
 </ol>

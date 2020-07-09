@@ -242,7 +242,7 @@ We will be using the following dataset for the next set of exercises:
 url <- "https://raw.githubusercontent.com/genomicsclass/dagdata/master/inst/extdata/femaleMiceWeights.csv"
 filename <- "femaleMiceWeights.csv"
 if(!file.exists("femaleMiceWeights.csv")) download(url,destfile=filename)
-df <- read.csv(filename) 
+dat <- read.csv(filename) 
 ```
 
 1. For quantitative data,  we need to estimate the population standard deviation.
@@ -253,7 +253,7 @@ We think of X as a random sample from the population of all mice in the control 
 <br><br>
 Define the parameter $\mu_x$ as the average of the control population. We estimate this parameter with the sample average $\bar{X}$. What is the sample average?
 
-```{r filter, eval = F}
+```{r filter}
 library(dplyr)
 X <- filter(dat, Diet=="chow") %>% select(Bodyweight) %>% unlist
 Y <- filter(dat, Diet=="hf") %>% select(Bodyweight) %>% unlist

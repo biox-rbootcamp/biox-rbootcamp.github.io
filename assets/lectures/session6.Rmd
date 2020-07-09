@@ -108,7 +108,7 @@ We will be using the following dataset for the next set of exercises:
 url <- "https://raw.githubusercontent.com/genomicsclass/dagdata/master/inst/extdata/femaleMiceWeights.csv"
 filename <- "femaleMiceWeights.csv"
 if(!file.exists("femaleMiceWeights.csv")) download(url,destfile=filename)
-df <- read.csv(filename) 
+dat <- read.csv(filename) 
 ```
 
 1. For quantitative data,  we need to estimate the population standard deviation.
