@@ -133,7 +133,7 @@ abs(pop_avg_hf_female - pop_avg_control_female)
     c. The sample size was larger for females.
     d. The sample size was smaller for females.
     
-**Answer** a and c 
+**Answer** a
 
 ## CLT Exercises
 
@@ -145,6 +145,8 @@ We will be using the same dataset `dat` as above.
 
 ```{r}
 pnorm(1) - (1 - pnorm(1))
+## OR
+pnorm(1) - pnorm(-1)
 ```
 
 2. (Conceptual) What proportion of these numbers are within two standard deviations away from the list’s average?
@@ -153,6 +155,8 @@ pnorm(1) - (1 - pnorm(1))
 
 ```{r}
 pnorm(2) - (1 - pnorm(2))
+## OR
+pnorm(2) - pnorm(-2)
 ```
 
 3. (Conceptual) What proportion of these numbers are within three standard deviations away from the list’s average?
@@ -161,6 +165,8 @@ pnorm(2) - (1 - pnorm(2))
 
 ```{r}
 pnorm(3) - (1 - pnorm(3))
+## OR
+pnorm(3) - pnorm(-3)
 ```
 
 4. Define y to be the weights of males on the control diet. What proportion of the mice are within one standard deviation away from the average weight (remember to use popsd for the population sd)?
@@ -171,6 +177,11 @@ upper_bound1 <- mean(y) + popsd(y)
 lower_bound1 <- mean(y) - popsd(y)
 
 mean(y <= upper_bound1 & y >= lower_bound1)
+
+
+## MORE ELEGANT WAY (Credit to Breakout Room 1)
+prop <- (y-mean(y))/popsd(y)
+mean(abs(prop) <= 1)
 ```
 
 5. What proportion of these numbers are within two standard deviations away from the list’s average?
@@ -180,6 +191,10 @@ upper_bound2 <- mean(y) + 2* popsd(y)
 lower_bound2 <- mean(y) - 2* popsd(y)
 
 mean(y <= upper_bound2 & y >= lower_bound2)
+
+## MORE ELEGANT WAY (Credit to Breakout Room 1)
+prop <- (y-mean(y))/popsd(y)
+mean(abs(prop) <= 2)
 ```
 
 6. What proportion of these numbers are within three standard deviations away from the list’s average?
@@ -189,6 +204,10 @@ upper_bound3 <- mean(y) + 3* popsd(y)
 lower_bound3 <- mean(y) - 3* popsd(y)
 
 mean(y <= upper_bound3 & y >= lower_bound3)
+
+## MORE ELEGANT WAY (Credit to Breakout Room 1)
+prop <- (y-mean(y))/popsd(y)
+mean(abs(prop) <= 3)
 ```
 
 Note that the numbers for the normal distribution and our weights are relatively close. Also, notice that we are indirectly comparing quantiles of the normal distribution to quantiles of the mouse weight distribution.
@@ -211,7 +230,7 @@ mean(avgs)
 8. What is the standard deviation of the distribution of sample averages?
 
 ```{r}
-popsd(avgs)
+sd(avgs)
 ```
 
 9. According to the CLT, the answer to exercise 7 should be the same as `mean(y)`. You should be able to confirm that these two numbers are very close. Which of the following does the CLT tell us should be close to your answer to exercise 8?
@@ -220,7 +239,7 @@ popsd(avgs)
     c. `sqrt(25)` / `popsd(y)`
     d. `popsd(y)`/`sqrt(25)`
 
-**Answer:** a
+**Answer:** d
 
 10. In practice we do not know $\sigma$(`popsd(y)`) which is why we can’t use the CLT directly. This is because we see a sample and not the entire distribution. We also can’t use `popsd(avgs)` because to construct averages, we have to take 10,000 samples and this is never practical. We usually just get one sample. Instead we have to estimate `popsd(y)`. As described, what we use is the sample standard deviation. Set the seed at 1, using the `replicate` function, create 10,000 samples of 25 and now, instead of the sample average, keep the standard deviation. Look at the distribution of the sample standard deviations. It is a random variable. The real population SD is about 4.5. What proportion of the sample SDs are below 3.5?
 
@@ -257,6 +276,9 @@ Define the parameter $\mu_x$ as the average of the control population. We estima
 library(dplyr)
 X <- filter(dat, Diet=="chow") %>% select(Bodyweight) %>% unlist
 Y <- filter(dat, Diet=="hf") %>% select(Bodyweight) %>% unlist
+
+X_bar <- mean(X)
+X_bar
 ```
   
 
@@ -266,10 +288,20 @@ Y <- filter(dat, Diet=="hf") %>% select(Bodyweight) %>% unlist
     c. $\bar{X}$ follows a normal distribution with mean $\mu_X$ and standard deviation $\sigma_x$ where $\sigma_x$ is the population standard deviation.
     d. $\bar{X}$ follows a normal distribution with mean $\mu_X$ and standard deviation $\frac{\sigma_x}{\sqrt(12)}$ where $\sigma_x$ is the population standard deviation.
 
+**Answer**: d
 
 3. The result above tells us the distribution of the following random variable: $Z = \sqrt{12}\frac{\bar{X} - \mu_{X}}{\sigma_X}$. What does the CLT tell us is the mean of $Z$ (you don’t need code)?
 
+**Answer**: 0
+
 4. The result of 2 and 3 tell us that we know the distribution of the difference between our estimate and what we want to estimate, but don’t know. However, the equation involves the population standard deviation $\sigma_X$, which we don’t know. Given what we discussed, what is your estimate of $\sigma_x$?
+
+```{r}
+sd(X)
+```
 
 5. Use the CLT to approximate the probability that our estimate $\bar{X}$ is off by more than 5.21 ounces from $\mu_X$.
 
+```{r}
+2 * ( 1-pnorm(5.21/sd(X) * sqrt(12) ) )
+```
