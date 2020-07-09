@@ -13,23 +13,12 @@ No prior knowledge of R or of statistics is required. This is not a graded class
 
 ## [](#announcements) Announcements
 
-**Solution for Lab 2 and Lab 3 are posted!**
+**Solution for Lab 4 and Lab 5 are posted!**
 
-**Please complete the [feedback survey](https://docs.google.com/forms/d/e/1FAIpQLScZU8TX7CzOJzZcGrJRlXspjaKNwempqzHdofRJfkYOHGZIFg/viewform?usp=sf_link) for first week if you haven't.**
-
-**TO DO for session 4 (Monday, July 6th):** 
+**TO DO for session 6 (Thursday, July 9th):** 
 
 * Watch the video lectures for the session 
-* Complete Lab 4 **prior to the discussion.**
-
-
-**Office hour change (Monday, July 6th):** 
-
-James' office hours will be at 3 PM.
-
-**Special Office Hours R-session (Tuesday, July 7th):** 
-
-James will hold a special session to go over the fundamentals of R at 3 PM.
+* Complete Lab 6 **prior to the discussion.**
 
 
 ## [](#logistics) Logistics
