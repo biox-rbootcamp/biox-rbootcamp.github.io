@@ -13,23 +13,22 @@ No prior knowledge of R or of statistics is required. This is not a graded class
 
 ## [](#announcements) Announcements
 
-**Solution for Lab 2 and Lab 3 are posted!**
+**Solution for Lab 6 are posted!**
 
-**Please complete the [feedback survey](https://docs.google.com/forms/d/e/1FAIpQLScZU8TX7CzOJzZcGrJRlXspjaKNwempqzHdofRJfkYOHGZIFg/viewform?usp=sf_link) for first week if you haven't.**
-
-**TO DO for session 4 (Monday, July 6th):** 
+**TO DO for session 7 (Monday, July 13th):** 
 
 * Watch the video lectures for the session 
-* Complete Lab 4 **prior to the discussion.**
+* Complete Lab 7 **prior to the discussion.**
 
+**TO DO for session 8 (Wednesday, July 15th):** 
 
-**Office hour change (Monday, July 6th):** 
+* Watch the video lectures for the session 
+* Complete Lab 8 **prior to the discussion.**
 
-James' office  hours will be at 3pm
+**TO DO for session 9 (Thursday, July 16th):** 
 
-**Special Office Hours R-session (Tuesday, July 7th):** 
-
-James will hold a special session to go over the fundamentals of R.
+* Watch the video lectures for the session 
+* Complete Lab 9 **prior to the discussion.**
 
 
 ## [](#logistics) Logistics
@@ -47,7 +46,7 @@ James will hold a special session to go over the fundamentals of R.
 **Office hours:** 
 * Mon 2 - 3 PM, Tue 3 - 4 PM, Wed 3 - 4 PM, and Thu 4 - 5 PM
 * Others by appointment (please email James)
-* Zoom Meeting ID: 490 875 5281
+* Zoom Meeting ID: 490 875 5281 (password sent via email)
 
 **Communication:** 
 Please direct your questions on class materials and assignments to Claire (cdonnat at stanford dot edu) and cc James (jameszli at stanford dot edu)
@@ -90,5 +89,15 @@ Here are a couple of cheatsheets with basic R commands:
 [Short R-reference card](https://cran.r-project.org/doc/contrib/Short-refcard.pdf)
 
 [R cheatsheet](http://nicolascampione.weebly.com/uploads/1/9/4/1/19411255/r_cheat_sheet.pdf)
+
+Here are a couple of cheatsheets with data import, transformation, visualization, and rmarkdown:
+
+[Data Import](https://github.com/rstudio/cheatsheets/raw/master/data-import.pdf)
+
+[Data Transformation (dplyr)](https://github.com/rstudio/cheatsheets/raw/master/data-transformation.pdf)
+
+[Data Visualization (ggplot2)](https://github.com/rstudio/cheatsheets/raw/master/data-visualization-2.1.pdf)
+
+[Rmarkdown](https://github.com/rstudio/cheatsheets/raw/master/rmarkdown-2.0.pdf)
 
 
