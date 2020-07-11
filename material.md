@@ -15,15 +15,15 @@ layout: cme195
 | 7 | M | Simulations | Lecture: Simulations [a) Simulations: ex1](https://www.youtube.com/watch?v=Xfdg0xqFjts)  [b) Simulations: ex2 (CLT)](https://www.youtube.com/watch?v=HLFqrY4QU9Q) [c)Generating simulated data](https://www.youtube.com/watch?v=tvv4IA8PEzw) | [Lab 7: Simulations](./biox-rbootcamp.github.io/assets/lectures/Lab2_simulations/Lab2_simulations.html)  | |  |
 | 8 | W |  | [Lecture:  Plotting with ggplot2 (I)](https://drive.google.com/file/d/1BBNvt2EWtZnixHbGxnXg-vbivP7Iu0EI/view?usp=sharing)| [Lab 8: ggplot2 (I)](./biox-rbootcamp.github.io/assets/lectures/Lab3_graphics/Lab3_graphics.html)|  |  |
 | 9 | Th |  | [Lecture:  Plotting with ggplot2 (II)](https://drive.google.com/file/d/1BBNvt2EWtZnixHbGxnXg-vbivP7Iu0EI/view?usp=sharing) | [Lab 9: ggplot2 (II)](./biox-rbootcamp.github.io/assets/lectures/Lab3_graphics/Lab3_graphics.html)  |  |
-| 10 | M | Mixtures and Bootstrap tests | [Lecture: Mixtures ](https://drive.google.com/file/d/1aXFkzL1tWYLnAf5PKkwMGvai6NUaHrnb/view?usp=sharing)  | Lab 10 |  |  |
-| 11 | W |  | [Lecture: Permutation tests]()  | Lab 11 |  |
-| 12 | Th |  | [Lecture: The Bootstrap]()  |  Lab 12 |  |
-| 13 | M | Clustering | [Lecture: Kmeans and density based clustering](https://drive.google.com/file/d/1ekIRX3Fi_TWMnwJhTeW4RrXslfot_sVE/view?usp=sharing) | Lab 13 |  |  |
-| 14 | W |  | [Lecture: Choosing the number of clusters]()| Lab 14 |  |
-| 15 | Th |  |  [Lecture: Hierarchical Clustering]() | Lab 15  |  |
-| 16 | M | Testing + Stats modeling| [Lecture: Testing + multiple hypothesis testing]() | Lab 16 |  |  |
-| 17 | W |  | [Lecture: Regression]() | Lab 17 |  |
-| 18 | Th |  |[Lecture: GLM]() |  Lab 18 |  |
+| 10 | M | Clustering | [Lecture: Kmeans and density based clustering](https://drive.google.com/file/d/1ekIRX3Fi_TWMnwJhTeW4RrXslfot_sVE/view?usp=sharing) | Lab 10 |  |  |
+| 11 | W |  | [Lecture: Choosing the number of clusters]()| Lab 11 |  |
+| 12 | Th |  |  [Lecture: Hierarchical Clustering]() | [Lab 12]  |  |
+| 13 | M | Testing + Stats modeling| [Lecture: Testing + multiple hypothesis testing]() | Lab 13 |  |  |
+| 14 | W |  | [Lecture: Regression]() | Lab 14 |  |
+| 15 | Th |  |[Lecture: GLM]() |  Lab 15 |  |
+| 16 | M | Mixtures and Bootstrap tests | [Lecture: Mixtures ](https://drive.google.com/file/d/1aXFkzL1tWYLnAf5PKkwMGvai6NUaHrnb/view?usp=sharing)  | Lab 16 |  |  |
+| 17 | W |  | [Lecture: Permutation tests]()  | Lab 17 |  |
+| 18 | Th |  | [Lecture: The Bootstrap]()  |  Lab 18 |  |
 | 19 | M |  Multivariate analysis | [Lecture: Multivariate analysis overview](https://drive.google.com/file/d/1BBNvt2EWtZnixHbGxnXg-vbivP7Iu0EI/view?usp=sharing)  | Lab 19 |  |  |
 | 20 | W |  |  [Lecture: SVD]() | Lab 20|  |
 | 21 | Th |  | [Lecture: Correlations]() |Lab 21  |  |
