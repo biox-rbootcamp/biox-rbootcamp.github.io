@@ -398,8 +398,9 @@ Try playing around with other inputs to the ```computer_power``` function; what 
 
 To sum up, consider the following exercises (to be done in class).
 
-1. You want to invest in Netflix stock options. You know that the log return  follows a normal distribution, such that:
+1. You want to invest in Netflix stock options.  You know that the log return  follows a normal distribution, such that:
 $$ \log(\frac{p_{t+1}}{p_t})  \sim N(0.001, 0.01)$$
+The price at day 1 is 1 dollar. 
 
 a. If you invest, what is the probability of the price doubling over the next hundred days?
 

@@ -383,7 +383,7 @@ A difference of .14 or 14% was never produced by chance, it was completely outsi
 
 ### Decision criteria and p-values
 
-What hypothesis testing quantifies is thus a probability: it is the probability to observe a statistic (here, the difference in means) as extreme (or big) as we do under chance alone. This probability is known as the _p-value for your test_.
+What hypothesis testing quantifies is thus a probability: it is the probability to observe a statistic (here, the difference in means) as extreme (or big) as we do under chance alone. This probability is known as the _p-value for your test_. The scenario in which the change between the two groups is due to chance alone is known as __``the null hypothesis``__. Thus, the core ingredient in statistical inference is in defining what chance looks like -- for instance, by making assumptions on the shapes of the distributions, like in the previous section.
 
 So now, you have you p-value as a metric to quantify how "likely" is your event under chance alone. You thus need to specify when that probability is low enough to say that chance is unlikely to have caused the change: this is called "Rejecting the null hypothesis". 
 
@@ -391,7 +391,8 @@ When you are determining whether or not chance could have produced a difference 
 
 **Alpha**. Researchers often set what is called an **alpha** criteria. This draws a line in the histogram, and says I will be comfortable assuming that chance did not produce my differences, when chance produces difference less than X percent of the time. This X percent, is the alpha value. For example, it is often set to 5%, or **p <= .05**. 
 
-Where is 5% of the time on our histogram? What mean difference or greater happens less than or equal to 5% of the time.
+Where is 5% of the time on our histogram? What mean difference or greater happens less than or equal to 5% of the time?
+
 
 ### Finding the critical region
 
@@ -433,14 +434,14 @@ Think of hypothesis testing as a general recipe to diagnose a dataset. The steps
 
 Step 1. Choose your test statistic -- that is, the variable that you want to measure (i.e, the difference in means,the absolute value of the difference, etc. ) and write down the null hypothesis.
 
-Step 2. Find a distribution for your statistic under the null
+Step 2. Find a distribution for your statistic under the null ---  that is, figure out what "chance" looks like.
 
 Step 3. Compute the probability of observing a  value ``as extreme as your statistic, or more'' under the null.
 
 
-### The t-test
+### A first example of the recipe: The t-test
 
-By way of example, let's focus on a very common test : the t-test. Watch the following [video here](https://crumplab.github.io/statistics/t-tests.html) on the t-test.
+By way of example, let's focus on a very common test : the t-test. Watch the following [video here](https://crumplab.github.io/statistics/t-tests.html) on the t-test, and read through the following section.
 
 The t-test was devised by William Gosset (1908), a chemist at **the Guiness brewery**,to select best the yielding varieties of barley. Among its typical applications:
 
@@ -450,9 +451,11 @@ The t-test was devised by William Gosset (1908), a chemist at **the Guiness brew
 
 Indeed, suppose you have observations $X_1, \cdots X_n$ for the control group in your experiment, and $Y_1, \cdots Y_n$ for the treatment group. You want to measure the existence of a difference between the two groups.
 
-Step 1. test-statistic : $T = |\bar{X} - \bar{Y}|$. Under the null, there is no difference between $\bar{X}$ and $\bar{Y}$ and they are sampled from the same distribution.
+Step 1. Defining a test-statistic : $T = |\bar{X} - \bar{Y}|$. .
 
-Step 2. Null distribution: by the central limit theorem:
+Step 2. Null distribution: Under the null, there is no difference between $\bar{X}$ and $\bar{Y}$ and they are sampled from the same distribution. Now, let's figure out what would be the distribution of our statistic under the null. 
+
+By the central limit theorem:
 $\bar{X} - \bar{Y} \sim N(0, 2\frac{\sigma^2}{n})$
 
 The trick is that we do not necessarily know the variance $\sigma^2$. This is where the t-distribution comes in handy. What Gausset proved was the follwoing.
@@ -461,17 +464,14 @@ If $X_i \sim \mathcal{N}(\mu, \sigma^2)$, the empirical estimates for mean
 and variance are:
 $\bar X = \frac{1}{n}\sum_{i = 1}^{n} X_i$ and 
 $s^2 = \frac{1}{n - 1}\sum_{i = 1}^n(X_i -\bar X)^2$
-
-The t-statistic is:
+Let's replace the $\sigma^2$ by $s^2$ in our statistic, which comes the t-statistic:
 
 $$
 T = \frac{\bar X −mu}{s/\sqrt{n}}\sim t_{\nu=n-1}
 $$
+This statistic is known to be a t distribution with n-1 degrees of freedom.
 
-In general, used when the test statistic would follow a normal distribution 
-if the value of a scaling term in the test statistic were known.
-
-Step 3. Compute the associated p-value. For reference, the t-distribution has the following shape.
+Step 3. Compute the associated p-value using `pt` for instance. For reference, the t-distribution has the following shape.
 
 
 ```{r, fold.plot=FALSE, echo=FALSE, out.width='50%'}
@@ -578,7 +578,7 @@ for `hwy` for each year group.
 
 
 
-__ Acknowledgedments__:
+__Acknowledgedments__:
 
 This lab was:
 

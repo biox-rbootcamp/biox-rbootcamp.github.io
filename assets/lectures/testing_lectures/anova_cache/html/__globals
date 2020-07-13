@@ -1,0 +1,21 @@
+unnamed-chunk-2	c	data.frame	rep	rnorm	set.seed
+unnamed-chunk-3	melatonin
+unnamed-chunk-4	~	melatonin	t.test
+unnamed-chunk-5	~	$	melatonin	t.test
+unnamed-chunk-6	~	boxplot	melatonin
+unnamed-chunk-7	==	~	$	abline	aov	boxplot	c	curve	dnorm	factor	glance	LETTERS	library	list	max	mean	min	plot	rep	rnorm	rug	segments	stripchart	x
+unnamed-chunk-8	c	library	manipulate	mu_a	mu_b	mu_c	n	par	plot_anova	sigma	slider
+unnamed-chunk-9	c	par	plot_anova	set.seed
+unnamed-chunk-10	c	par	plot_anova	set.seed
+unnamed-chunk-11	c	par	plot_anova	set.seed
+unnamed-chunk-12	c	par	plot_anova	set.seed
+unnamed-chunk-13	~	coagulation	library	names	plot
+unnamed-chunk-14	~	aov	coagulation	summary
+unnamed-chunk-15	$	coag_aov	coagulation	data.frame	predict	unique
+unnamed-chunk-16	~	$	aov	as.factor	c	data.frame	is.factor	rep	rnorm	set.seed	summary
+unnamed-chunk-17	[[	~	$	aov	c	curve	data.frame	df	hist	ifelse	library	rep	replicate	rnorm	summary	x
+unnamed-chunk-18	<	mean	replicate	sim_anova
+unnamed-chunk-19	<	mean	replicate	sim_anova
+unnamed-chunk-20	<	mean	replicate	sim_anova
+unnamed-chunk-21	coag	coagulation	diet	pairwise.t.test	with
+unnamed-chunk-22	coag	coagulation	diet	pairwise.t.test	with

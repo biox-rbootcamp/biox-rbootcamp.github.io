@@ -16,7 +16,7 @@ philosophy implemented in the `R` package `ggplot2`. This is a newer version tha
 To do for __Wednesday__:
 
 
-* Begin by watching the  first part of the [lecture on data visualization](https://drive.google.com/file/d/1BBNvt2EWtZnixHbGxnXg-vbivP7Iu0EI/view?usp=sharing) (0 to 56 min -- we will watch the rest for Thursday) : this will provide you with an introduction to the importance of plotting and give you an overview of the different plotting functions with ggplot2. We will work through this lab during our discussion sessions on Wednesday and Thursday.
+* Begin by watching the  first part of the [lecture on data visualization](https://drive.google.com/file/d/1BBNvt2EWtZnixHbGxnXg-vbivP7Iu0EI/view?usp=sharing) (0 to 56 min -- we will watch the rest for Thursday) : this will provide you with an introduction to the importance of plotting and give you an overview of the different plotting functions with ggplot2. We will work through this lab during our discussion sessions on Wednesday and Thursday. You should run the different chunks of code, and observe the structure, as well as try tweaking the input to see how ggplot2 works.
 
  
 * Complement the lecture by reading this [chapter on the ggplot grammar](https://rafalab.github.io/dsbook/ggplot2.html)
@@ -162,7 +162,22 @@ ppp <- ggplot(births_small)
 
 Note that this doesn't actually plot anything (just like if you wrote 
 `junk <- 7` doesn't output anything until you run `junk`.
-What happens here when you run `ppp`? 
+
+__Question__ : What happens here when you run `ppp`? 
+
+The idea is that you then need to add the objects that you want to plot to `ppp` -- a little like legos.
+
+
+Let's start of easy by plotting a scatter plot, to understand the relation between weight gain and estimated gestational time.
+To create a geometric object layer for a **scatter plot we use the 
+function `geom_point()`**.In order for it to know what part of the data we want
+to actually plot, we need to give an aesthetic. We can do this by declaring 
+that **the aesthetic for the x-axis is the estimated gestation time and y is the weight gain*.
+
+```{r}
+print(ppp + geom_point(aes(x=ESTGEST, y=WTGAIN)))
+```
+
 
 The number of births per day of the week can be shown easily in a barplot,
 so let's use that. To create a geometric object layer for a **barplot we use the 
@@ -539,7 +554,9 @@ ggplot(dat, aes(col = patient, x = treatment, y = ESR1)) +
   facet_grid( . ~ time)
 ```
 
-## Questions (Thursday)
+
+
+## Questions (Wednesday)
 
 Answer the following questions.
 

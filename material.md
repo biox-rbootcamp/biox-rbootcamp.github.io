@@ -16,20 +16,20 @@ layout: cme195
 | 8 | W |  | [Lecture:  Plotting with ggplot2 (I)](https://drive.google.com/file/d/1BBNvt2EWtZnixHbGxnXg-vbivP7Iu0EI/view?usp=sharing)| [Lab 8: ggplot2 (I)](./biox-rbootcamp.github.io/assets/lectures/Lab3_graphics/Lab3_graphics.html)|  |  |
 | 9 | Th |  | [Lecture:  Plotting with ggplot2 (II)](https://drive.google.com/file/d/1BBNvt2EWtZnixHbGxnXg-vbivP7Iu0EI/view?usp=sharing) | [Lab 9: ggplot2 (II)](./biox-rbootcamp.github.io/assets/lectures/Lab3_graphics/Lab3_graphics.html)  |  |
 | 10 | M | Testing and Statistical models| [Lecture: Testing  a)Null Hypothesis](https://crumplab.github.io/statistics/foundations-for-inference.html#videos-3) [b)Types of Errors](https://crumplab.github.io/statistics/foundations-for-inference.html#types-of-errors)| [Lab 10](./biox-rbootcamp.github.io/assets/lectures/testing_lectures/lab13_hypothesis_testing.html) |  |  |
-| 11 | W |  | [Lecture: Multiple Hypothesis Testing]() | [Lab 11]() |  |
-| 12 | Th | | [Lecture: Regression and GLMs]() |  [Lab 12]() |  |
-| 13 | M | Mixtures and Bootstrap tests | [Lecture: Mixtures](https://drive.google.com/file/d/1aXFkzL1tWYLnAf5PKkwMGvai6NUaHrnb/view?usp=sharing)  | [Lab 13]() |  |  |
-| 14 | W |  | [Lecture: Permutation tests and the Bootstrap]()  | [Lab 14]() |  |
-| 15 | Th |  | [Lecture: ANOVA]()  |  [Lab 15]() |  |
-| 16 | M | Clustering | [Lecture: Kmeans and density based clustering](https://drive.google.com/file/d/1ekIRX3Fi_TWMnwJhTeW4RrXslfot_sVE/view?usp=sharing) | [Lab 16]() |  |  |
-| 17 | W |  | [Lecture: Hierarchical Clustering]()| [Lab 17]() |  |
-| 18 | Th |  |  [Lecture: Machine Learning]() | [Lab 18]()  |  |
-| 19 | M |  Multivariate analysis | [Lecture: Multivariate analysis overview](https://drive.google.com/file/d/1BBNvt2EWtZnixHbGxnXg-vbivP7Iu0EI/view?usp=sharing)  | [Lab 19]() |  |  |
-| 20 | W |  |  [Lecture: TSNE and Umaps]() | [Lab 20]()|  |
-| 21 | Th |  | [Lecture: Finding Correlations and Associations]() |[Lab 21]()  |  |
-| 22 | M | High-dimensional statistics | [Lecture: High-dimensional statistics (I)]()  | [Lab 22]() |  |
-| 23 | W | |  [Lecture: High-dimensional statistics (II)]()  | [Lab 23]() |  |
-| 24 | Th |Networks | [Lecture: Friedman-Rafsky test ]()  | [Lab 24]() |  |
+| 11 | W |  | [Lecture: Multiple Hypothesis Testing]() | [Lab 11](./biox-rbootcamp.github.io/assets/lectures/testing_lectures/multiple_testing.html) |  |
+| 12 | Th |  | [Lecture: ANOVA]()  |  [Lab 12](./biox-rbootcamp.github.io/assets/lectures/testing_lectures/anova.html)|  |
+| 13 | M | Regression | [Lecture: Simple Linear Regression]() |  [Lab 13]() |  |
+| 14 | W | | [Lecture: Multivariate Regression]() |  [Lab 14]() |  |
+| 15 | Th |  | [Lecture: GLMs]() |  [Lab 15]() |  |
+| 16 | M | Mixtures and Bootstrap tests | [Lecture: Mixtures](https://drive.google.com/file/d/1aXFkzL1tWYLnAf5PKkwMGvai6NUaHrnb/view?usp=sharing)  | [Lab 16]() |  |  |
+| 17 | W |  | [Lecture: Permutation tests and the Bootstrap]()  | [Lab 17]() |  |
+| 18 | Th |  | [Lecture: Model diagnostics]()  |  [Lab 18]() |  |
+| 19 | M | Clustering | [Lecture: Kmeans and density based clustering](https://drive.google.com/file/d/1ekIRX3Fi_TWMnwJhTeW4RrXslfot_sVE/view?usp=sharing) | [Lab 19]() |  |  |
+| 20 | W |  | [Lecture: Hierarchical Clustering]()| [Lab 20]() |  |
+| 21 | Th |  |  [Lecture: Machine Learning]() | [Lab 21]()  |  |
+| 22 | W |  Multivariate analysis | [Lecture: Multivariate analysis overview](https://drive.google.com/file/d/1BBNvt2EWtZnixHbGxnXg-vbivP7Iu0EI/view?usp=sharing)  | [Lab 22]() |  |  |
+| 23 | M | High-dimensional statistics | [Lecture: High-dimensional statistics (II) ]()  | [Lab 23]() |  |
+| 24 | Th |Networks | [Lecture: Networks ]()  | [Lab 24]() |  |
 
 
 ## [](#tut) Introductory Tutorials

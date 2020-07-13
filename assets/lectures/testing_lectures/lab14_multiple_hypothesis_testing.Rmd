@@ -1,7 +1,7 @@
 ---
 title: "Multiple Hypothesis Testig"
 author: "bioX R-Summer bootcamp"
-date: "7/22/2020"
+date: "7/21/2020"
 output: 
   html_document:
     toc: true

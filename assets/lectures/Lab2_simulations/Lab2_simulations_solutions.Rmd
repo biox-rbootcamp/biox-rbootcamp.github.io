@@ -268,9 +268,26 @@ of the nucleotides.
 ## In Class Exercices
 
 1. You want to invest in Netflix stock options. You know that the log return  follows a normal distribution, such that:
-$$ \log(\frac{p_{t+1}}{p_t})  \sim N(0.001, 0.01)$$
+$$ \log(\frac{p_{t+1}}{p_t})  \sim Normal(\mu = 0.001, \sigma^2= 0.01)$$
+In other words,
 
-a. If you invest, what is the probability of the price doubling over the next hundred days?
+$$ p_{t+1} = p_t * exp(N(\mu, \sigma^2))$$
+
+```{r}
+B = 10000
+price= matrix(0, B, 100 +1)  ### B x 101 dimensional matrix 
+price[,1] = 1
+mu = 0.001
+sd1 = sqrt(0.01)
+
+for (t in 1:100){
+  price[, t+1] = sapply(price[,t], function(x){x * exp(rnorm(1, mu, sd1)) })
+}
+
+
+```
+
+a. If you invest, what is the probability of the price being at least double what it was at day 100 compared to at day 0?
 
 __ First solution__
 
@@ -284,14 +301,13 @@ $$\implies  \frac{p_{100}}{p_0} \geq 2 \iff N(0.1,1) \geq log(2) =0.69 $$
 
 __Simulation based solution__
 
-$$ \log(p_t) = N(0.001 + log(p_t), 0.01)$$
 
 ```{r}
 B = 1000
 price = matrix(0, B, 100+1)
 price[,1] =1
 for(t in 1:100){
-  price[,t+1] = sapply(price[,t], function(x){exp(rnorm(1, 0.001 + log(x),sqrt(0.01)))})
+  price[,t+1] = sapply(price[,t], function(x){x * exp(rnorm(1, 0.001,sqrt(0.01)))})
 }
 
 ```
@@ -310,20 +326,27 @@ print(mean(T[T>0]))
 ```
 
 
-c. Imagine a strategy where at day 1,  you invest 100 dollars, buying 100 options at 1 dollar. You then cash out whenever your investment doubles, and re-invest 100 dollars. At the end of the 100 days, you sell what you have at the current price. What is your expected profit after 100 days? What is the probability that the profit exceeds 2,000 dollars? The probability that you loose money?
+c. Imagine a strategy where at day 1,  you invest 100 dollars, buying 100 options at 1 dollar. You then cash out whenever your investment doubles (you sell), and re-invest 100 dollars. At the end of the 100 days, you sell what you have at the current price. What is your expected profit after 100 days? What is the probability that the profit exceeds 200 dollars? The probability that you loose money?
 
 ```{r}
 profit = apply(price, 1,function(x){
   t = floor(max(log(x)/log(2)))
   if (t>=1){
-    100* floor(max(x)/2) + x[101] * 100/x[which(x>=exp(t*log(2)))[1]]
+    res = 0 
+    a = 1
+    for (k  in 1:t){
+      b=which(x>=2^k)[1] ### first time the price doubles 
+      res = res - 100 + 100/x[a]* x[b]  ### -investment + quantity bought  * price sold
+      a = b
+    }
+    return(res)
   }else{
     - 100 + x[101] * 100/1
   }
 })
 
 print(mean(profit))
-print(mean(profit>2000))
+print(mean(profit>200))
 print(mean(profit<0))
 ```
 
