@@ -15,9 +15,9 @@ layout: cme195
 | 7 | M | Simulations | Lecture: Simulations [a) Simulations: ex1](https://www.youtube.com/watch?v=Xfdg0xqFjts)  [b) Simulations: ex2 (CLT)](https://www.youtube.com/watch?v=HLFqrY4QU9Q) [c)Generating simulated data](https://www.youtube.com/watch?v=tvv4IA8PEzw) | [Lab 7: Simulations](./biox-rbootcamp.github.io/assets/lectures/Lab2_simulations/Lab2_simulations.html)  | |  |
 | 8 | W |  | [Lecture:  Plotting with ggplot2 (I)](https://drive.google.com/file/d/1BBNvt2EWtZnixHbGxnXg-vbivP7Iu0EI/view?usp=sharing)| [Lab 8: ggplot2 (I)](./biox-rbootcamp.github.io/assets/lectures/Lab3_graphics/Lab3_graphics.html)|  |  |
 | 9 | Th |  | [Lecture:  Plotting with ggplot2 (II)](https://drive.google.com/file/d/1BBNvt2EWtZnixHbGxnXg-vbivP7Iu0EI/view?usp=sharing) | [Lab 9: ggplot2 (II)](./biox-rbootcamp.github.io/assets/lectures/Lab3_graphics/Lab3_graphics.html)  |  |
-| 10 | M | Testing + Stats modeling| [Lecture: Testing + multiple hypothesis testing]() | [Lab 10]() |  |  |
-| 11 | W |  | [Lecture: Regression]() | [Lab 11]() |  |
-| 12 | Th | | [Lecture: GLM]() |  [Lab 12]() |  |
+| 10 | M | Testing and Statistical models| [Lecture: Testing  a)Null Hypothesis](https://crumplab.github.io/statistics/foundations-for-inference.html#videos-3) [b)Types of Errors](https://crumplab.github.io/statistics/foundations-for-inference.html#types-of-errors)| [Lab 10](./biox-rbootcamp.github.io/assets/lectures/Lab3_graphics/lab13_hypothesis_testing.html) |  |  |
+| 11 | W |  | [Lecture: Multiple Hypothesis Testing]() | [Lab 11]() |  |
+| 12 | Th | | [Lecture: Regression and GLMs]() |  [Lab 12]() |  |
 | 13 | M | Mixtures and Bootstrap tests | [Lecture: Mixtures](https://drive.google.com/file/d/1aXFkzL1tWYLnAf5PKkwMGvai6NUaHrnb/view?usp=sharing)  | [Lab 13]() |  |  |
 | 14 | W |  | [Lecture: Permutation tests and the Bootstrap]()  | [Lab 14]() |  |
 | 15 | Th |  | [Lecture: ANOVA]()  |  [Lab 15]() |  |

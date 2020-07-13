@@ -392,3 +392,19 @@ compute_power(4, 0.5, 10000) # So it looks like 4 samples will do it.
 ```
 
 Try playing around with other inputs to the ```computer_power``` function; what is the importance for ```numTrials``` and how do you think you should choose it? What is the relationship between the power and ```sigma```? (e.g. if you let ```sigma=3```, how many samples do you need to achieve the same power as before?)
+
+
+## In-class exercises
+
+To sum up, consider the following exercises (to be done in class).
+
+1. You want to invest in Netflix stock options. You know that the log return  follows a normal distribution, such that:
+$$ \log(\frac{p_{t+1}}{p_t})  \sim N(0.001, 0.01)$$
+
+a. If you invest, what is the probability of the price doubling over the next hundred days?
+
+b. How long does it typically take for the price to double?
+
+c. Imagine a strategy where at day 1,  you invest 100 dollars, buying 100 options at 1 dollar. You then cash out whenever your investment doubles, and re-invest 100 dollars. At the end of the 100 days, you sell what you have at the current price. What is your expected profit after 100 days? What is the probability that the profit exceeds 2,000 dollars? The probability that you loose money?
+
+2. Your friend in the department of psychology is running an experiment to assess the negative effect of sugar on memory task. For that purpose, he wants to find two (equal) groups of people, who will be asked to remember a series of associations, one, after drinking a sugar-heavy ice-tea, and the other, after drinking a ``diet'' version of the previous with synthetic sugar. He supposes that the range of scores (from 0 to 50) will be normally distributed for each group and wants to detect a difference of at least 2 points. Preliminary results indicate that the standard deviation within the groups is roughly 5 points, and the mean for the control is roughly 60. How many candidates should he pick to be 95\% sure that there is a difference? In other words, how many candidates should he pick to ensure that the difference in means in greater than what chance would yield in 95\% of cases if the two groups were identically distributed?

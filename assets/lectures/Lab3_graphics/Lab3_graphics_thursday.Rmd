@@ -12,30 +12,15 @@ output:
 ## Goal and Video
 
 The goal of this lab is to become familiar with the grammar of graphics 
-philosophy implemented in the `R` package `ggplot2`. This is a newer version than basic R plots. However, it is a more powerful tool, and completely beginner friendly, so we won't go through the basic R-plots and will get you accustomed right away to this particular way of making plots. 
-- __To do for Wednesday__ Begin by watching the  first part of the [lecture on data visualization](https://drive.google.com/file/d/1BBNvt2EWtZnixHbGxnXg-vbivP7Iu0EI/view?usp=sharing) (0 to 56 min -- we will watch the rest for Thursday) : this will provide you with an introduction to the importance of plotting and give you an overview of the different plotting functions with ggplot2. We will work through this lab. 
+philosophy implemented in the `R` package `ggplot2`. This is a newer version than basic R plots. However, it is a more powerful tool, and completely beginner friendly, so we won't go through the basic R-plots and will get you accustomed right away to this particular way of making plots.
+- __To do for Thursday__ Begin by watching the  second part of the [lecture on data visualization](https://drive.google.com/file/d/1BBNvt2EWtZnixHbGxnXg-vbivP7Iu0EI/view?usp=sharing) (57 min to the end).
  
-- Complement the lecture by reading this [chapter on the ggplot grammar](https://rafalab.github.io/dsbook/ggplot2.html)
  
-- If you are very unfamiliar with any plotting commands, you can also read the following introductory chapter on [data visualization](https://rafalab.github.io/dsbook/introduction-to-data-visualization.html) and watch the following series of very short youtube videos. Most of them use basic R code, but the arguments and the logic behind the plot is similar with ggplot2, so these are a good way of introducing the types of plots that you'll require: 
-   
-   + a) [Histograms](https://www.youtube.com/watch?v=UaXYRf6qtEg) 
-   
-   + b) [QQplots](https://www.youtube.com/watch?v=5F62EwMF26c) 
-   
-   + c) [Boxplots](https://www.youtube.com/watch?v=Hh-Pd23OmVo) 
-   
-   + d) [Scatter plots](https://www.youtube.com/watch?v=dmJzInKpuRE) 
-   
-   + e) [Plots to avoid](https://www.youtube.com/watch?v=p-dYnSbBTa8) 
-       
-   + f) [On qplot-- for very simple plots:](https://www.youtube.com/watch?v=eclAMC_WY4U)
- 
-- Work through the first part of this lab by running all the R code to your computer and making sure that you understand the input and the output. 
+- Work through the second part of this lab by running all the R code to your computer and making sure that you understand the input and the output. 
 
 
 
-## Getting Started
+## Getting Started (Wednesday)
 
 We will be going through some of the topics from the `ggplot2` documentation
 website, [docs.ggplot2.org](http://docs.ggplot2.org). You should keep that website open as 
@@ -45,7 +30,7 @@ Another useful resource, the complete guide to the Grammar of Graphics
 philosophy, is available through [Springer website](https://link.springer.com/book/10.1007%2F978-3-319-24277-4) 
 (to which you have a free legal access with your Stanford ID).
 
-### Required Packages 
+### Required Packages (Wednesday)
 
 In order to learn how to use `ggplot2`, we will use a few datasets 
 available through the `nutshell`, `parathyroidSE`, `EnsDb.Hsapiens.v86` packages.
@@ -775,5 +760,9 @@ ggplot(df, aes(x = score, fill = region)) +
 
 ## In-class exercise
 
-We will walk through the following exercise in class. Feel free to have a look beforehand, but we will solve it in groups.
+We will walk through the following exercise in class. Feel free to have a look beforehand, but we will solve it in groups during the Thursday session.
+
+
+
+
 

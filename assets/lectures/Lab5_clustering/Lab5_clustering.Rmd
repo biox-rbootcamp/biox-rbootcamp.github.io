@@ -1,7 +1,7 @@
 ---
-title: 'Lab 5: Clustering'
-author: "Bios221"
-date: "10/9/2019"
+title: 'Lab 10: Clustering'
+author: "bioX R-bootcamp 2020"
+date: "07/11/2019"
 output:
   html_document:
     toc: true
@@ -13,23 +13,30 @@ output:
 knitr::opts_chunk$set(echo = TRUE, fig.width=7, fig.height=5) 
 ```
 
+
+## Videos for the discussion session
+
+The topic of the week consists in clustering -- one of the simplest and most useful tools that you can deploy in data analysis.
+Indeed, data analysis is a way of finding structure (or patterns) in data. These patterns can be:
+
+- clusters (or ``blobs'') of similar observations,
+
+- a relationship between a quantity of interest and other variables (e.g. $y = \alpha x$),
+
+- associations between observations (e.g, in microbiology, bacteria that always co-occur in a given environment)
+
+
+-etc.
+
+This week, we are going to focus on the first bullet point --- that is, look into ways of finding groups of similar observations. This is a part of a wider domain, called unsupervised learning -- we don't know what the clusters should nor if there are any.
+
+
 ## Goal
 
 In this lab we will learn the basics of clustering using a mass cytometry 
-example. 
-
-Work through this lab by running all the R code on your computer and making sure 
+example. Work through this lab by running all the R code on your computer and making sure 
 that you understand the input and the output. Make alterations where you see
-fit. We encourage you to work through this lab with a partner. 
-
-Once you get to the end of this lab, go to [Canvas](https://canvas.stanford.edu) 
-to submit your answer to the quiz questions dispersed throughout this lab.
-Some questions will be open-ended and you will not see them apprear
-on Canvas.
-
-You may NOT work with other students to answer the questions on Canvas. 
-You will need a Stanford ID to log in to Canvas.
-
+fit. 
 
 ## Mass cytometry (CyTOF)
 
@@ -53,7 +60,9 @@ library("ggcyto")
 ```
 
 Cytometry is a biophysical technology that allows you to measure
-physical and chemical characteristics of cells. Modern flow and mass 
+physical and chemical characteristics of cells. The determination of these characteristics is crucial in many research applications, including in medical fields including immunology, hematology, and oncology. Indeed, these physical properties are used to cluster cell types. We chose this example as mass/flow cytometry is a type of data that many of you at bio-X will potentially encounter.  
+
+Modern flow and mass 
 cytometry allows for simultaneous multiparametric analysis of thousands of 
 particles per second.
 

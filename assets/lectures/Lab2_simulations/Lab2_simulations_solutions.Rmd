@@ -1,9 +1,12 @@
 ---
-title: "Lab 2: Simulations Answers"
-author: "Bios 221: Modern Statistics for Modern Biology"
-date: "10/2/2019"
+title: "Lab 7: Simulations Answers"
+author: "Week 3 Session 7"
+date: "07/13/2020"
 output: 
-  html_document
+  html_document:
+    toc: true
+    toc_float: true
+    code_folding: hide
 ---
 
 ```{r setup, include=FALSE}
@@ -259,6 +262,92 @@ oe > quantile(oenull, p = 0.95)
 95% quantile of the empirical null distribution of the statistics,
 so we can conclude that Celegans's chrM does not have an even distribution
 of the nucleotides.
+
+
+
+## In Class Exercices
+
+1. You want to invest in Netflix stock options. You know that the log return  follows a normal distribution, such that:
+$$ \log(\frac{p_{t+1}}{p_t})  \sim N(0.001, 0.01)$$
+
+a. If you invest, what is the probability of the price doubling over the next hundred days?
+
+__ First solution__
+
+$$ \log(\frac{p_{100}}{p_0}) = \sum_{t=1}^{100}\log(\frac{p_{t}}{p_{t-1}})   \sim N(0.1, 1)$$
+$$\implies  \frac{p_{100}}{p_0} \geq 2 \iff N(0.1,1) \geq log(2) =0.69 $$
+
+```{r}
+1-pnorm(0.69, mean=0.1,sd=1)
+```
+
+
+__Simulation based solution__
+
+$$ \log(p_t) = N(0.001 + log(p_t), 0.01)$$
+
+```{r}
+B = 1000
+price = matrix(0, B, 100+1)
+price[,1] =1
+for(t in 1:100){
+  price[,t+1] = sapply(price[,t], function(x){exp(rnorm(1, 0.001 + log(x),sqrt(0.01)))})
+}
+
+```
+
+```{r}
+mean(price[,101]>=2)
+```
+
+
+b. How long does it typically take for the price to double?
+
+```{r}
+B = 1000
+T = apply(price,1, function(x){ifelse(max(x)>2, which(x>=2)[1], 0)})
+print(mean(T[T>0]))
+```
+
+
+c. Imagine a strategy where at day 1,  you invest 100 dollars, buying 100 options at 1 dollar. You then cash out whenever your investment doubles, and re-invest 100 dollars. At the end of the 100 days, you sell what you have at the current price. What is your expected profit after 100 days? What is the probability that the profit exceeds 2,000 dollars? The probability that you loose money?
+
+```{r}
+profit = apply(price, 1,function(x){
+  t = floor(max(log(x)/log(2)))
+  if (t>=1){
+    100* floor(max(x)/2) + x[101] * 100/x[which(x>=exp(t*log(2)))[1]]
+  }else{
+    - 100 + x[101] * 100/1
+  }
+})
+
+print(mean(profit))
+print(mean(profit>2000))
+print(mean(profit<0))
+```
+
+
+2. Your friend in the department of psychology is running an experiment to assess the negative effect of sugar on memory task. For that purpose, he wants to find two (equal) groups of people, who will be asked to remember a series of associations, one, after drinking a sugar-heavy ice-tea, and the other, after drinking a ``diet'' version of the previous with synthetic sugar. He supposes that the range of scores (from 0 to 50) will be normally distributed for each group and wants to detect a difference of at least 2 points. Preliminary results indicate that the standard deviation within the groups is roughly 5 points, and the mean for the control is roughly 60. How many candidates should he pick to be 95\% sure that there is a difference? In other words, how many candidates should he pick to ensure that the difference in means in greater than what chance would yield in 95\% of cases if the two groups were identically distributed?
+
+
+```{r}
+B =5000
+power_computation =function(x){
+  thres = quantile(sapply(1:10000, function(y){mean(rnorm(x, 60,5))  - mean(rnorm(x, 60,5))} ),0.95)
+  diff = sapply(1:B, function(y){
+      G1= rnorm(x, 60,5)
+      G2 = rnorm(x, 58,5)
+      return(mean(G1) - mean(G2)> thres)
+      #return(mean(G1) - mean(G2)> qnorm(0.95, 0, 2*5/sqrt(x))) ### simpler way
+  })
+  return(mean(diff))
+}
+power = sapply(seq(1,200,2), power_computation )
+plot(seq(1,200,2), power)
+abline(v = seq(1,200,2)[which(power > 0.95)[1]])
+```
+
 
 
 

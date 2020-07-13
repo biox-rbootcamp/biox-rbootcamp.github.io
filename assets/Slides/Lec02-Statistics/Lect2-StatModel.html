@@ -1,0 +1,845 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+ "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <meta name="author" content="Susan Holmes and Wolfgang Huber" />
+  <meta name="font-size-adjustment" content="2"/>
+  <title>MSMB, Lecture 2: Statistical Modeling</title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <style type="text/css">
+a.sourceLine { display: inline-block; line-height: 1.25; }
+a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
+a.sourceLine:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+a.sourceLine { text-indent: -1em; padding-left: 1em; }
+}
+pre.numberSource a.sourceLine
+  { position: relative; left: -4em; }
+pre.numberSource a.sourceLine::before
+  { content: attr(data-line-number);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; pointer-events: all; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {  }
+@media screen {
+a.sourceLine::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  <link href="Lect2-StatModel_files/slidy-2/styles/slidy.css" rel="stylesheet" />
+  <script src="Lect2-StatModel_files/slidy-2/scripts/slidy.js"></script>
+</head>
+<body>
+<div class="slide titlepage">
+  <h1 class="title">MSMB, Lecture 2: Statistical Modeling</h1>
+  <p class="author">
+Susan Holmes and Wolfgang Huber
+  </p>
+  <p class="date">1 Oct 2019</p>
+</div>
+<div class="slide section level1">
+
+<p><link href='http://fonts.googleapis.com/css?family=Lato&subset=latin,latin-ext' rel='stylesheet' type='text/css'></p>
+<style type="text/css"> 
+.small-code pre code {
+  font-size: 1em;
+}
+body{
+  font-family: Lato;
+  font-size: 24pt;
+  max-width: 1000px;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.5;
+}
+h1{
+  font-family: Lato;
+  font-size: 32pt;
+  color: #0080FF;
+}
+h2,h3,h4,h5,h6{
+  font-family: Lato;
+  font-size: 24pt;
+  color: #0080FF;
+}
+b, strong {
+ color: #0080FF;
+}
+.main-container {
+  max-width: 1800px;
+  margin-left: auto;
+  margin-right: auto;
+  line-height:1.5;
+}
+
+</style>
+</div>
+<div id="statistical-modeling" class="slide section level1">
+<h1>Statistical Modeling</h1>
+<!-- ![Statistics](http://bios221.stanford.edu/images/StatisticalML.png){width="30%"} -->
+<p><img src="/Users/whuber/CUBook/images/StatDiagram.png" width="27%" style="display: block; margin: auto;" /></p>
+<ul>
+<li>Previous lecture: knowledge of a generative model and the values of the <em>parameters</em> provided us with probability distributions of the possible data</li>
+<li>This enhanced our decision making – for instance, whether we had really found an epitope.</li>
+<li>In many real situations, neither generative distribution nor parameters are known.</li>
+<li>We need to estimate them from the data we have.</li>
+</ul>
+<p>Statistical modeling works from the data <em>upwards</em> to a model that <em>might</em> plausibly explain the data.</p>
+<ul>
+<li>This lecture will show us some of the distributions that serve as building blocks for statistical model building and inference in such situations.</li>
+<li>The examples in this lecture are all parametric (i.e., the models only have a small number of unknown parameters), the principles do generalize.</li>
+</ul>
+</div>
+<div id="goals-for-this-lecture" class="slide section level1">
+<h1>Goals for this lecture</h1>
+<ul>
+<li>See the difference between probabilistic modeling and statistics.</li>
+<li>Fit distributions to data histograms.</li>
+<li>See why we have to use <em>estimators</em> instead of actual parameters.</li>
+<li>Give examples of estimating procedures such as <em>maximum likelihood</em>.</li>
+<li>Show we can use statistical models and estimation for evaluating dependencies in binomial and multinomial distributions.</li>
+<li>Explore a simple model class for (sequential) data: Markov chains.</li>
+<li>Lab: show concrete applications involving genomes and Bioconductor classes dedicated to the manipulation of genomic data as strings or sequences.</li>
+</ul>
+</div>
+<div id="parameters-are-the-key" class="slide section level1">
+<h1>Parameters are the key</h1>
+<h2 id="examples-of-parameters">Examples of parameters</h2>
+<ul>
+<li>A single parameter <span class="math inline">\(\lambda\)</span> defines a Poisson distribution.<br />
+</li>
+<li>Other distributions have more than one parameter, e.g., binomial <span class="math inline">\((n, p)\)</span>, normal <span class="math inline">\((\mu, \sigma)\)</span>.</li>
+</ul>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="kw">library</span>(<span class="st">&quot;dplyr&quot;</span>)</a>
+<a class="sourceLine" id="cb1-2" data-line-number="2"><span class="kw">library</span>(<span class="st">&quot;ggplot2&quot;</span>)</a>
+<a class="sourceLine" id="cb1-3" data-line-number="3"><span class="kw">lapply</span>(<span class="kw">c</span>(<span class="dv">5</span>, <span class="dv">15</span>, <span class="dv">40</span>), <span class="cf">function</span>(lambda)</a>
+<a class="sourceLine" id="cb1-4" data-line-number="4">    <span class="kw">tibble</span>(<span class="dt">n =</span> <span class="dv">0</span><span class="op">:</span><span class="dv">60</span>, <span class="dt">p =</span> <span class="kw">dpois</span>(n, lambda), <span class="dt">lambda =</span> lambda)) <span class="op">%&gt;%</span><span class="st"> </span>bind_rows <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb1-5" data-line-number="5"><span class="st">  </span><span class="kw">ggplot</span>(<span class="kw">aes</span>(<span class="dt">x =</span> n, <span class="dt">y =</span> p)) <span class="op">+</span><span class="st"> </span><span class="kw">geom_point</span>() <span class="op">+</span><span class="st"> </span><span class="kw">facet_grid</span>( <span class="op">~</span>lambda)</a></code></pre></div>
+<p><img src="Lect2-StatModel_files/figure-slidy/parameters-1.png" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="difference-between-statistical-and-probabilistic-models" class="slide section level1">
+<h1>Difference between statistical and probabilistic models</h1>
+<p><img src="img/Induction-Deduction.png" width="100%" style="display: block; margin: auto;" /></p>
+<p>In the epitope example, knowing that false positives occur as Poisson(0.01) per position, the number of patients assayed and the length of the protein ensured that there were <em>no unknown parameters</em>. Given this probability model, we were able to decide whether the data at hand were compatible with no allergic reaction, or whether they pointed to there being some in some patients.</p>
+<p>Now suppose that we know the number of patients and the length of the protein (these are given by the experimental design). We then observe data, but we suppose now that the false positive rate distribution and its parameter(s) are unknown.</p>
+<p>We need to go <em>up</em> from the data we observe to estimate both a probability model <span class="math inline">\(\mathcal{F}\)</span> (Poisson, normal, binomial, …) and the missing parameter(s) for that model.</p>
+</div>
+<div id="an-example-of-simple-statistical-modeling" class="slide section level1">
+<h1>An example of simple statistical modeling</h1>
+<p>There are two parts to the modeling process:</p>
+<ol style="list-style-type: decimal">
+<li>A suitable probability <strong>distribution</strong> for the data generating process</li>
+<li>A feasible way to <strong>estimate its parameters</strong></li>
+</ol>
+<p>As we saw in Lecture 1, discrete count data can often be modeled by elementary probability distributions such as binomial, multinomial or Poisson distributions. For continuous measurements, the normal distribution is the most elementary building block. Realistic distributions can also be more complicated mixtures of these elementary ones (more on this in the <em>Mixtures</em> lecture).</p>
+<p>Let’s revisit the epitope data example. We again remove the tricky outlier.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" data-line-number="1"><span class="kw">load</span>(<span class="kw">input_dir</span>(<span class="st">&quot;data/e100.RData&quot;</span>))</a>
+<a class="sourceLine" id="cb2-2" data-line-number="2"><span class="kw">barplot</span>(<span class="kw">table</span>(e100), <span class="dt">space =</span> <span class="fl">0.2</span>, <span class="dt">col =</span> <span class="st">&quot;forestgreen&quot;</span>)</a></code></pre></div>
+<p><img src="Lect2-StatModel_files/figure-slidy/e100-1.png" width="35%" style="display: block; margin: auto;" /></p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" data-line-number="1">bad =<span class="st"> </span>(e100 <span class="op">&gt;</span><span class="st"> </span><span class="dv">3</span>)</a>
+<a class="sourceLine" id="cb3-2" data-line-number="2"><span class="kw">library</span>(<span class="st">&quot;assertthat&quot;</span>)</a>
+<a class="sourceLine" id="cb3-3" data-line-number="3"><span class="kw">assert_that</span>(<span class="kw">sum</span>(bad) <span class="op">==</span><span class="st"> </span><span class="dv">1</span>)</a>
+<a class="sourceLine" id="cb3-4" data-line-number="4">e99 =<span class="st"> </span>e100[<span class="op">!</span>bad]</a></code></pre></div>
+<h2 id="goodness-of-fit-visual-and-quantitative-evaluation">Goodness-of-fit: visual and quantitative evaluation</h2>
+<p>Our first step is to find a fit from candidate distributions. This requires consulting goodness-of-fit plots and quantitative metrics.</p>
+<p>One visual diagram is known as the rootogram <span class="citation">(Cleveland 1988)</span>. It hangs the observed values from the theoretical values (red points). If the counts correspond exactly to their theoretical values, the bottom of the boxes align exactly with the horizontal axis.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" data-line-number="1"><span class="kw">library</span>(<span class="st">&quot;vcd&quot;</span>)</a>
+<a class="sourceLine" id="cb4-2" data-line-number="2">gf1 =<span class="st"> </span><span class="kw">goodfit</span>(e99, <span class="st">&quot;poisson&quot;</span>)</a>
+<a class="sourceLine" id="cb4-3" data-line-number="3">gf1<span class="op">$</span>par</a></code></pre></div>
+<pre><code>## $lambda
+## [1] 0.4848485</code></pre>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" data-line-number="1">gf1</a></code></pre></div>
+<pre><code>## 
+## Observed and fitted values for poisson distribution
+## with parameters estimated by `ML&#39; 
+## 
+##  count observed    fitted pearson residual
+##      0       58 60.963259       -0.3795207
+##      1       34 29.557944        0.8170469
+##      2        7  7.165562       -0.5078572</code></pre>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb8-1" data-line-number="1"><span class="kw">rootogram</span>(gf1, <span class="dt">xlab =</span> <span class="st">&quot;&quot;</span>)</a></code></pre></div>
+<p><img src="Lect2-StatModel_files/figure-slidy/Rootogram-1.png" width="25%" style="display: block; margin: auto;" /></p>
+<h2 id="calibrating-our-expectations">Calibrating our expectations</h2>
+<p>To see what such a plot looks like with data that we know to come from a Poisson distribution, use <span class="math inline">\(\lambda\)</span> = 0.5 to simulate 100 numbers and draw their rootogram.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" data-line-number="1">simdat =<span class="st"> </span><span class="kw">rpois</span>(<span class="dv">100</span>, <span class="dt">lambda =</span> <span class="fl">0.5</span>)</a>
+<a class="sourceLine" id="cb9-2" data-line-number="2">gf2 =<span class="st"> </span><span class="kw">goodfit</span>( simdat, <span class="st">&quot;poisson&quot;</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb10-1" data-line-number="1"><span class="kw">rootogram</span>(gf1, <span class="dt">main =</span> <span class="st">&quot;gf1&quot;</span>, <span class="dt">xlab =</span> <span class="st">&quot;&quot;</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb11-1" data-line-number="1"><span class="kw">rootogram</span>(gf2, <span class="dt">main =</span> <span class="st">&quot;gf2&quot;</span>, <span class="dt">xlab =</span> <span class="st">&quot;&quot;</span>)</a></code></pre></div>
+<p><img src="Lect2-StatModel_files/figure-slidy/RootogramPoisson3-1.png" width="60%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="how-do-we-know-lambda" class="slide section level1">
+<h1>How do we know <span class="math inline">\(\lambda\)</span>?</h1>
+<h2 id="or-how-did-goodfit-do-it">Or: how did <code>goodfit</code> do it?</h2>
+<p>A Poisson distribution is completely determined by one parameter: <span class="math inline">\(\lambda\)</span> (which is also its mean).</p>
+<p>If we assume that the data follow a Poisson distribution, how do we estimate the parameter?</p>
+<p>We choose the value that makes the observed data the most likely: <strong>maximum likelihood estimation</strong></p>
+<p>Estimators commonly wear a hat: <span class="math inline">\(\hat{\lambda}\)</span></p>
+</div>
+<div id="the-likelihood-function" class="slide section level1">
+<h1>The likelihood function</h1>
+<p>For each possible value of the parameter <span class="math inline">\(\lambda\)</span>, we compute the probability of the data. This is the <strong>likelihood function</strong></p>
+<p><span class="math display">\[
+L\left(x=(k_1,k_2,k_3,\ldots),\,\lambda \right) = f(k_1,k_2,k_3,\ldots,\lambda) = \prod_{i=1}^{100} f_\lambda(k_i)
+\]</span></p>
+<p>Often, we (equivalently) work with its logarithm. It is as simple as</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb12-1" data-line-number="1">loglikelihood =<span class="st"> </span><span class="cf">function</span>(lambda, k) {</a>
+<a class="sourceLine" id="cb12-2" data-line-number="2">  <span class="kw">sum</span>(<span class="kw">log</span>(<span class="kw">dpois</span>(k, lambda)))</a>
+<a class="sourceLine" id="cb12-3" data-line-number="3">}</a></code></pre></div>
+<p>Note that in this functionm, <code>k</code> is a vector and <code>lambda</code> is a single number.</p>
+<p>Now we can compute the likelihood for a whole series of values from, say, 0 to 1:</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb13-1" data-line-number="1"><span class="kw">library</span>(<span class="st">&quot;magrittr&quot;</span>) <span class="co"># for the T-pipe %T&gt;%</span></a>
+<a class="sourceLine" id="cb13-2" data-line-number="2">lambdas =<span class="st"> </span><span class="kw">seq</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dt">by =</span> <span class="fl">0.01</span>)</a>
+<a class="sourceLine" id="cb13-3" data-line-number="3">ll =<span class="st"> </span><span class="kw">sapply</span>(lambdas, loglikelihood, <span class="dt">k =</span> e100)</a>
+<a class="sourceLine" id="cb13-4" data-line-number="4"><span class="kw">plot</span>(lambdas, ll, <span class="dt">type =</span> <span class="st">&quot;l&quot;</span>, <span class="dt">col =</span> <span class="st">&quot;midnightblue&quot;</span>, </a>
+<a class="sourceLine" id="cb13-5" data-line-number="5">     <span class="dt">xlab =</span> <span class="kw">expression</span>(lambda), <span class="dt">ylab =</span> <span class="st">&quot;&quot;</span>, <span class="dt">lwd =</span> <span class="dv">2</span>)</a>
+<a class="sourceLine" id="cb13-6" data-line-number="6">m0 =<span class="st"> </span><span class="kw">mean</span>(e100) <span class="op">%T&gt;%</span><span class="st"> </span>cat</a></code></pre></div>
+<pre><code>## 0.55</code></pre>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb15-1" data-line-number="1"><span class="kw">abline</span>(<span class="dt">v =</span> m0, <span class="dt">col =</span> <span class="st">&quot;orange3&quot;</span>, <span class="dt">lwd =</span> <span class="fl">1.5</span>)</a>
+<a class="sourceLine" id="cb15-2" data-line-number="2"><span class="kw">abline</span>(<span class="dt">h =</span> <span class="kw">loglikelihood</span>(m0, <span class="dt">k =</span> e100), <span class="dt">col =</span> <span class="st">&quot;darkgrey&quot;</span>, <span class="dt">lwd =</span> <span class="fl">1.5</span>)</a></code></pre></div>
+<p><img src="Lect2-StatModel_files/figure-slidy/poislikel-1.png" width="50%" style="display: block; margin: auto;" /></p>
+<p>In fact there is a shortcut: the function <code>goodfit</code>.</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb16-1" data-line-number="1">gf =<span class="st"> </span><span class="kw">goodfit</span>(e100, <span class="st">&quot;poisson&quot;</span>)</a>
+<a class="sourceLine" id="cb16-2" data-line-number="2">gf<span class="op">$</span>par</a></code></pre></div>
+<pre><code>## $lambda
+## [1] 0.55</code></pre>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb18-1" data-line-number="1">m0</a></code></pre></div>
+<pre><code>## [1] 0.55</code></pre>
+</div>
+<div id="classical-statistics-for-classical-data" class="slide section level1">
+<h1>Classical statistics for classical data</h1>
+<p>Here is a traditional proof of our computational finding.</p>
+<p><span class="math display">\[
+\begin{aligned}
+\log L(x, \lambda) 
+&amp;=\log\prod_{i=1}^{100} e^{-\lambda} \frac{\lambda^{k_i}}{k_i!} \\
+&amp;=\sum_{i=1}^{100} -\lambda +k_i \log\lambda-\log (k_i!)\\
+&amp;=-100\lambda +\log\lambda\left(\sum_{i=1}^{100} k_i\right)  + \text{const.}
+\end{aligned}
+\]</span> To find the <span class="math inline">\(\lambda\)</span> that maximizes this, we compute the derivative in <span class="math inline">\(\lambda\)</span> and set it to zero. (Exercise: verify that the second derivative is positive.)</p>
+<p><span class="math display">\[
+\begin{aligned}
+\frac{d}{d\lambda}\log L&amp;=-100 +\frac{1}{\lambda}\sum_{i=1}^{100} k_i
+\stackrel{!}{=}0\\
+\Leftrightarrow\lambda&amp;=\frac{1}{100}\sum_{i=1}^{100} k_i \quad\quad\text{(the mean)}
+\end{aligned}
+\]</span></p>
+</div>
+<div id="so-what-is-the-value-of-modeling-data-with-a-parametric-distribution-and-parameter-estimates" class="slide section level1">
+<h1>So what is the value of modeling data with a parametric distribution and parameter estimates?</h1>
+<ul>
+<li><p>Hypothesis testing: formulate a <em>null model</em> for the data (e.g., all observations are from the same distribution regardless group or treatment) and check whether this fits</p></li>
+<li><p>Alternatively (but not always) we also have an <em>alternative model</em> and can compare which one fits better</p></li>
+<li><p>Models are also concise but expressive representation of the data - a summary</p></li>
+</ul>
+</div>
+<div id="statistical-models-often-combine-deterministic-and-probabilistic-parts" class="slide section level1">
+<h1>Statistical models often combine deterministic and probabilistic parts</h1>
+<p>Prototypical: the <strong>linear model</strong></p>
+<p><span class="math display">\[
+\begin{align}
+&amp;y = ax+b + \varepsilon,\quad\quad \varepsilon\sim N(0,s)\\
+\Leftrightarrow\quad&amp;y \sim N( \text{mean} = ax+b, \;\text{sd} = s)
+\end{align}
+\]</span></p>
+<p>for two continuous variables <span class="math inline">\(x\)</span> and <span class="math inline">\(y\)</span>, where we assume that <span class="math inline">\(y\)</span> (the “response”) follows a distribution determined by <span class="math inline">\(x\)</span> (the “explanatory variable”).</p>
+<p>Model fit: the residuals <span class="math inline">\(\varepsilon\)</span> should be independent, identically distributed normal</p>
+<p>The linear model can be generalized by</p>
+<ul>
+<li>having more complicated deterministic parts</li>
+<li>have a different stochastic part: e.g., for count data, Poisson (<span class="math inline">\(\leftarrow\)</span> RNA-seq and other types of high-throughput sequencing data), or binomial.</li>
+</ul>
+</div>
+<div id="sec:likely" class="slide section level1">
+<h1>Binomial distributions and maximum likelihood</h1>
+<p>Two parameters:</p>
+<ul>
+<li>number of trials <span class="math inline">\(n\)</span> - usually known</li>
+<li>probability <span class="math inline">\(p\)</span> of seeing a “hit”, or a “1”, … in a trial - often unknown</li>
+</ul>
+<h2 id="example">Example</h2>
+<p>Someone took a sample of <span class="math inline">\(225\)</span> males and tested them for red-green colorblindness. They coded the data as 0 if the subject was not colorblind and 1 if he was. We can summarize the data <code>cb</code> by:</p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb20-1" data-line-number="1"><span class="kw">table</span>(cb)</a></code></pre></div>
+<pre><code>## cb
+##   0   1 
+## 207  18</code></pre>
+<p>Which value of <span class="math inline">\(p\)</span> is the most likely given these data?</p>
+<p><span class="math inline">\(\hat{p}=?\)</span></p>
+<p>In this special case, your intuition may give you an estimate (which turns out to be the maximum likelihood estimator, MLE).</p>
+<p>ASo let’s compute the likelihood for many possible <span class="math inline">\(p\)</span>, plot it, and see where the maximum falls.</p>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb22-1" data-line-number="1">probs =<span class="st"> </span><span class="kw">seq</span>(<span class="dv">0</span>, <span class="fl">0.3</span>, <span class="dt">by =</span> <span class="fl">0.01</span>)</a>
+<a class="sourceLine" id="cb22-2" data-line-number="2">likelihood =<span class="st"> </span><span class="cf">function</span>(p, x)</a>
+<a class="sourceLine" id="cb22-3" data-line-number="3">  <span class="kw">dbinom</span>(<span class="kw">sum</span>(x), <span class="dt">prob =</span> p, <span class="dt">size =</span> <span class="kw">length</span>(x))</a>
+<a class="sourceLine" id="cb22-4" data-line-number="4"></a>
+<a class="sourceLine" id="cb22-5" data-line-number="5">lv =<span class="st"> </span><span class="kw">likelihood</span>(probs, cb)</a>
+<a class="sourceLine" id="cb22-6" data-line-number="6"><span class="kw">plot</span>(probs, lv, <span class="dt">pch =</span> <span class="dv">16</span>, <span class="dt">xlab =</span> <span class="st">&quot;p&quot;</span>, <span class="dt">ylab =</span> <span class="st">&quot;likelihood&quot;</span>, <span class="dt">cex =</span> <span class="fl">0.6</span>)</a></code></pre></div>
+<p><img src="Lect2-StatModel_files/figure-slidy/likely1-1.png" width="50%" style="display: block; margin: auto;" /></p>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb23-1" data-line-number="1">probs[<span class="kw">which.max</span>(lv)]</a></code></pre></div>
+<pre><code>## [1] 0.08</code></pre>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb25-1" data-line-number="1"><span class="dv">18</span><span class="op">/</span><span class="dv">225</span></a></code></pre></div>
+<pre><code>## [1] 0.08</code></pre>
+</div>
+<div id="another-example" class="slide section level1">
+<h1>Another example</h1>
+<p>The likelihood and the probability are the same mathematical function, just interpreted differently.</p>
+<p>Suppose <span class="math inline">\(n=300\)</span> and we observe <span class="math inline">\(y=40\)</span> successes. Then, for the binomial distribution:</p>
+<p><span class="math display">\[
+f(\theta\,|\,n,y) = f(y\,|\,n,\theta)={n \choose y} \theta^y (1-\theta)^{(n-y)}.
+\]</span> As the numbers involved are often very large or very small, e.g.,</p>
+<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb27-1" data-line-number="1"><span class="kw">choose</span>(<span class="dv">300</span>, <span class="dv">40</span>)</a></code></pre></div>
+<pre><code>## [1] 9.793479e+49</code></pre>
+<div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb29-1" data-line-number="1"><span class="fl">0.5</span> <span class="op">^</span><span class="st"> </span><span class="dv">260</span></a></code></pre></div>
+<pre><code>## [1] 5.397605e-79</code></pre>
+<p>we use the log likelihood, abbreviated by <span class="math inline">\(\ell\)</span> to give: <span class="math display">\[
+\log f(\theta |y) = \ell(\theta) = \log {n \choose y} + y\log\theta + (n-y)\log(1-\theta).
+\]</span> Here’s a little function we use to calculate it:</p>
+<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb31-1" data-line-number="1">loglikelihood =<span class="st"> </span><span class="cf">function</span>(theta, n, k) {</a>
+<a class="sourceLine" id="cb31-2" data-line-number="2">  <span class="kw">log</span>(<span class="kw">choose</span>(n, k)) <span class="op">+</span><span class="st"> </span>k <span class="op">*</span><span class="st"> </span><span class="kw">log</span>(theta) <span class="op">+</span><span class="st"> </span>(n<span class="op">-</span>k) <span class="op">*</span><span class="st"> </span><span class="kw">log</span>(<span class="dv">1</span> <span class="op">-</span><span class="st"> </span>theta)</a>
+<a class="sourceLine" id="cb31-3" data-line-number="3">}</a></code></pre></div>
+<p>which we plot for the range of <span class="math inline">\(\theta\)</span> (the binomial probability) from 0 to 1.</p>
+<div class="sourceCode" id="cb32"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb32-1" data-line-number="1">thetas =<span class="st"> </span><span class="kw">seq</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dt">by =</span> <span class="fl">0.001</span>)</a>
+<a class="sourceLine" id="cb32-2" data-line-number="2">llv =<span class="st"> </span><span class="kw">loglikelihood</span>(thetas, <span class="dt">n =</span> <span class="dv">300</span>, <span class="dt">k =</span> <span class="dv">40</span>)</a>
+<a class="sourceLine" id="cb32-3" data-line-number="3"><span class="kw">plot</span>(thetas, llv,</a>
+<a class="sourceLine" id="cb32-4" data-line-number="4">  <span class="dt">type=</span><span class="st">&quot;l&quot;</span>, <span class="dt">xlab =</span> <span class="kw">expression</span>(theta),</a>
+<a class="sourceLine" id="cb32-5" data-line-number="5">  <span class="dt">ylab =</span> <span class="kw">expression</span>(<span class="kw">paste</span>(<span class="st">&quot;loglik(&quot;</span>, theta, <span class="st">&quot;)&quot;</span>)), <span class="dt">main =</span> <span class="st">&quot;&quot;</span>)</a></code></pre></div>
+<p><img src="Lect2-StatModel_files/figure-slidy/loglikelihood-1.png" width="50%" style="display: block; margin: auto;" /></p>
+<div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb33-1" data-line-number="1">thetas[<span class="kw">which.max</span>(llv)]</a></code></pre></div>
+<pre><code>## [1] 0.133</code></pre>
+<ul>
+<li>The maximum is consistent with intuition (40/300=0.1333….)</li>
+<li>But we see that many other values of <span class="math inline">\(\theta\)</span> are almost equally likely, as the function is quite flat around the maximum.</li>
+</ul>
+</div>
+<div id="multinomial-data" class="slide section level1">
+<h1>Multinomial data</h1>
+<h2 id="modeling-count-of-dna-base-pairs">Modeling count of DNA base pairs</h2>
+<p>There are four basic molecules of DNA:<br />
+A - adenine,<br />
+C - cytosine,<br />
+G - guanine,<br />
+T - thymine.</p>
+<p>The nucleotides are classified into two groups: purines (A and G) and pyrimidines (C and T). The binomial distribution won’t work, as we have not two, but four different possible values. We use the multinomial distribution instead. Let’s look at an example.</p>
+<h2 id="nucleotide-bias">Nucleotide bias</h2>
+<p>Data from the one strand of DNA for the genes of the bacterium <em>Staphylococcus aureus</em> are available in a FASTA file, which we can load as follows.</p>
+<div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb35-1" data-line-number="1"><span class="kw">library</span>(<span class="st">&quot;Biostrings&quot;</span>)</a>
+<a class="sourceLine" id="cb35-2" data-line-number="2">staph =<span class="st"> </span><span class="kw">readDNAStringSet</span>(<span class="kw">input_dir</span>(<span class="st">&quot;data/staphsequence.ffn.txt&quot;</span>), <span class="st">&quot;fasta&quot;</span>)</a></code></pre></div>
+<p>Let’s print the number of genes and the names of the first two:</p>
+<div class="sourceCode" id="cb36"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb36-1" data-line-number="1"><span class="kw">length</span>(staph)</a></code></pre></div>
+<pre><code>## [1] 2650</code></pre>
+<div class="sourceCode" id="cb38"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb38-1" data-line-number="1"><span class="kw">names</span>(staph)[<span class="dv">1</span><span class="op">:</span><span class="dv">2</span>] <span class="op">%&gt;%</span><span class="st"> </span>strwrap</a></code></pre></div>
+<pre><code>## [1] &quot;lcl|NC_002952.2_cdsid_YP_039478.1 [gene=dnaA] [protein=chromosomal&quot;
+## [2] &quot;replication initiation protein] [protein_id=YP_039478.1]&quot;          
+## [3] &quot;[location=517..1878]&quot;                                              
+## [4] &quot;lcl|NC_002952.2_cdsid_YP_039479.1 [gene=dnaN] [protein=DNA&quot;        
+## [5] &quot;polymerase III subunit beta] [protein_id=YP_039479.1]&quot;             
+## [6] &quot;[location=2156..3289]&quot;</code></pre>
+<p>The first gene:</p>
+<div class="sourceCode" id="cb40"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb40-1" data-line-number="1">staph[<span class="dv">1</span>]</a></code></pre></div>
+<pre><code>##   A DNAStringSet instance of length 1
+##     width seq                                          names               
+## [1]  1362 ATGTCGGAAAAAGAAATTTGG...AAGAAATAAGAAATGTATAA lcl|NC_002952.2_c...</code></pre>
+<div class="sourceCode" id="cb42"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb42-1" data-line-number="1"><span class="kw">length</span>(staph[[<span class="dv">1</span>]])</a></code></pre></div>
+<pre><code>## [1] 1362</code></pre>
+<div class="sourceCode" id="cb44"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb44-1" data-line-number="1"><span class="kw">letterFrequency</span>(staph[[<span class="dv">1</span>]], <span class="dt">letters=</span><span class="st">&quot;ACGT&quot;</span>, <span class="dt">OR =</span> <span class="dv">0</span>)</a></code></pre></div>
+<pre><code>##   A   C   G   T 
+## 522 219 229 392</code></pre>
+<p>We hypothesize that selective pressure can modify the nucleotide frequencies in different genes differently. How do we check for that?</p>
+</div>
+<div id="does-the-nucleotide-composition-of-the-first-ten-genes-come-from-the-same-multinomial-distribution" class="slide section level1">
+<h1>Does the nucleotide composition of the first ten genes come from the same multinomial distribution?</h1>
+<p>We do not have a prior reference, we just want to see whether the nucleotides occur in the same proportions, exemplarily in the first 10 genes. Deviations might deliver a biological insight: different selective pressure on these genes.</p>
+<div class="sourceCode" id="cb46"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb46-1" data-line-number="1">tablf =<span class="st"> </span><span class="kw">vapply</span>(staph, letterFrequency, <span class="dt">letters =</span> <span class="st">&quot;ACGT&quot;</span>, <span class="dt">OR =</span> <span class="dv">0</span>, </a>
+<a class="sourceLine" id="cb46-2" data-line-number="2">               <span class="dt">FUN.VALUE =</span> <span class="kw">numeric</span>(<span class="dv">4</span>))</a>
+<a class="sourceLine" id="cb46-3" data-line-number="3"><span class="kw">dimnames</span>(tablf)[[<span class="dv">2</span>]] =<span class="st"> </span><span class="kw">names</span>(staph) <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb46-4" data-line-number="4"><span class="st">  </span><span class="kw">sub</span>(<span class="st">&quot;^.*gene=&quot;</span>, <span class="st">&quot;&quot;</span>, .) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">sub</span>(<span class="st">&quot;].*&quot;</span>, <span class="st">&quot;&quot;</span>, .)</a>
+<a class="sourceLine" id="cb46-5" data-line-number="5">tablfs =<span class="st"> </span>tablf[, <span class="dv">1</span><span class="op">:</span><span class="dv">10</span>]</a>
+<a class="sourceLine" id="cb46-6" data-line-number="6">tablfs</a></code></pre></div>
+<pre><code>##   dnaA dnaN SAR0003 recF gyrB gyrA SAR0007 hutH serS SAR0010
+## A  522  413      85  411  685  887     275  510  487     191
+## C  219  176      31  168  293  395     137  244  180     111
+## G  229  193      56  207  423  586     169  316  263     142
+## T  392  352      74  327  531  793     250  445  357     252</code></pre>
+<p>Calculate sums of columns - the total number of bases per gene:</p>
+<div class="sourceCode" id="cb48"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb48-1" data-line-number="1">bpg =<span class="st"> </span><span class="kw">colSums</span>(tablfs)</a>
+<a class="sourceLine" id="cb48-2" data-line-number="2">bpg</a></code></pre></div>
+<pre><code>##    dnaA    dnaN SAR0003    recF    gyrB    gyrA SAR0007    hutH    serS 
+##    1362    1134     246    1113    1932    2661     831    1515    1287 
+## SAR0010 
+##     696</code></pre>
+<div class="sourceCode" id="cb50"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb50-1" data-line-number="1"><span class="kw">sweep</span>(tablfs, <span class="dv">2</span>, bpg, <span class="st">`</span><span class="dt">/</span><span class="st">`</span>) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">round</span>(<span class="dv">2</span>)</a></code></pre></div>
+<pre><code>##   dnaA dnaN SAR0003 recF gyrB gyrA SAR0007 hutH serS SAR0010
+## A 0.38 0.36    0.35 0.37 0.35 0.33    0.33 0.34 0.38    0.27
+## C 0.16 0.16    0.13 0.15 0.15 0.15    0.16 0.16 0.14    0.16
+## G 0.17 0.17    0.23 0.19 0.22 0.22    0.20 0.21 0.20    0.20
+## T 0.29 0.31    0.30 0.29 0.27 0.30    0.30 0.29 0.28    0.36</code></pre>
+<p>We want to compare the nucleotide proportions in these genes.</p>
+<p>As a first step, we compute the average proportion for each nucleotide across the genes.</p>
+<div class="sourceCode" id="cb52"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb52-1" data-line-number="1">p0 =<span class="st"> </span><span class="kw">rowSums</span>(tablfs) <span class="op">/</span><span class="st"> </span><span class="kw">sum</span>(tablfs)</a>
+<a class="sourceLine" id="cb52-2" data-line-number="2">p0</a></code></pre></div>
+<pre><code>##         A         C         G         T 
+## 0.3495343 0.1529310 0.2022384 0.2952962</code></pre>
+<p>We suppose <code>p0</code> is the vector of multinomial probabilities for the four nucleotides, in all the genes. We use a Monte Carlo simulation to test whether the observed departures from the nucleotide frequencies in each gene are within a probable enough range.</p>
+<p>We compute the expected counts by taking the outer product of the vector of probabilities p0 by the total number of bases in each gene:</p>
+<div class="sourceCode" id="cb54"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb54-1" data-line-number="1">expectedtab =<span class="st"> </span><span class="kw">outer</span>(p0, bpg)</a>
+<a class="sourceLine" id="cb54-2" data-line-number="2"><span class="kw">round</span>(expectedtab)</a></code></pre></div>
+<pre><code>##   dnaA dnaN SAR0003 recF gyrB gyrA SAR0007 hutH serS SAR0010
+## A  476  396      86  389  675  930     290  530  450     243
+## C  208  173      38  170  295  407     127  232  197     106
+## G  275  229      50  225  391  538     168  306  260     141
+## T  402  335      73  329  571  786     245  447  380     206</code></pre>
+<p>A random table with the correct column sums can be created as follows. (This is done according to the null hypothesis that the true proportions are given by <code>p0</code>.)</p>
+<div class="sourceCode" id="cb56"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb56-1" data-line-number="1">randomtab =<span class="st"> </span><span class="kw">sapply</span>(bpg, <span class="cf">function</span>(s) { <span class="kw">rmultinom</span>(<span class="dv">1</span>, s, p0) } )</a>
+<a class="sourceLine" id="cb56-2" data-line-number="2">randomtab</a></code></pre></div>
+<pre><code>##      dnaA dnaN SAR0003 recF gyrB gyrA SAR0007 hutH serS SAR0010
+## [1,]  483  385      92  404  693  934     277  548  454     225
+## [2,]  204  168      40  165  275  417     126  213  207     113
+## [3,]  300  229      40  210  360  520     190  333  251     145
+## [4,]  375  352      74  334  604  790     238  421  375     213</code></pre>
+<p>How do we measure whether the two tables are “close”? Here we choose to use the following summary statistic:</p>
+<p><span class="math display">\[
+\text{diffstat} = \sum_{ij} \frac{(\text{observed}_{ij} - \text{expected}_{ij})^2}{\text{expected}_{ij}} 
+\]</span> or as an R function</p>
+<div class="sourceCode" id="cb58"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb58-1" data-line-number="1">computediffstat =<span class="st"> </span><span class="cf">function</span>(o, e) {</a>
+<a class="sourceLine" id="cb58-2" data-line-number="2">  <span class="kw">sum</span>((o <span class="op">-</span><span class="st"> </span>e)<span class="op">^</span><span class="dv">2</span><span class="op">/</span>e)</a>
+<a class="sourceLine" id="cb58-3" data-line-number="3">}</a>
+<a class="sourceLine" id="cb58-4" data-line-number="4"><span class="kw">computediffstat</span>(tablfs, expectedtab)</a></code></pre></div>
+<pre><code>## [1] 68.65126</code></pre>
+<div class="sourceCode" id="cb60"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb60-1" data-line-number="1"><span class="kw">computediffstat</span>(randomtab, expectedtab)</a></code></pre></div>
+<pre><code>## [1] 29.96952</code></pre>
+<p>Now we do this not only once, but many times. All these statistics constitute the null distribution, as they were generated under the null hypothesis that <code>p0</code> is the vector of multinomial proportions.</p>
+<div class="sourceCode" id="cb62"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb62-1" data-line-number="1">statnull =<span class="st"> </span><span class="kw">replicate</span>(<span class="dv">8000</span>, {</a>
+<a class="sourceLine" id="cb62-2" data-line-number="2">  randomtab =<span class="st"> </span><span class="kw">sapply</span>(bpg, <span class="cf">function</span>(s) { <span class="kw">rmultinom</span>(<span class="dv">1</span>, s, p0) } )</a>
+<a class="sourceLine" id="cb62-3" data-line-number="3">  <span class="kw">computediffstat</span>(randomtab, expectedtab)</a>
+<a class="sourceLine" id="cb62-4" data-line-number="4">})</a>
+<a class="sourceLine" id="cb62-5" data-line-number="5"><span class="kw">hist</span>(statnull, <span class="dt">col =</span> <span class="st">&quot;lavender&quot;</span>, <span class="dt">breaks =</span> <span class="dv">40</span>, <span class="dt">main =</span> <span class="st">&quot;&quot;</span>)</a></code></pre></div>
+<p><img src="Lect2-StatModel_files/figure-slidy/parabootmulti-1.png" width="50%" style="display: block; margin: auto;" /></p>
+<div class="sourceCode" id="cb63"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb63-1" data-line-number="1">statdata =<span class="st"> </span><span class="kw">computediffstat</span>(tablfs, expectedtab)</a>
+<a class="sourceLine" id="cb63-2" data-line-number="2"><span class="kw">mean</span>(statnull <span class="op">&gt;</span><span class="st"> </span>statdata)</a></code></pre></div>
+<pre><code>## [1] 0.000125</code></pre>
+<p>We see that in fact the probability of seeing a value as large as 68.7 is very small. We can conclude that it is very rare that such a value would occur under the null model (which says that the data come from a common multinomial distribution with <code>p0</code> as its probability vector.</p>
+</div>
+<div id="assessing-a-distributions-fit-using-the-qq-plot" class="slide section level1">
+<h1>Assessing a distribution’s fit using the QQ-plot</h1>
+<p>Statistical theory could have helped us avoid us running these simulations.</p>
+<p>It tells us that the values of the <code>statnull</code> statistic are well approximated by a distribution called <span class="math inline">\(\chi^2\)</span> (chi-squared) with parameter 27 (3 times 9).</p>
+<p>Besides reducing your carbon footprint, using theory also is more accurate when you are estimating small probabilities (<span class="math inline">\(\leftarrow\)</span> Lecture 1). Tail probabilities tend to be hard to compute by Monte Carlo.</p>
+<p>We can check how well the theoretical and the simulated distribution match up using another visual goodness-of-fit tool: the QQ-plot.</p>
+<p>(NB: A perhaps seemingly more intuitive approach to compare two distributions, whether from two different samples, or one from a sample and one from a theoretical model, would be looking at their histograms and/or densities. But this is clumsy and difficult to read.)</p>
+<h2 id="quantiles">Quantiles</h2>
+<p>In the previous lecture on the epitope data, we ordered the 100 sample values <span class="math inline">\(x_{(1)},x_{(2)},\ldots,x_{(100)}\)</span>. Then, for instance, any value between the 22nd and the 23rd, will be acceptable as a 0.22-quantile <span class="math inline">\(c_{0.22}\)</span>. We can also write this as <span class="math inline">\(x_{(21)} \leq c_{0.22} &lt; x_{(23)}\)</span>. <span class="math inline">\(c_{0.22}\)</span> is any number such that 22% of the values are smaller than it:</p>
+<p><span class="math display">\[
+c_{0.22} \text{ is any number such that: } 
+\frac{1}{n} \#\left\{i:\,x_i\leq c_{0.22}\right\}= 0.22 
+\]</span> we also write <span class="math display">\[
+\hat{\mathcal F}_n(c_{0.22})
+=c_{0.22},
+\]</span> where <span class="math inline">\(\hat{\mathcal F}_n\)</span> is a function we call the empirical cumulative distribution function (ECDF).</p>
+<div class="figure" style="text-align: center">
+<img src="Lect2-StatModel_files/figure-slidy/quant12-1.png" alt="The histogram of the distribution of `statnull` and the quantiles $c_{0.22}$ and $c_{0.995}$" width="50%" />
+<p class="caption">
+The histogram of the distribution of <code>statnull</code> and the quantiles <span class="math inline">\(c_{0.22}\)</span> and <span class="math inline">\(c_{0.995}\)</span>
+</p>
+</div>
+<p>We can now compute the quantiles of the data vector and compare them to the those of the <span class="math inline">\(\chi_{27}^2\)</span> distribution.</p>
+<div class="sourceCode" id="cb65"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb65-1" data-line-number="1">pp =<span class="st"> </span><span class="kw">ppoints</span>(<span class="kw">length</span>(statnull))</a>
+<a class="sourceLine" id="cb65-2" data-line-number="2"><span class="kw">head</span>(pp)</a></code></pre></div>
+<pre><code>## [1] 0.0000625 0.0001875 0.0003125 0.0004375 0.0005625 0.0006875</code></pre>
+<div class="sourceCode" id="cb67"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb67-1" data-line-number="1"><span class="kw">qqplot</span>(<span class="kw">qchisq</span>(pp, <span class="dt">df =</span> <span class="dv">27</span>), statnull, <span class="dt">pch=</span><span class="st">&quot;.&quot;</span>, <span class="dt">cex =</span> <span class="dv">2</span>,</a>
+<a class="sourceLine" id="cb67-2" data-line-number="2">       <span class="dt">col=</span><span class="st">&quot;purple&quot;</span>, <span class="dt">xlab =</span> <span class="kw">expression</span>(chi[<span class="st">&quot;df=27&quot;</span>]<span class="op">^</span><span class="dv">2</span>),</a>
+<a class="sourceLine" id="cb67-3" data-line-number="3">       <span class="dt">xlim =</span> <span class="kw">c</span>(<span class="dv">10</span>, <span class="dv">55</span>), <span class="dt">ylim=</span><span class="kw">c</span>(<span class="dv">10</span>, <span class="dv">55</span>))</a>
+<a class="sourceLine" id="cb67-4" data-line-number="4"><span class="kw">qqline</span>(statnull, <span class="dt">dist =</span> <span class="cf">function</span>(p) <span class="kw">qchisq</span>(p, <span class="dt">df =</span> <span class="dv">27</span>),</a>
+<a class="sourceLine" id="cb67-5" data-line-number="5">          <span class="dt">col=</span><span class="st">&quot;blue&quot;</span>, <span class="dt">lty=</span><span class="dv">6</span>, <span class="dt">lwd=</span><span class="dv">2</span>)</a></code></pre></div>
+<p><img src="Lect2-StatModel_files/figure-slidy/qqplot3-1.png" width="50%" style="display: block; margin: auto;" /></p>
+<p>Now that we have established that <code>statnull</code> follows a <span class="math inline">\(\chi^2_{27}\)</span> distribution, we can use this fact to compute our p-value: the probability that we would observe a value as high as 68.7:</p>
+<div class="sourceCode" id="cb68"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb68-1" data-line-number="1"><span class="dv">1</span> <span class="op">-</span><span class="st"> </span><span class="kw">pchisq</span>(statdata, <span class="dt">df =</span> <span class="dv">27</span>)</a></code></pre></div>
+<pre><code>## [1] 1.74323e-05</code></pre>
+</div>
+<div id="chargaffs-rule" class="slide section level1">
+<h1>Chargaff’s rule</h1>
+<p>In fact, it was Chargaff who discovered the most important pattern in the nucleotide frequencies. Long before DNA sequencing was available, he used the weight of the molecules.</p>
+<div class="figure" style="text-align: center">
+<img src="/Users/whuber/CUBook/images/ChargaffColdSpring.png" alt="Erwin Chargaff, 1947" width="40%" />
+<p class="caption">
+Erwin Chargaff, 1947
+</p>
+</div>
+<p>Unfortunately, Chargaff only published the <em>percentages</em> of the mass present in different organisms for each of the nucleotides, not the measurements themselves.</p>
+<div class="sourceCode" id="cb70"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb70-1" data-line-number="1"><span class="kw">load</span>(<span class="kw">input_dir</span>(<span class="st">&quot;data/ChargaffTable.RData&quot;</span>))</a>
+<a class="sourceLine" id="cb70-2" data-line-number="2">ChargaffTable</a></code></pre></div>
+<pre><code>##                   A    T    C    G
+## Human-Thymus   30.9 29.4 19.9 19.8
+## Mycobac.Tuber  15.1 14.6 34.9 35.4
+## Chicken-Eryth. 28.8 29.2 20.5 21.5
+## Sheep-liver    29.3 29.3 20.5 20.7
+## Sea Urchin     32.8 32.1 17.7 17.3
+## Wheat          27.3 27.1 22.7 22.8
+## Yeast          31.3 32.9 18.7 17.1
+## E.coli         24.7 23.6 26.0 25.7</code></pre>
+<div class="figure" style="text-align: center">
+<img src="Lect2-StatModel_files/figure-slidy/ChargaffBars-1.png" alt="Each barplot was made with a different row from the above table. There is certainly a tendency in the nucleotide frequencies." width="80%" />
+<p class="caption">
+Each barplot was made with a different row from the above table. There is certainly a tendency in the nucleotide frequencies.
+</p>
+</div>
+<h2 id="do-these-data-seem-to-come-from-equally-likely-multinomial-categories">Do these data seem to come from equally likely multinomial categories?</h2>
+<p>Chargaff <em>saw</em> the answer to this question and postulated a pattern called <em>base pairing</em>, which ensured a perfect match of the (molar) amount of adenine (A) in the DNA of an organism to the amount of thymine (T). This is now called Chargaff’s rule. Similarly, whatever the amount of guanine (G), the amount of cytosine (C) is the same. The departure from the balanced multinomial distribution is not subtle.</p>
+<h2 id="testing-for-significant-base-pairing">Testing for significant base pairing</h2>
+<p>Suppose a first round of data revealed the pattern (<span class="math inline">\(p_{\mbox{C}}=p_{\mbox{G}}\)</span> and <span class="math inline">\(p_{\mbox{A}}=p_{\mbox{T}}\)</span>), and now we want to test this hypothesis with the data above from a <em>second round</em> of experiments, summarized by the above table.</p>
+<p>Define our test statistic to be <span class="math display">\[
+(p_{\mbox{C}}-p_{\mbox{G}})^2+(p_{\mbox{A}}-p_{\mbox{T}})^2
+\]</span> summed over all rows of the table. This value should be the smaller, the more similar the frequencies of paired nucleotides are.</p>
+<div class="sourceCode" id="cb72"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb72-1" data-line-number="1">nucleotide_frequencies =<span class="st"> </span>ChargaffTable <span class="op">/</span><span class="st"> </span><span class="dv">100</span></a>
+<a class="sourceLine" id="cb72-2" data-line-number="2">statchargaff =<span class="st"> </span><span class="cf">function</span>(x) {</a>
+<a class="sourceLine" id="cb72-3" data-line-number="3">  <span class="kw">sum</span>((x[, <span class="dv">2</span>] <span class="op">-</span><span class="st"> </span>x[, <span class="dv">1</span>])<span class="op">^</span><span class="dv">2</span> <span class="op">+</span><span class="st"> </span>(x[, <span class="dv">4</span>] <span class="op">-</span><span class="st"> </span>x[, <span class="dv">3</span>])<span class="op">^</span><span class="dv">2</span>)</a>
+<a class="sourceLine" id="cb72-4" data-line-number="4">}</a>
+<a class="sourceLine" id="cb72-5" data-line-number="5"><span class="kw">statchargaff</span>(nucleotide_frequencies)</a></code></pre></div>
+<pre><code>## [1] 0.001108</code></pre>
+<div class="sourceCode" id="cb74"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb74-1" data-line-number="1">permstat =<span class="st"> </span><span class="kw">replicate</span>(<span class="dv">10000</span>, {</a>
+<a class="sourceLine" id="cb74-2" data-line-number="2">  permuted =<span class="st"> </span><span class="kw">t</span>(<span class="kw">apply</span>(nucleotide_frequencies, <span class="dv">1</span>, sample))</a>
+<a class="sourceLine" id="cb74-3" data-line-number="3">  <span class="kw">statchargaff</span>(permuted)</a>
+<a class="sourceLine" id="cb74-4" data-line-number="4">})</a>
+<a class="sourceLine" id="cb74-5" data-line-number="5">fractionsmallerorequal =<span class="st"> </span><span class="kw">mean</span>(permstat <span class="op">&lt;=</span><span class="st"> </span><span class="kw">statchargaff</span>(nucleotide_frequencies))</a>
+<a class="sourceLine" id="cb74-6" data-line-number="6">fractionsmallerorequal</a></code></pre></div>
+<pre><code>## [1] 3e-04</code></pre>
+<p><img src="Lect2-StatModel_files/figure-slidy/permstatC-1.png" width="50%" style="display: block; margin: auto;" /></p>
+<p>Question 1: should we think of <code>fractionsmallerorequal</code> as a p-value?</p>
+<p>Question 2: if we had come up with the hypothesis that <span class="math inline">\(p_{\mbox{C}}=p_{\mbox{G}}\)</span> and <span class="math inline">\(p_{\mbox{A}}=p_{\mbox{T}}\)</span> from the same data that we then use to compute <code>fractionsmallerorequal</code>, would there be a problem?</p>
+</div>
+<div id="codon-usage-patterns" class="slide section level1">
+<h1>Codon usage patterns</h1>
+<p>A sequence of three nucleotides (a codon) in a coding region of a gene can be transcribed into one of 20 possible amino acids. There are <span class="math inline">\(4^3 = 64\)</span> possible codon sequences, but only 20 amino acids.</p>
+<p>The multiplicity (the number of codons that code for the same amino acid) varies from 2 to 6. The different codon-spellings of each amino acid do not occur with equal probabilities. Let’s look at the data for the standard laboratory strain of tuberculosis (H37Rv):</p>
+<div class="sourceCode" id="cb76"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb76-1" data-line-number="1"><span class="kw">library</span>(<span class="st">&quot;readr&quot;</span>)</a>
+<a class="sourceLine" id="cb76-2" data-line-number="2">Myc =<span class="st"> </span><span class="kw">read_table</span>(<span class="kw">input_dir</span>(<span class="st">&quot;data/M_tuberculosis.txt&quot;</span>), <span class="dt">col_names =</span> <span class="ot">TRUE</span>, <span class="dt">comment =</span> <span class="st">&quot;#&quot;</span>)</a>
+<a class="sourceLine" id="cb76-3" data-line-number="3">Myc</a></code></pre></div>
+<pre><code>## # A tibble: 79 x 4
+##    AmAcid Codon Number PerThous
+##    &lt;chr&gt;  &lt;chr&gt;  &lt;dbl&gt;    &lt;dbl&gt;
+##  1 Gly    GGG    25874     19.2
+##  2 Gly    GGA    13306      9.9
+##  3 Gly    GGT    25320     18.8
+##  4 Gly    GGC    68310     50.8
+##  5 &quot;&quot;     &lt;NA&gt;      NA     NA  
+##  6 Glu    GAG    41103     30.6
+##  7 Glu    GAA    21767     16.2
+##  8 Asp    GAT    21165     15.8
+##  9 Asp    GAC    56687     42.2
+## 10 &quot;&quot;     &lt;NA&gt;      NA     NA  
+## # … with 69 more rows</code></pre>
+<p>The codons for the amino acid proline are of the form <code>CC*</code>, which occur with the following frequencies.</p>
+<div class="sourceCode" id="cb78"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb78-1" data-line-number="1"><span class="kw">library</span>(<span class="st">&quot;dplyr&quot;</span>)</a>
+<a class="sourceLine" id="cb78-2" data-line-number="2">MycPro =<span class="st"> </span><span class="kw">filter</span>(Myc, AmAcid <span class="op">==</span><span class="st"> &quot;Pro&quot;</span>)</a>
+<a class="sourceLine" id="cb78-3" data-line-number="3">MycPro<span class="op">$</span>Codon</a></code></pre></div>
+<pre><code>## [1] &quot;CCG&quot; &quot;CCA&quot; &quot;CCT&quot; &quot;CCC&quot;</code></pre>
+<div class="sourceCode" id="cb80"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb80-1" data-line-number="1">MycPro<span class="op">$</span>Number <span class="op">/</span><span class="st"> </span><span class="kw">sum</span>(MycPro<span class="op">$</span>Number)</a></code></pre></div>
+<pre><code>## [1] 0.54302025 0.10532985 0.05859765 0.29305225</code></pre>
+<p>The counts enable us to estimate the theoretical probabilities (or parameters) by taking the maximum likelihood estimates as the proportions with which each occurs.</p>
+<p>Exercise: use a <span class="math inline">\(\chi^2\)</span>-distribution with 3 degrees of freedom as the reference distribution to which you compare the <span class="math inline">\(\chi^2\)</span>-statistic computed from the actual numbers of occurence of the four categories (proline codons) and their expected values.</p>
+</div>
+<div id="working-with-two-categorical-variables" class="slide section level1">
+<h1>Working with two categorical variables</h1>
+<p>Up to now, we have visited cases where the data are taken from a sample that can be classified into different boxes: the binomial and Poisson for Yes/No binary boxes and the Multinomial for categorical variables such as A/C/G/T or genotypes such as aa/aA/AA.</p>
+<p>However, it might be that we measure two (or more) categorical variables on a set of subjects, for instance eye color and hair color. We can then cross-tabulate the counts for every combination of eye and hair color. This concept, called <strong>contingency table</strong>, is useful for many biological data types.</p>
+<div class="sourceCode" id="cb82"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb82-1" data-line-number="1">HairEyeColor</a></code></pre></div>
+<pre><code>## , , Sex = Male
+## 
+##        Eye
+## Hair    Brown Blue Hazel Green
+##   Black    32   11    10     3
+##   Brown    53   50    25    15
+##   Red      10   10     7     7
+##   Blond     3   30     5     8
+## 
+## , , Sex = Female
+## 
+##        Eye
+## Hair    Brown Blue Hazel Green
+##   Black    36    9     5     2
+##   Brown    66   34    29    14
+##   Red      16    7     7     7
+##   Blond     4   64     5     8</code></pre>
+<p><code>HairEyeColor</code> is a 3 dimensional array with three dimensions:<br />
+- 1 Hair: Black, Brown, Red, Blond<br />
+- 2 Eye: Brown, Blue, Hazel, Green<br />
+- 3 Sex: Male, Female</p>
+<div class="sourceCode" id="cb84"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb84-1" data-line-number="1"><span class="kw">dim</span>(HairEyeColor)</a></code></pre></div>
+<pre><code>## [1] 4 4 2</code></pre>
+<div class="sourceCode" id="cb86"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb86-1" data-line-number="1">? HairEyeColor</a></code></pre></div>
+<h4 id="color-blindness-and-sex">Color blindness and sex</h4>
+<p>Deuteranopia is a form of red-green color blindness due to the fact that medium wavelength sensitive cones (green) are missing. A deuteranope can only distinguish 2 to 3 different hues, whereas somebody with normal vision sees 7 different hues. A survey for this type of color blindness in human subjects produced a two-way table crossing color blindness and sex.</p>
+<div class="sourceCode" id="cb87"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb87-1" data-line-number="1"><span class="kw">load</span>(<span class="kw">input_dir</span>(<span class="st">&quot;data/Deuteranopia.RData&quot;</span>))</a>
+<a class="sourceLine" id="cb87-2" data-line-number="2">Deuteranopia</a></code></pre></div>
+<pre><code>##           Men Women
+## Deute      19     2
+## NonDeute 1981  1998</code></pre>
+<p>How do we test whether there is a relationship between sex and the occurence of color blindness?</p>
+<p>We postulate the null model of two independent binomials: one for sex and one for color blindness, with parameters from the respective marginal distributions. Under this model we know all the table cells‘ probabilities, and we can compare the observed counts to the expected ones. In R, this is done through the <code>chisq.test</code> function.</p>
+<div class="sourceCode" id="cb89"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb89-1" data-line-number="1"><span class="kw">chisq.test</span>(Deuteranopia)</a></code></pre></div>
+<pre><code>## 
+##  Pearson&#39;s Chi-squared test with Yates&#39; continuity correction
+## 
+## data:  Deuteranopia
+## X-squared = 12.255, df = 1, p-value = 0.0004641</code></pre>
+</div>
+<div id="concatenating-several-multinomials-motifs" class="slide section level1">
+<h1>Concatenating several multinomials: motifs</h1>
+<p>The <a href="http://www.sciencegateway.org/resources/kozak.htm">Kozak Motif</a> is a sequence that occurs close to the start codon <strong>ATG</strong> of a coding region. The start codon itself always has a fixed spelling, but in positions 5 to the left of it, there is also a nucleotide pattern that is not fixed, but in which the letters are quite far from being equally likely.</p>
+<p>We summarize this by giving the Position-Weight-Matrix(PWM), which provides the multinomial probabilities at every position. This is encoded graphically by what is called a <strong>logo</strong>.</p>
+<div class="sourceCode" id="cb91"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb91-1" data-line-number="1"><span class="kw">library</span>(<span class="st">&quot;seqLogo&quot;</span>)</a>
+<a class="sourceLine" id="cb91-2" data-line-number="2"><span class="kw">load</span>(<span class="kw">input_dir</span>(<span class="st">&quot;data/kozak.RData&quot;</span>))</a>
+<a class="sourceLine" id="cb91-3" data-line-number="3">kozak</a></code></pre></div>
+<pre><code>##   [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9]
+## A 0.33 0.25  0.4 0.15 0.20    1    0    0 0.05
+## C 0.12 0.25  0.1 0.40 0.40    0    0    0 0.05
+## G 0.33 0.25  0.4 0.20 0.25    0    0    1 0.90
+## T 0.22 0.25  0.1 0.25 0.15    0    1    0 0.00</code></pre>
+<div class="sourceCode" id="cb93"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb93-1" data-line-number="1">pwm =<span class="st"> </span><span class="kw">makePWM</span>(kozak)</a>
+<a class="sourceLine" id="cb93-2" data-line-number="2"><span class="kw">seqLogo</span>(pwm, <span class="dt">ic.scale =</span> <span class="ot">FALSE</span>)</a></code></pre></div>
+<p><img src="Lect2-StatModel_files/figure-slidy/seqlogo-1.png" width="50%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="recap" class="slide section level1">
+<h1>Recap</h1>
+<p>What have we noticed in our study of the frequencies in these ‘box’ models for categorical variables?</p>
+<ul>
+<li><p>different ‘boxes‘ in the multinomials we have encountered are rarely of equal size, i.e., equality of the different <span class="math inline">\(p_i\)</span>’s is the exception rather than the rule.</p></li>
+<li><p>departures from independence (i.e., correlations) of two categorical variables (sex and colorblindness, hair and eye color, ..) are common.</p></li>
+</ul>
+<p>We will see in a later lecture that we can explore the directions, patterns in and possible explanations for these dependencies by using multivariate decompositions of the contingency tables.</p>
+<p>An important special case of dependent categorical variables are sequences (in time and/or space).</p>
+</div>
+<div id="markov-chains" class="slide section level1">
+<h1>Markov chains</h1>
+<p>Dependence in ordered observations occurs, for instance, in temporal weather patterns and nucleotides along a sequence: the distribution of the next value depends on the ones before.</p>
+<p>Sometimes it is useful to make a simplifying assumption: the distribution of the next value depends only on the one before. If this holds, we call it the <em>Markov property</em>. (A different way of stating the assumption is that the current values, or <em>state</em>, contains all information that there needed to predict all the future behaviour of the system – cf. Newtonian, Hamiltonian mechanics.)</p>
+<p>For DNA sequences, we may see specific succession patterns so that the pairs of nucleotides, called digrams (e.g., CG, CA, CC and CT) are not equally frequent. For instance in parts of the genome we see more frequent instances of CA than we would expect under independence:</p>
+<p><span class="math display">\[
+P(\mbox{CA}) \neq P(\mbox{C})P(\mbox{A}).
+\]</span></p>
+<p><img src="img/chap2-statsfourstateMC-1.png" width="40%" style="display: block; margin: auto;" /></p>
+<h2 id="transition-matrix">Transition matrix</h2>
+<p><span class="math display">\[
+\left(\begin{array}{cccc}
+W_{11}&amp;W_{12}&amp;\ldots&amp;W_{1n}\\
+W_{21}&amp;W_{22}&amp;\ldots&amp;W_{2n}\\
+\vdots&amp;\vdots&amp;      &amp;\vdots\\
+W_{n1}&amp;W_{n2}&amp;\ldots&amp;W_{nn}\\
+\end{array}\right)
+\]</span></p>
+<p>If at time (or sequence position, …) <span class="math inline">\(t\)</span> the value (or state) is <span class="math inline">\(i\)</span> (<span class="math inline">\(i\in\{1,\ldots,n\}\)</span>), the probability that at time <span class="math inline">\(t+1\)</span> the value (state) is <span class="math inline">\(j\)</span> is <span class="math inline">\(W_{ij}\)</span>.</p>
+<p>The row sums and the column sums of the matrix <span class="math inline">\(W\)</span> are all one (<span class="math inline">\(\sum_i W_{ij} = \sum_j W_{ij} = 1\)</span>), and all <span class="math inline">\(W_{ij}\ge0\)</span>. Such a matrix is also called a stochastic matrix.</p>
+<p>How to estimate a transition matrix from data?</p>
+</div>
+<div id="bayesian-thinking" class="slide section level1">
+<h1>Bayesian Thinking</h1>
+<p>Up to now we have followed a classical approach where probabilities are defined as long term frequencies from observations. If we visit a new place and have had four days of sunshine, we might estimate that the probability of sunshine here is 100% and that of rain 0%. However, this does not take into account any other information that we might already know. For that we need a different approach, which is able to combine prior knowledge as well as the data at hand: this is provided by the Bayesian paradigm.</p>
+<p>Bayesian thinking also operates in terms of parameters (i.e. ‘knowledge’ = parameter values). However, at any point in our chain of reasoning (even prior to seeing the current data), there is a probability distribution on our parameters. Once the current data is seen, we simply update the distribution, which is then called the posterior.</p>
+<!-- ![Turtles all the way down ](http://bios221.stanford.edu/images/turtles.jpg){width="0.8\linewidth"} -->
+<div class="figure" style="text-align: center">
+<img src="/Users/whuber/CUBook/images/turtles.jpg" alt="Turtles all the way down" width="60%" />
+<p class="caption">
+Turtles all the way down
+</p>
+</div>
+</div>
+<div id="simulation-study-of-the-bayesian-paradigm-for-the-binomial-distribution-textbntheta" class="slide section level1">
+<h1>Simulation study of the Bayesian paradigm for the binomial distribution <span class="math inline">\(\text{B}(n,\theta)\)</span></h1>
+<p>Instead of assuming that our parameter <span class="math inline">\(\theta\)</span> has one single value, the Bayesian world view lets us to see it as a draw from a statistical distribution.</p>
+<p>The distribution expresses our belief about the possible values of the parameter <span class="math inline">\(\theta\)</span>.</p>
+<p>In principle, we can use any distribution that we like that takes values in the same range of values as our parameter (we also call that the distribution’s <strong>support</strong>).</p>
+<p>For a parameter that expresses a proportion or a probability, and which takes its values between 0 and 1, it is convenient to use the <strong>beta distribution</strong>. Its density is:</p>
+<p><span class="math display">\[
+f_{\alpha,\beta}(x) = \frac{x^{\alpha-1} (1-x)^{\beta-1}}{\mathrm{B}(\alpha, \beta)}, \quad\text{ where  }
+\mathrm{B}(\alpha ,\beta)=\frac{\Gamma(\alpha)\Gamma(\beta)}{\Gamma(\alpha+\beta)}
+\]</span></p>
+<p>We can see that this function depends on two parameters <span class="math inline">\(\alpha\)</span> and <span class="math inline">\(\beta\)</span>, making it a very flexible family of distributions (so it can ’fit’ a lot different situations). We also see that not only gene naming can be confusing: here both the name of the distribution family and one of its two parameters is called beta.</p>
+<p>Now here comes a nice fact: if we start with a prior belief that our distribution of <span class="math inline">\(\theta\)</span> is beta-shaped, observe a dataset of <span class="math inline">\(n\)</span> binomial trials, then update our belief, the posterior will also have a beta distribution, albeit (usually) with new parameters.</p>
+<p>This is a provable mathematical property, which is expressed by saying that the binomial and the beta are <em>conjugate</em>. We will not prove it, however we illustrate it with a simulation.</p>
+</div>
+<div id="priors-and-the-marginal-distribution" class="slide section level1">
+<h1>Priors and the marginal distribution</h1>
+<p>Consider a random variable <span class="math inline">\(Y\)</span> that is binomial distributed with parameter <span class="math inline">\(\theta\)</span>. We have seen how the density of <span class="math inline">\(Y\)</span> (or sampled histograms) look when <span class="math inline">\(\theta\)</span> takes a given, fixed value. But what happens if <span class="math inline">\(\theta\)</span> itself also varies according to some distribution?</p>
+<p>We call this the <strong>marginal distribution</strong> of <span class="math inline">\(Y\)</span>.</p>
+<p>Let’s simulate that. We first generate a random sample of 10000 <span class="math inline">\(\theta\)</span>s, and for each of these we then generate a random sample of <span class="math inline">\(Y\)</span>.</p>
+<div class="sourceCode" id="cb94"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb94-1" data-line-number="1">rtheta =<span class="st"> </span><span class="kw">rbeta</span>(<span class="dv">100000</span>, <span class="dv">50</span>, <span class="dv">350</span>)</a>
+<a class="sourceLine" id="cb94-2" data-line-number="2">y =<span class="st"> </span><span class="kw">sapply</span>(rtheta, <span class="cf">function</span>(th) {</a>
+<a class="sourceLine" id="cb94-3" data-line-number="3">  <span class="kw">rbinom</span>(<span class="dv">1</span>, <span class="dt">prob =</span> th, <span class="dt">size =</span> <span class="dv">300</span>)</a>
+<a class="sourceLine" id="cb94-4" data-line-number="4">})</a>
+<a class="sourceLine" id="cb94-5" data-line-number="5"><span class="kw">hist</span>(y, <span class="dt">breaks =</span> <span class="dv">50</span>, <span class="dt">col =</span> <span class="st">&quot;orange&quot;</span>, <span class="dt">main=</span><span class="st">&quot;&quot;</span>)</a></code></pre></div>
+<div class="figure" style="text-align: center">
+<img src="Lect2-StatModel_files/figure-slidy/histmarginal-1.png" alt="Histogram of $Y$" width="50%" />
+<p class="caption">
+Histogram of <span class="math inline">\(Y\)</span>
+</p>
+</div>
+<h2 id="histogram-of-all-the-thetas-such-that-y40-the-posterior-distribution">Histogram of all the thetas such that <span class="math inline">\(Y=40\)</span>: the posterior distribution</h2>
+<p>So let’s suppose we observed an experimental data point where <span class="math inline">\(Y\)</span> was 40. How does this change our belief about the distribution of <span class="math inline">\(\theta\)</span>? We compute the posterior distribution of <span class="math inline">\(\theta\)</span> by conditioning on those outcomes where <span class="math inline">\(Y\)</span> was 40 (<code>thetaPostEmp</code>), and also the one given by theory (<code>densPostTheory</code>).</p>
+<div class="sourceCode" id="cb95"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb95-1" data-line-number="1">thetaPostEmp =<span class="st"> </span>rtheta[y <span class="op">==</span><span class="st"> </span><span class="dv">40</span>]</a>
+<a class="sourceLine" id="cb95-2" data-line-number="2"><span class="kw">hist</span>(thetaPostEmp, <span class="dt">breaks =</span> <span class="dv">40</span>, <span class="dt">col =</span> <span class="st">&quot;chartreuse4&quot;</span>,</a>
+<a class="sourceLine" id="cb95-3" data-line-number="3">     <span class="dt">probability =</span> <span class="ot">TRUE</span>, <span class="dt">main =</span> <span class="st">&quot;&quot;</span>, <span class="dt">xlab =</span> <span class="kw">expression</span>(<span class="st">&quot;posterior&quot;</span><span class="op">~</span>theta))</a>
+<a class="sourceLine" id="cb95-4" data-line-number="4">densPostTheory =<span class="st"> </span><span class="kw">dbeta</span>(thetas, <span class="dv">90</span>, <span class="dv">610</span>) <span class="co"># more on this below</span></a>
+<a class="sourceLine" id="cb95-5" data-line-number="5"><span class="kw">lines</span>(thetas, densPostTheory, <span class="dt">type =</span> <span class="st">&quot;l&quot;</span>, <span class="dt">lwd =</span> (<span class="dv">1</span><span class="op">+</span><span class="kw">sqrt</span>(<span class="dv">5</span>))<span class="op">/</span><span class="dv">2</span>)</a></code></pre></div>
+<p><img src="Lect2-StatModel_files/figure-slidy/densityposterior-1.png" width="40%" style="display: block; margin: auto;" /></p>
+<p>We can check the means of both versions of the posterior distribution and see that they are close to 4 significant digits.</p>
+<div class="sourceCode" id="cb96"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb96-1" data-line-number="1"><span class="kw">mean</span>(thetaPostEmp)</a></code></pre></div>
+<pre><code>## [1] 0.1288427</code></pre>
+<div class="sourceCode" id="cb98"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb98-1" data-line-number="1">dtheta =<span class="st"> </span>thetas[<span class="dv">2</span>]<span class="op">-</span>thetas[<span class="dv">1</span>]</a>
+<a class="sourceLine" id="cb98-2" data-line-number="2"><span class="kw">sum</span>(thetas <span class="op">*</span><span class="st"> </span>densPostTheory <span class="op">*</span><span class="st"> </span>dtheta)</a></code></pre></div>
+<pre><code>## [1] 0.1285714</code></pre>
+<p>To get the mean of the theoretical density, above we computed the integral <span class="math inline">\(\int_0^1 \theta f(\theta) d\theta\)</span> using numerical integration, i.e., by summing over the integrant. This is not always convenient (or feasible), in particular when our parameters are high-dimensional (e.g., if our model involved not only a single <span class="math inline">\(\theta\)</span> parameter, but several thousand as for instance in the case of image analysis). In such cases, and when an analytic solution is also not available, we can resort to Monte Carlo integration (which here is very simple):</p>
+<div class="sourceCode" id="cb100"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb100-1" data-line-number="1">thetaPostMc =<span class="st"> </span><span class="kw">rbeta</span>(<span class="dt">n =</span> <span class="fl">1e6</span>, <span class="dv">90</span>, <span class="dv">610</span>)</a>
+<a class="sourceLine" id="cb100-2" data-line-number="2"><span class="kw">mean</span>(thetaPostMc)</a></code></pre></div>
+<pre><code>## [1] 0.1285694</code></pre>
+<h2 id="the-posterior-distribution-is-also-a-beta">The posterior distribution is also a beta</h2>
+<p>Now we have seen that the posterior distribution is also a beta. In our case its parameters 90 and 610 were obtained by adding to the prior parameters 50, 350 the number of observed successes, 40, and observed failures, 260. Thus the general rule is <span class="math display">\[
+\text{beta}(\alpha_{\text{post}}, \beta_{\text{post}}) = 
+\text{beta}(\alpha_{\text{prior}} + y,\beta_{\text{prior}} + (n-y))
+\]</span></p>
+<h2 id="now-suppose-we-have-a-second-set-of-observations">Now suppose we have a second set of observations</h2>
+<p>After seeing our first set of data, we have a new belief about our <span class="math inline">\(\theta\)</span>, namely <span class="math inline">\(\text{beta}(90, 610)\)</span>. It acts as our new prior if we collect a new set of data. Say we make <span class="math inline">\(n=150\)</span> observations of which there were <span class="math inline">\(y=25\)</span> successes, 125 failures.</p>
+<p>What is now our new best belief about <span class="math inline">\(\theta\)</span>?</p>
+<p>Using the same reasoning as before, the new posterior will be <span class="math display">\[
+\text{beta}(90+25=115,\, 610+125=735).
+\]</span></p>
+<p>The mean of this distribution is <span class="math inline">\(\frac{115}{115+735}=\frac{115}{850}\simeq 0.135\)</span>, thus one point estimate of <span class="math inline">\(\theta\)</span> would be 0.135.</p>
+<p>The theoretical (MAP) estimate would be the mode of <span class="math inline">\(\text{beta}(115, 735)\)</span>, i.e., <span class="math inline">\(\frac{114}{848}\simeq 0.134\)</span>. Let’s check this numerically.</p>
+<div class="sourceCode" id="cb102"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb102-1" data-line-number="1">densPost2 =<span class="st"> </span><span class="kw">dbeta</span>(thetas, <span class="dv">115</span>, <span class="dv">735</span>)</a>
+<a class="sourceLine" id="cb102-2" data-line-number="2">mcPost2   =<span class="st"> </span><span class="kw">rbeta</span>(<span class="fl">1e6</span>, <span class="dv">115</span>, <span class="dv">735</span>)</a>
+<a class="sourceLine" id="cb102-3" data-line-number="3"></a>
+<a class="sourceLine" id="cb102-4" data-line-number="4"><span class="kw">sum</span>(thetas <span class="op">*</span><span class="st"> </span>densPost2 <span class="op">*</span><span class="st"> </span>dtheta)  <span class="co"># mean, by numeric integration</span></a></code></pre></div>
+<pre><code>## [1] 0.1352941</code></pre>
+<div class="sourceCode" id="cb104"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb104-1" data-line-number="1"><span class="kw">mean</span>(mcPost2)                     <span class="co"># mean, by MC</span></a></code></pre></div>
+<pre><code>## [1] 0.1353139</code></pre>
+<div class="sourceCode" id="cb106"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb106-1" data-line-number="1">thetas[<span class="kw">which.max</span>(densPost2)]      <span class="co"># MAP estimate</span></a></code></pre></div>
+<pre><code>## [1] 0.134</code></pre>
+<!-- ![MonteCarlo](http://bios221.stanford.edu/images/roulette.png){width="0.3\linewidth"} -->
+<p><img src="/Users/whuber/CUBook/images/roulette.png" width="30%" style="display: block; margin: auto;" /></p>
+<p>The last line of this code uses a Monte Carlo method for finding the MAP from a sample from <code>rbeta(., 115, 735)</code>.</p>
+<h2 id="exercise">Exercise</h2>
+<p>Redo these computations replacing our original prior with a softer prior (broader, less peaked), synonymous with less prior information. How much does this change the final result?</p>
+<p>As a general rule, the prior rarely changes the posterior distribution substantially except if it is very peaked (i.e., if, at the outset, we were already rather sure of it) or if there is very little data.</p>
+<p>The best situation to be in is to have enough data to swamp the prior so that its choice has negligible impact on the final result.</p>
+<h2 id="confidence-statements">Confidence statements</h2>
+<p>Sometimes we don’t just want a point estimate, but a <strong>credible interval</strong> (a Bayesian equivalent of the <strong>confidence interval</strong>). E.g., we can take the 2.5 and 97.5 percentiles of the posterior distribution:</p>
+<p><span class="math display">\[
+P (L \leq \theta \leq U) = 0.95
+\]</span></p>
+<div class="sourceCode" id="cb108"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb108-1" data-line-number="1"><span class="kw">quantile</span>(mcPost2, <span class="kw">c</span>(<span class="fl">0.025</span>, <span class="fl">0.975</span>))</a></code></pre></div>
+<pre><code>##      2.5%     97.5% 
+## 0.1131540 0.1590786</code></pre>
+</div>
+<div id="example-haplotype-frequencies" class="slide section level1">
+<h1>Example: haplotype frequencies</h1>
+<p>Here’s a forensics example using signatures from the Y chromosome called haplotypes. Our roadmap is:</p>
+<ul>
+<li>We’ll first look at the motivation and terminology behind the computations involved in haplotype frequency analyses.</li>
+<li>Then we’ll revisit the concept of likelihood.</li>
+<li>We’ll see how we can think of unknown parameters as being random numbers, modeling our uncertainty about them with a prior distribution.</li>
+<li>Finally, we’ll see how to incorporate newly observed data into the distributions and compute a posterior distribution and confidence statements about the parameters.</li>
+</ul>
+<p>In this example we want to estimate the proportion of a particular Y-haplotye assembled from the different short tandem repeats (STR).</p>
+<!-- ![STR](http://bios221.stanford.edu/images/STRDefinition.png){width="1.1\linewidth"} -->
+<div class="figure" style="text-align: center">
+<img src="/Users/whuber/CUBook/images/STRDefinition.png" alt="STR" width="80%" />
+<p class="caption">
+STR
+</p>
+</div>
+<p>The combination of values at the special STR locations used for forensics are labeled by the number of repeats at the specific positions. Here is part of an STR haplotype table:</p>
+<pre><code>  Individual DYS19 DXYS156Y DYS389m DYS389n DYS389p
+1         H1    14       12       4      12       3
+2         H3    15       13       4      13       3
+3         H4    15       11       5      11       3
+4         H5    17       13       4      11       3
+5         H7    13       12       5      12       3
+6         H8    16       11       5      12       3</code></pre>
+<p>This says that the haplotype H1 has 14 repeats at position DYS19, 12 repeats at position DXYS156Y, <span class="math inline">\(\ldots\)</span>. We want to find the underlying proportion <span class="math inline">\(\theta\)</span> of the haplotype of interest in the population of interest. We are going to consider the occurrence of a haplotype as a ‘success’ in a binomial distribution using collected observations.</p>
+</div>
+<div id="a-more-complicated-example-from-rna-seq-analysis" class="slide section level1">
+<h1>A more complicated example from RNA-seq analysis</h1>
+<!-- ![PredictionInterval](http://bios221.stanford.edu/images/DESeq2-Prediction-Interval.png){width="\textwidth"} -->
+<div class="figure" style="text-align: center">
+<img src="/Users/whuber/CUBook/images/DESeq2-Prediction-Interval.png" alt="From Love, Huber and Anders in their article about the `DESeq2` package." width="42%" />
+<p class="caption">
+From Love, Huber and Anders in their article about the <code>DESeq2</code> package.
+</p>
+</div>
+<p>Shown are the prior (solid black line), the likelihoods (solid lines, scaled to integrate to 1) and the posteriors (dashed lines) for two genes (green and purple). Due to the higher dispersion of the data for the purple gene, its likelihood is wider and less peaked (indicating less information), so the prior has more influence on its posterior than for the green gene.</p>
+<p>The stronger curvature of the green posterior at its maximum translates to a smaller reported standard error for the MAP logarithmic fold change (LFC) estimate (horizontal error bar).</p>
+</div>
+<div id="worked-examples-using-biological-sequence-data" class="slide section level1">
+<h1>Worked examples using biological sequence data</h1>
+<p>In Section 2.10, Questions 2.21 - 2.23 of the book, we explore the occurrence of the <strong>Shine-Dalgarno motif</strong> AGGAGGT in the genome of E.coli. This motif helps initiate protein synthesis in bacteria. We look at the frequency at which it occurs per length of genomic sequence, and at distances between its occurences.</p>
+<p>In Section 2.10.1, Questions 2.24 - 2.26, we look at differences between dinucleotide frequencies in regions of the human genome called <strong>CpG islands</strong> and the rest.</p>
+</div>
+<div id="summary-of-this-lecture" class="slide section level1">
+<h1>Summary of this lecture</h1>
+<p>This lecture explained how to go from a set of experimental data back to a distribution model and its parameters.</p>
+<p>We saw statistical models for experiments with two or more possible (categorical) outcomes: binomial and multinomial.</p>
+<p>We saw maximum likelihood and Bayesian estimation procedures.</p>
+<p>We saw examples on codon usage and nucleotide pattern discovery.</p>
+<p>Further reading: Chapter 2 in the book</p>
+<div id="refs" class="references">
+<div id="ref-Tukey:1988">
+<p>Cleveland, William S. 1988. <em>The Collected Works of John W. Tukey: Graphics 1965-1985</em>. Vol. 5. CRC Press.</p>
+</div>
+</div>
+</div>
+
+  <!-- dynamically load mathjax for compatibility with self-contained -->
+  <script>
+    (function () {
+      var script = document.createElement("script");
+      script.type = "text/javascript";
+      script.src  = "Lect2-StatModel_files/mathjax-local/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+      document.getElementsByTagName("head")[0].appendChild(script);
+    })();
+  </script>
+
+</body>
+</html>

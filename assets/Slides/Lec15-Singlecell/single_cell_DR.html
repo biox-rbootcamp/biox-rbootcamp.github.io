@@ -1,0 +1,584 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+ "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <meta name="author" content="Davide Risso, Wolfgang Huber" />
+  <meta name="date" content="2019-10-10" />
+  <meta name="font-size-adjustment" content="2"/>
+  <title>Single-cell data analysis</title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <style type="text/css">
+a.sourceLine { display: inline-block; line-height: 1.25; }
+a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
+a.sourceLine:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+a.sourceLine { text-indent: -1em; padding-left: 1em; }
+}
+pre.numberSource a.sourceLine
+  { position: relative; left: -4em; }
+pre.numberSource a.sourceLine::before
+  { content: attr(data-line-number);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; pointer-events: all; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {  }
+@media screen {
+a.sourceLine::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  <link href="single_cell_DR_files/slidy-2/styles/slidy.css" rel="stylesheet" />
+  <script src="single_cell_DR_files/slidy-2/scripts/slidy.js"></script>
+</head>
+<body>
+<div class="slide titlepage">
+  <h1 class="title">Single-cell data analysis</h1>
+  <p class="author">
+Davide Risso, Wolfgang Huber
+  </p>
+  <p class="date">10 Oct 2019</p>
+</div>
+<div id="single-cell-rna-seq" class="slide section level1">
+<h1>Single-cell RNA-seq</h1>
+<p><link href='http://fonts.googleapis.com/css?family=Lato&subset=latin,latin-ext' rel='stylesheet' type='text/css'></p>
+<style type="text/css"> 
+.small-code pre code {
+  font-size: 1em;
+}
+body{
+  font-family: Lato;
+  font-size: 24pt;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.25;
+}
+h1{
+  font-family: Lato;
+  font-size: 30pt;
+  color: #0080FF;
+}
+h2,h3,h4,h5,h6{
+  font-family: Lato;
+  font-size: 24pt;
+  color: #0080FF;
+}
+b, strong{
+ color: #0080FF;
+}
+.main-container{
+  max-width: 1800px;
+  margin-left: auto;
+  margin-right: auto;
+  line-height:1.25;
+}
+</style>
+<div class="figure" style="text-align: center">
+<img src="img/sandberg.jpg" alt="Sandberg, Nature Methods (2014)" width="494" />
+<p class="caption">
+Sandberg, Nature Methods (2014)
+</p>
+</div>
+</div>
+<div id="single-cell-signal-is-noisy" class="slide section level1">
+<h1>Single-cell signal is noisy</h1>
+<div class="figure" style="text-align: center">
+<img src="img/owens.jpg" alt="Owens, Nature (2012)" width="90%" />
+<p class="caption">
+Owens, Nature (2012)
+</p>
+</div>
+</div>
+<div id="single-cell-data-let-us-ask-new-questions" class="slide section level1">
+<h1>Single-cell data let us ask new questions</h1>
+<div class="figure" style="text-align: center">
+<img src="img/cell_state.png" alt="Wagner, Regev, Yosef, Nature Biotechnology (2016)" width="77%" />
+<p class="caption">
+Wagner, Regev, Yosef, Nature Biotechnology (2016)
+</p>
+</div>
+</div>
+<div id="single-cell-data-meet-big-data" class="slide section level1">
+<h1>Single-cell data meet big data</h1>
+<div class="figure" style="text-align: center">
+<img src="img/svensson-scaling-nprot.png" alt="Svensson, Vento-Tormo, Teichmann, Nature Protocols (2018)" width="100%" />
+<p class="caption">
+Svensson, Vento-Tormo, Teichmann, Nature Protocols (2018)
+</p>
+</div>
+</div>
+<div id="single-cell-meet-big-data" class="slide section level1">
+<h1>Single-cell meet big data</h1>
+<ul>
+<li><p>BRAIN Initiative “mini” brain atlas</p>
+<ul>
+<li>340,000 cells and nuclei from the mouse primary motor cortex</li>
+<li>Plans to sequence 3M cells for the whole brain (less than <span class="math inline">\(1\%\)</span>)</li>
+</ul></li>
+<li><p>The Human Cell Atlas “preview” dataset</p>
+<ul>
+<li><a href="https://preview.data.humancellatlas.org" class="uri">https://preview.data.humancellatlas.org</a></li>
+<li>530,000 cells from umbilical cord blood and bone marrow</li>
+<li>Millions expected “soon”</li>
+</ul></li>
+</ul>
+<p align="center">
+<img src="img/Brain.png" style="width:34.0%" /> <img src="img/hca.png" style="width:40.0%" />
+</p>
+</div>
+<div id="a-typical-workflow" class="slide section level1">
+<h1>A typical workflow</h1>
+<p><img src="img/Workflow1.png" width="100%" style="display: block; margin: auto;" /><img src="img/Workflow2.png" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="the-singlecellexperiment-class" class="slide section level1">
+<h1>The <code>SingleCellExperiment</code> class</h1>
+<p><img src="img/sce.png" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="the-singlecellexperiment-class-1" class="slide section level1">
+<h1>The <code>SingleCellExperiment</code> class</h1>
+<p>Single-cell RNA-seq data from PBMC cells, generated by 10X Genomics (see .Rmd file for details)</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1">sce</a></code></pre></div>
+<pre><code>## class: SingleCellExperiment 
+## dim: 3079 1000 
+## metadata(1): log.exprs.offset
+## assays(2): counts logcounts
+## rownames(3079): ENSG00000188976 ENSG00000187608 ...
+##   ENSG00000198727 ENSG00000220023
+## rowData names(12): ENSEMBL_ID Symbol_TENx ... total_counts
+##   log10_total_counts
+## colnames(1000): Cell1 Cell2 ... Cell999 Cell1000
+## colData names(56): Sample Barcode ...
+##   pct_counts_in_top_200_features_mito
+##   pct_counts_in_top_500_features_mito
+## reducedDimNames(2): PCA zinbwave
+## spikeNames(0):</code></pre>
+</div>
+<div id="resources" class="slide section level1">
+<h1>Resources</h1>
+<ul>
+<li>Orchestrating Single-Cell Analysis with Bioconductor -review
+<ul>
+<li><a href="https://doi.org/10.1101/590562" class="uri">https://doi.org/10.1101/590562</a></li>
+<li><a href="https://osca.bioconductor.org" class="uri">https://osca.bioconductor.org</a></li>
+</ul></li>
+<li><a href="https://f1000research.com/articles/5-2122/v2">A step-by-step workflow for low-level analysis of single-cell RNA-seq data with Bioconductor</a></li>
+<li><a href="https://f1000research.com/articles/6-1158/v1">Bioconductor workflow for single-cell RNA sequencing</a></li>
+<li><a href="https://github.com/seandavi/awesome-single-cell">github.com/seandavi/awesome-single-cell</a></li>
+<li><a href="https://www.scrna-tools.org">scrna-tools.org</a></li>
+<li><a href="https://satijalab.org/seurat">Seurat</a></li>
+<li><a href="https://bioconductor.org/help/course-materials">Bioconductor workshop materials</a></li>
+</ul>
+</div>
+<div id="bulk-vs-single-cell-rna-seq" class="slide section level1">
+<h1>Bulk vs single-cell RNA-seq</h1>
+<p><img src="img/var_sc.png" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="zero-inflated-gamma-poisson-to-the-rescue" class="slide section level1">
+<h1>Zero-inflated Gamma Poisson to the rescue?</h1>
+<p>For <span class="math inline">\(\pi\in[0,1]\)</span>, the density of the zero-inflated Gamma-Poisson distribution is given by</p>
+<p><span class="math display">\[
+f_{\text{ZIGP}}(y;\mu,\theta, \pi) = \pi \delta_0(y) + (1 - \pi) f_{\text{GP}}(y;\mu,\theta), \quad \forall y\in\mathbb{N},
+\]</span></p>
+<p>where <span class="math inline">\(\delta_0(\cdot)\)</span> is the Dirac function.</p>
+<p>Here, <span class="math inline">\(\pi\)</span> is interpreted as the probability that a <span class="math inline">\(0\)</span> is observed instead of the actual count (“dropout”), resulting in an inflation of zeros compared to the GP distribution.</p>
+</div>
+<div id="single-cell-rna-seq-read-counts" class="slide section level1">
+<h1>Single-cell RNA-seq read counts</h1>
+<div class="figure" style="text-align: center">
+<img src="img/townes_fig_s1.png" alt="Townes et al., bioR$\chi$iv (2019) https://doi.org/10.1101/574574" width="100%" />
+<p class="caption">
+Townes et al., bioR<span class="math inline">\(\chi\)</span>iv (2019) <a href="https://doi.org/10.1101/574574" class="uri">https://doi.org/10.1101/574574</a>
+</p>
+</div>
+</div>
+<div id="logarithm-transformation-is-not-helpful" class="slide section level1">
+<h1>Logarithm transformation is not helpful</h1>
+<p><img src="img/townes_logcpm.png" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="do-we-need-to-account-for-the-extra-zeros-in-the-model" class="slide section level1">
+<h1>Do we need to account for the extra zeros in the model?</h1>
+<div class="figure" style="text-align: center">
+<img src="img/val.png" alt="Svensson (2019), Droplet scRNA-seq is not zero-inflated, bioR$\chi$iv https://doi.org/10.1101/582064" width="100%" />
+<p class="caption">
+Svensson (2019), Droplet scRNA-seq is not zero-inflated, bioR<span class="math inline">\(\chi\)</span>iv <a href="https://doi.org/10.1101/582064" class="uri">https://doi.org/10.1101/582064</a>
+</p>
+</div>
+</div>
+<div id="do-we-need-to-account-for-the-extra-zeros-in-the-model-1" class="slide section level1">
+<h1>Do we need to account for the extra zeros in the model?</h1>
+<p><img src="img/09_rg_rube_goldberg_inventions_usps_stamp.jpg" width="40%" style="display: block; margin: auto;" /></p>
+<p>In UMI (unique molecular identifiers) data, in particular in droplet-based data, zero-inflation is not an important issue.</p>
+<p>In non-UMI data, the problem are not too many zeros, but too many high numbers (from runaway PCR duplication)</p>
+</div>
+<div id="naught-all-zeros-in-sequence-count-data-are-the-same" class="slide section level1">
+<h1>Naught all zeros in sequence count data are the same</h1>
+<ul>
+<li>“…, we find that zero-inflated models … tend to inflate parameter estimates … due to inherent identifiability issues.”</li>
+<li>“… this parameter inflation can be so severe as to dominate the results of a differential expression analysis…”</li>
+<li>“We find that simpler sampling models are well equipped to perform inference in situations dominated by sampling and biological zeros.”</li>
+</ul>
+<p>Silverman, Roche, Mukherjee, David. doi: <a href="http://dx.doi.org/10.1101/477794" class="uri">http://dx.doi.org/10.1101/477794</a></p>
+</div>
+<div id="quality-control-and-filtering" class="slide section level1">
+<h1>Quality Control and Filtering</h1>
+<p><img src="img/marie.jpg" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="quality-control-and-filtering-1" class="slide section level1">
+<h1>Quality Control and Filtering</h1>
+<p>Exploratory data analysis (EDA) and quality control (QC) are of utmost importance in genomics.</p>
+<p>With single cell data we have the luxury of having a large number of samples, hence we can filter out low quality cells as well as poorly sampled (=measured) genes.</p>
+<p>There are some simple metrics that we can compute.</p>
+<p><a href="https://en.wikipedia.org/wiki/Quality_(business)">NB: what is quality?</a></p>
+</div>
+<div id="identifying-empty-droplets" class="slide section level1">
+<h1>Identifying empty droplets</h1>
+<div class="figure" style="text-align: center">
+<img src="img/empty_drop.png" alt="Bioconductor package `DropletUtils`" width="100%" />
+<p class="caption">
+Bioconductor package <code>DropletUtils</code>
+</p>
+</div>
+</div>
+<div id="computing-qc-metrics" class="slide section level1">
+<h1>Computing QC metrics</h1>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" data-line-number="1">sce =<span class="st"> </span>TENxPBMCData<span class="op">::</span><span class="kw">TENxPBMCData</span>(<span class="st">&quot;pbmc4k&quot;</span>)</a>
+<a class="sourceLine" id="cb3-2" data-line-number="2">sce =<span class="st"> </span>scater<span class="op">::</span><span class="kw">calculateQCMetrics</span>(sce)</a></code></pre></div>
+<div class="figure" style="text-align: center">
+<img src="img/qc_scater.png" alt="Filtering genes and samples" width="100%" />
+<p class="caption">
+Filtering genes and samples
+</p>
+</div>
+</div>
+<div id="exploring-batch-effects" class="slide section level1">
+<h1>Exploring batch effects</h1>
+<div class="figure" style="text-align: center">
+<img src="img/qc_scone.png" alt="Bioconductor package `scone`" width="100%" />
+<p class="caption">
+Bioconductor package <code>scone</code>
+</p>
+</div>
+</div>
+<div id="normalization" class="slide section level1">
+<h1>Normalization</h1>
+<p><img src="img/drake.jpg" width="77%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="normalization-1" class="slide section level1">
+<h1>Normalization</h1>
+<p>As with bulk RNA-seq, it is important to account for the differences in sequencing depth and the other biases that may affect the expression levels.</p>
+<div class="figure" style="text-align: center">
+<img src="img/norm.png" alt="Vallejos et al., Nature Methods (2017)" width="100%" />
+<p class="caption">
+Vallejos et al., Nature Methods (2017)
+</p>
+</div>
+</div>
+<div id="bulk-rna-seq-normalization-methods-do-not-always-work" class="slide section level1">
+<h1>Bulk RNA-seq normalization methods do not always work</h1>
+<div class="figure" style="text-align: center">
+<img src="img/norm2.png" alt="Vallejos et al., Nature Methods (2017)" width="77%" />
+<p class="caption">
+Vallejos et al., Nature Methods (2017)
+</p>
+</div>
+</div>
+<div id="pooling-across-cells-helps" class="slide section level1">
+<h1>Pooling across cells helps</h1>
+<div class="figure" style="text-align: center">
+<img src="img/lun_scran_fig3.png" alt="Bioconductor package `scran`" width="90%" />
+<p class="caption">
+Bioconductor package <code>scran</code>
+</p>
+</div>
+</div>
+<div id="model-based-approach" class="slide section level1">
+<h1>Model-based approach</h1>
+<p>An alternative is to include normalization as a parameter of the statistical model.</p>
+<p>This has the advantage of propagating the uncertainty in the estimation of the scaling factors.</p>
+<p>This is the approach of the <code>BASiCS</code> and <code>zinbwave</code> Bioconductor packages.</p>
+</div>
+<div id="dimensionality-reduction" class="slide section level1">
+<h1>Dimensionality reduction</h1>
+<p><img src="img/fuck_grapefruit.png" width="77%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="dimensionality-reduction-1" class="slide section level1">
+<h1>Dimensionality reduction</h1>
+<p>Dimensionality reduction is useful for two related goals</p>
+<ol style="list-style-type: decimal">
+<li><em>Visualize</em> high dimensional data (usually in two dimensions)
+<ul>
+<li>PCA</li>
+<li>t-SNE</li>
+<li>UMAP</li>
+</ul></li>
+<li><em>Infer</em> low-dimensional structures from high dimensional data (1–50 dimensions)
+<ul>
+<li>PCA</li>
+<li>Factor analysis (e.g., <code>MOFA</code> package <a href="https://doi.org/10.15252/msb.20178124" class="uri">https://doi.org/10.15252/msb.20178124</a>)</li>
+<li><code>glmpca</code> package (CRAN) <a href="https://doi.org/10.1101/574574" class="uri">https://doi.org/10.1101/574574</a></li>
+<li><code>ZIFA</code>, <code>ZINB-WaVE</code> (NB caveat about zero-inflation, above)</li>
+</ul></li>
+</ol>
+</div>
+<div id="sample-quality-effects-visualized-by-pca" class="slide section level1">
+<h1>Sample quality effects visualized by PCA</h1>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" data-line-number="1">df =<span class="st"> </span><span class="kw">tibble</span>(</a>
+<a class="sourceLine" id="cb4-2" data-line-number="2">       <span class="dt">PC1 =</span> <span class="kw">reducedDim</span>(sce, <span class="st">&quot;PCA&quot;</span>)[, <span class="dv">1</span>],</a>
+<a class="sourceLine" id="cb4-3" data-line-number="3">       <span class="dt">PC2 =</span> <span class="kw">reducedDim</span>(sce, <span class="st">&quot;PCA&quot;</span>)[, <span class="dv">2</span>],</a>
+<a class="sourceLine" id="cb4-4" data-line-number="4">       <span class="dt">Batch =</span> sce<span class="op">$</span>Sample,</a>
+<a class="sourceLine" id="cb4-5" data-line-number="5">       <span class="st">`</span><span class="dt">log10(total_counts)</span><span class="st">`</span> =<span class="st"> </span>sce<span class="op">$</span>log10_total_counts,</a>
+<a class="sourceLine" id="cb4-6" data-line-number="6">       <span class="dt">total_genes =</span> sce<span class="op">$</span>log10_total_features_by_counts)</a>
+<a class="sourceLine" id="cb4-7" data-line-number="7"></a>
+<a class="sourceLine" id="cb4-8" data-line-number="8"><span class="kw">ggplot</span>(df, <span class="kw">aes</span>(<span class="dt">x =</span> PC1, <span class="dt">y =</span> PC2, <span class="dt">color =</span> <span class="st">`</span><span class="dt">log10(total_counts)</span><span class="st">`</span>)) <span class="op">+</span></a>
+<a class="sourceLine" id="cb4-9" data-line-number="9"><span class="st">  </span><span class="kw">geom_point</span>(<span class="dt">size =</span> <span class="fl">.5</span>) <span class="op">+</span><span class="st"> </span><span class="kw">scale_color_continuous</span>(<span class="dt">low =</span> <span class="st">&quot;blue&quot;</span>, <span class="dt">high =</span> <span class="st">&quot;yellow&quot;</span>) <span class="op">+</span></a>
+<a class="sourceLine" id="cb4-10" data-line-number="10"><span class="st">  </span><span class="kw">ggtitle</span>(<span class="st">&quot;12K PBMC (10X Genomics)&quot;</span>) <span class="op">+</span><span class="st"> </span><span class="kw">coord_fixed</span>()</a></code></pre></div>
+<p><img src="single_cell_DR_files/figure-slidy/pcasce-1.png" width="70%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="batch-effects" class="slide section level1">
+<h1>Batch effects!</h1>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" data-line-number="1">pca2 =<span class="st"> </span><span class="kw">ggplot</span>(df, <span class="kw">aes</span>(<span class="dt">x =</span> PC1, <span class="dt">y =</span> PC2, <span class="dt">color =</span> Batch)) <span class="op">+</span></a>
+<a class="sourceLine" id="cb5-2" data-line-number="2"><span class="st">  </span><span class="kw">geom_point</span>(<span class="dt">size =</span> <span class="fl">.5</span>) <span class="op">+</span><span class="st"> </span><span class="kw">scale_color_brewer</span>(<span class="dt">palette =</span> <span class="st">&quot;Set1&quot;</span>) <span class="op">+</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb5-3" data-line-number="3"><span class="st">  </span><span class="kw">coord_fixed</span>() </a>
+<a class="sourceLine" id="cb5-4" data-line-number="4">pca2 <span class="op">+</span><span class="st"> </span><span class="kw">ggtitle</span>(<span class="st">&quot;12K PBMC (10X Genomics)&quot;</span>) </a></code></pre></div>
+<p><img src="single_cell_DR_files/figure-slidy/batcheffects-1.png" width="70%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="the-zinb-wave-model" class="slide section level1">
+<h1>The ZINB-WaVE model</h1>
+<p><span class="math inline">\(Y_{ij}\)</span>: count of gene <span class="math inline">\(j\)</span> (for <span class="math inline">\(j=1,\ldots,J\)</span>) for sample <span class="math inline">\(i\)</span> (for <span class="math inline">\(i=1,\ldots, n\)</span>).</p>
+<p><img src="img/zinb_schema.jpg" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="zinb-wave-adjusts-for-batch-effects" class="slide section level1">
+<h1>ZINB-WaVE adjusts for batch effects</h1>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" data-line-number="1"><span class="kw">library</span>(<span class="st">&quot;zinbwave&quot;</span>)</a>
+<a class="sourceLine" id="cb6-2" data-line-number="2">sce =<span class="st"> </span><span class="kw">zinbwave</span>(sce, <span class="dt">X =</span> <span class="st">&quot;~batch&quot;</span>, <span class="dt">K =</span> <span class="dv">10</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" data-line-number="1">gridExtra<span class="op">::</span><span class="kw">grid.arrange</span>(</a>
+<a class="sourceLine" id="cb7-2" data-line-number="2">pca2 <span class="op">+</span><span class="st"> </span><span class="kw">ggtitle</span>(<span class="st">&quot;before&quot;</span>),</a>
+<a class="sourceLine" id="cb7-3" data-line-number="3"><span class="kw">tibble</span>(<span class="dt">Z1 =</span> <span class="kw">reducedDim</span>(sce, <span class="st">&quot;zinbwave&quot;</span>)[,<span class="dv">1</span>],</a>
+<a class="sourceLine" id="cb7-4" data-line-number="4">       <span class="dt">Z2 =</span> <span class="kw">reducedDim</span>(sce, <span class="st">&quot;zinbwave&quot;</span>)[,<span class="dv">2</span>],</a>
+<a class="sourceLine" id="cb7-5" data-line-number="5">       <span class="dt">Batch =</span> sce<span class="op">$</span>Sample) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb7-6" data-line-number="6"><span class="kw">ggplot</span>(<span class="kw">aes</span>(<span class="dt">x =</span> Z1, <span class="dt">y =</span> Z2, <span class="dt">color =</span> Batch)) <span class="op">+</span></a>
+<a class="sourceLine" id="cb7-7" data-line-number="7"><span class="st">  </span><span class="kw">geom_point</span>(<span class="dt">size =</span> <span class="fl">.5</span>) <span class="op">+</span><span class="st"> </span><span class="kw">scale_color_brewer</span>(<span class="dt">palette =</span> <span class="st">&quot;Set1&quot;</span>) <span class="op">+</span></a>
+<a class="sourceLine" id="cb7-8" data-line-number="8"><span class="st">  </span><span class="kw">ggtitle</span>(<span class="st">&quot;after ZINB-WaVE&quot;</span>) <span class="op">+</span><span class="st"> </span><span class="kw">coord_fixed</span>(), </a>
+<a class="sourceLine" id="cb7-9" data-line-number="9"><span class="dt">ncol =</span> <span class="dv">2</span>)</a></code></pre></div>
+<p><img src="single_cell_DR_files/figure-slidy/zinbwavefixesbatcheffects-1.png" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="glm-pca" class="slide section level1">
+<h1>GLM-PCA</h1>
+<p>In droplet-based data, it might be safe to ignore zero inflation.</p>
+<p>We could use a simpler “NB-WAVE” model.</p>
+<p>Alternatively, we can exploit the fact that the Gamma-Poisson distribution (with known dispersion) belongs to the exponential family.</p>
+<p>The GLM-PCA method is a generalization of PCA for the exponential family.</p>
+<p>Townes et al. (2019) propose a fast approximation to GLM-PCA based on deviance residuals that is much faster than ZINB-WAVE and gives comparable results: CRAN package <code>glmpca</code>, bioR<span class="math inline">\(\chi\)</span>iv <a href="https://doi.org/10.1101/574574" class="uri">https://doi.org/10.1101/574574</a></p>
+</div>
+<div id="approximate-pca" class="slide section level1">
+<h1>Approximate PCA</h1>
+<p>Even regular PCA is not scalable enough to very large datasets (millions of cells) and approximations are needed.</p>
+<p>The <code>BiocSingular</code> package provides implementations of the random PCA algorithm and the implicitly restarted Lanczos bidiagonalization algorithm (IRLBA).</p>
+</div>
+<div id="lineage-inference" class="slide section level1">
+<h1>Lineage Inference</h1>
+<p><img src="img/cell.png" width="77%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="motivation" class="slide section level1">
+<h1>Motivation</h1>
+<p><img src="img/pseudo1.png" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="motivation-1" class="slide section level1">
+<h1>Motivation</h1>
+<p><img src="img/pseudo2.png" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="motivation-2" class="slide section level1">
+<h1>Motivation</h1>
+<p><img src="img/pseudo3.png" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="the-slingshot-algorithm" class="slide section level1">
+<h1>The slingshot algorithm</h1>
+<p>Street, Risso, …, Purdom, Dudoit (2018). <em>Slingshot: cell lineage and pseudotime inference for single-cell transcriptomics</em> BMC Genomics, 477 <a href="https://doi.org/10.1186/s12864-018-4772-0" class="uri">https://doi.org/10.1186/s12864-018-4772-0</a> : <code>slingshot</code> package on Bioconductor</p>
+<p>Start from a representation of the cells in some space defined by their gene expression (usually after dimensionality reduction - NB: horseshoes lecture). Suppose we identified <span class="math inline">\(K\)</span> clusters.</p>
+<ol style="list-style-type: decimal">
+<li>Identification of lineages
+<ul>
+<li>treat clusters as nodes in a graph</li>
+<li>draw a minimum spanning tree (MST) between the nodes</li>
+<li>lineages are ordered sets of clusters</li>
+<li>semi-supervised: set the starting cluster (root of the tree) and optionally a set of known end points (leaves)</li>
+</ul></li>
+<li>Draw a “smooth” path through the lineages
+<ul>
+<li>use of <em>principal curves</em> (Hastie and Stuetzle, 1989)</li>
+<li>shrink curves together in shared paths (simultaneous principal curves)</li>
+<li>project each cell onto the principal curve(s) to infer pseudotime</li>
+</ul></li>
+</ol>
+</div>
+<div id="the-slingshot-algorithm-1" class="slide section level1">
+<h1>The slingshot algorithm</h1>
+<div class="figure" style="text-align: center">
+<img src="img/sling0.png" alt="RSEC: Resampling-based Sequential Ensemble Clustering" width="100%" />
+<p class="caption">
+RSEC: Resampling-based Sequential Ensemble Clustering
+</p>
+</div>
+</div>
+<div id="the-slingshot-algorithm-2" class="slide section level1">
+<h1>The slingshot algorithm</h1>
+<p><img src="img/sling1.png" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="the-slingshot-algorithm-3" class="slide section level1">
+<h1>The slingshot algorithm</h1>
+<p><img src="img/sling11.png" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="the-slingshot-algorithm-4" class="slide section level1">
+<h1>The slingshot algorithm</h1>
+<p><img src="img/sling151.png" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="principal-curves" class="slide section level1">
+<h1>Principal curves</h1>
+<div class="figure" style="text-align: center">
+<img src="img/HastieStuetzlePrincipalCurves.png" alt="Hastie and Stuetzle, JASA 1989" width="100%" />
+<p class="caption">
+Hastie and Stuetzle, JASA 1989
+</p>
+</div>
+</div>
+<div id="the-slingshot-algorithm-5" class="slide section level1">
+<h1>The slingshot algorithm</h1>
+<p><img src="img/sling2.png" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="the-slingshot-algorithm-6" class="slide section level1">
+<h1>The slingshot algorithm</h1>
+<p><img src="img/sling21.png" width="100%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="shape-sensitive-distance" class="slide section level1">
+<h1>Shape-sensitive distance</h1>
+<p>Constructing an MST involves specifying a distance measure between nodes.</p>
+<p>A Mahalanobis-like distance, i.e., a covariance-scaled Euclidean distance, that accounts for cluster shape, works well in practice.</p>
+<p><span class="math display">\[
+d^2(\mathcal{C}_i,\mathcal{C}_j) \equiv (\bar{X}_i - \bar{X}_j)^T (S_i + S_j)^{-1} (\bar{X}_i - \bar{X}_j),
+\]</span></p>
+</div>
+<div id="biological-meaningful-supervision" class="slide section level1">
+<h1>Biological meaningful supervision</h1>
+<p>Slingshot allows two forms of supervision during lineage identification:</p>
+<ul>
+<li>initial state (root)</li>
+<li>terminal states (leaves)</li>
+</ul>
+<p>Like other methods, Slingshot requires the user to identify the <em>initial cluster</em> or <em>root node</em>.</p>
+<p>Slingshot optionally allows the specification of <em>terminal cell states</em>, imposing a <em>local constraint</em> on the MST algorithm.</p>
+<!--
+# Principal Curves algorithm (Hastie and Stuetzle, 1989)
+
+Iteratively follow these steps:
+
+1. Project all data points onto the curve and calculate the arc length from the beginning of the curve to each point’s projection. Setting the lowest value to zero, this produces pseudotimes.
+
+2. For each dimension $j$, use the cells' pseudotimes to predict their coordinates, typically with a smoothing spline.
+    - This produces a set of $J'$ functions which collectively map pseudotime values defining a smooth curve in $J'$ dimensions.
+
+3. Repeat this process until convergence, using the sum of squared distances between cells' actual coordinates and their projections on the curves to determine convergence.
+-->
+</div>
+<div id="simultaneous-principal-curves" class="slide section level1">
+<h1>Simultaneous Principal Curves</h1>
+<p>To allow for multiple lineages, we modify the principal curves algorithms in two ways:</p>
+<ul>
+<li><p>We incorporate cell weights to allow cells to contribute differently to different lineages.</p></li>
+<li><p>We add a <em>shrinkage</em> procedure to ensure smooth branching events.</p></li>
+</ul>
+<p>The shrinkage is performed by first recursively constructing an average curve for each branching event, then recursively shrinking the branching lineage curves toward this average.</p>
+<!--
+# Shrinkage
+
+We construct _non-increasing_ curve-specific weights, with $w_m(0) = 1$ (maximum shrinkage)
+    - diverging curves always share the same initial point
+    
+Shrink the diverging curves toward the average curve:
+
+$$
+\mathbf{c}_m^\text{new}(t) \equiv w_m(t)\mathbf{c}_{\text{avg}}(t) + (1-w_m(t))\mathbf{c}_m(t).
+$$
+
+# The `slingshot` package
+
+
+```r
+library(slingshot)
+ce = slingshot(ce, reducedDim = "MDS", start.clus = "c1")
+```
+-->
+</div>
+<div id="acknowedgements" class="slide section level1">
+<h1>Acknowedgements</h1>
+<p>Davide Risso (University of Padova)</p>
+<p>Twitter:  Github: </p>
+<p><img src="img/stickers8.png" width="50%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="extrapolation" class="slide section level1">
+<h1>Extrapolation</h1>
+<p><img src="img/extrapolating.png" width="77%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="random-fortune-cookie" class="slide section level1">
+<h1>Random fortune cookie</h1>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb8-1" data-line-number="1">fortunes<span class="op">::</span><span class="kw">fortune</span>(<span class="kw">floor</span>(<span class="kw">exp</span>(<span class="kw">exp</span>(pi<span class="op">/</span><span class="dv">2</span>))))</a></code></pre></div>
+<p>I wish to perform brain surgery this afternoon at 4pm and don’t know where to start. My background is the history of great statistician sports legends but I am willing to learn. I know there are courses and numerous books on brain surgery but I don’t have the time for those. Please direct me to the appropriate HowTos, and be on standby for solving any problem I may encounter while in the operating room. Some of you might ask for specifics of the case, but that would require my following the posting guide and spending even more time than I am already taking to write this note. – I. Ben Fooled (aka Frank Harrell) R-help (April 1, 2005)</p>
+</div>
+
+  <!-- dynamically load mathjax for compatibility with self-contained -->
+  <script>
+    (function () {
+      var script = document.createElement("script");
+      script.type = "text/javascript";
+      script.src  = "single_cell_DR_files/mathjax-local/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+      document.getElementsByTagName("head")[0].appendChild(script);
+    })();
+  </script>
+
+</body>
+</html>

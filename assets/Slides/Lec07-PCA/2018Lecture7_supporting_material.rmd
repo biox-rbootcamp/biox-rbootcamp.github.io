@@ -1,0 +1,493 @@
+---
+title: 'Lecture 7: Supporting Code'
+author: "Bios 221: Modern Statistics for Modern Biology"
+date: "7/3/2018"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+
+
+```{r setup}
+library(tidyverse)
+```
+
+Matrices and their Motivation
+=============================
+
+It is current practice to measure many variables on the same patients,
+we may have all the biometrical characteristics, height, weight, BMI,
+age as well as clinical variables such as blood pressure, blood sugar,
+heart rate for 100 patients, these variables will not be independent.
+
+
+What are the data?
+------------------
+
+-   To start off, a useful toy example we’ll use is from the sports
+    world; performances of decathlon athletes.
+
+    These are measurements of athletes’ performances in the decathlon:
+    the variables m100, m400, m1500 are performance times in seconds for
+    the 100 metres, 400 metres and 1500 meters respectively, ‘m110‘ is
+    the time taken to finish the 110 meters hurdles whereas pole is the
+    pole-jump height, weight is the length in metres the athletes threw
+    the weight.
+
+             m100   long   weight   highj    m400    m110    disc   pole    jave    m1500
+      --- ------- ------ -------- ------- ------- ------- ------- ------ ------- --------
+        1   11.25   7.43    15.48    2.27   48.90   15.13   49.28   4.70   61.32   268.95
+        2   10.87   7.45    14.97    1.97   47.71   14.46   44.36   5.10   61.76   273.02
+        3   11.18   7.44    14.20    1.97   48.29   14.81   43.66   5.20   64.16   263.20
+        4   10.62   7.38    15.02    2.03   49.06   14.72   44.80   4.90   64.04   285.11
+
+
+
+
+```{r loadath,echo=FALSE}
+library(ade4)
+data(olympic)
+athletes=olympic$tab
+#athletes=scale(athletes)
+#athletes=data.frame(athletes)
+names(athletes)=c("m100","long","weight","highj","m400","m110","disc", "pole","javel","m1500")
+```
+
+Car data
+===========
+
+```{r}
+head(mtcars)
+```
+
+
+Diabetes
+===========
+-   Clinical measurements (‘diabetes‘ data). This data measures glucose
+    levels in the blood after fasting (glufast), after a test condition
+    (glutest) as well as steady state plasma glucose (steady) and steady
+    state (insulin) for diabetes, the sixth variable is not
+    continuous and is considered a *supplementary* variable as we will
+    see.
+
+```{r}
+diabetes=read.table(url("http://bios221.stanford.edu/data/diabetes.txt"),
+                    header=TRUE,row.names=1)
+diabetes[1:4,]
+```
+
+Microbial Ecology
+------------------
+-   Operational Taxon Unit read counts in a microbial ecology study; the
+    columns represent different ‘species’ of bacteria, the rows are
+    labeled for the samples.
+
+```{r}
+data("GlobalPatterns", package = "phyloseq")
+GPOTUs = as.matrix(t(phyloseq::otu_table(GlobalPatterns)))
+GPOTUs[1:4, 6:13]
+```
+
+ 
+ 
+RNA-Seq
+------------------
+-   Here are some RNA-seq transcriptomic data showing numbers of mRNA
+    reads present for different patient samples, the rows are patients
+    and the columns are the genes.
+
+                   FBgn0000017 FBgn0000018 FBgn0000022 FBgn0000024 FBgn0000028 FBgn0000032
+        untreated1        4664         583           0          10           0        1446
+        untreated2        8714         761           1          11           1        1713
+        untreated4        3150         310           0           3           0         672
+        treated1          6205         722           0          10           0        1698
+        treated3          3334         308           0           5           1         757
+
+
+
+
+
+Mass Spectroscopy
+------------------
+-   Mass spectroscopy data where we have samples containing informative
+    labels (knockout versus wildtype mice) and protein $\times$ features
+    designated by their m/z number.
+
+        mz       129.9816   72.08144  151.6255  142.0349  169.0413    186.0355
+        KOGCHUM1  60515      181495          0    196526    25500    51504.40
+        WTGCHUM1 252579       54697        412    487800    48775    130491.15
+        WTGCHUM2 187859       56318      46425   454226    45626    100845.01
+
+Expression Data (microarray)
+------------------
+
+-   Here the rows are samples from different subjects and different T
+    cell types and the columns are a subset of gene expression
+    measurements on the 156 most differentially expressed genes
+    (Holmes2005memory).
+```{r}
+#######Melanoma/Tcell Data: Peter Lee, Susan Holmes, PNAS.
+load(url("http://bios221.stanford.edu/data/Msig3transp.RData"))
+round(Msig3transp,2)[1:5,1:6]
+celltypes=factor(substr(rownames(Msig3transp),7,9))
+status=factor(substr(rownames(Msig3transp),1,3))
+```
+
+The voting data
+------------------
+```{r votingdata}
+#house=read.table("/Users/susan/Dropbox/CaseStudies/votes.txt")
+#head(house[,1:5])
+#party=scan("/Users/susan/Dropbox/CaseStudies/party.txt")
+#table(party)
+```
+
+```{r}
+library(dplyr)
+library(GGally)
+```
+
+
+
+```{r, message = FALSE, warning=FALSE, eval = FALSE}
+my_mtcars <- select(mtcars, mpg, wt, qsec, cyl, gear, am) %>%
+  mutate(cyl = factor(cyl), gear = factor(gear), am = factor(am)) 
+ggpairs(my_mtcars, aes(color = cyl))
+```
+
+
+```{r  message = FALSE, warning=FALSE, eval = FALSE}
+library(dplyr)
+library(GGally)
+my_mtcars <- select(mtcars, mpg, wt, qsec) 
+ggpairs(my_mtcars)
+```
+
+
+```{r}
+my_mtcars <- select(mtcars, mpg, wt, qsec, hp) 
+apply(my_mtcars, 2, mean)
+apply(my_mtcars, 2, sd)
+```
+
+```{r}
+my_mtcars_centered = scale(my_mtcars, center = TRUE, scale = FALSE)
+apply(my_mtcars_centered, 2, mean)
+apply(my_mtcars_centered, 2, sd)
+```
+
+```{r}
+my_mtcars_centered_scaled = scale(my_mtcars)
+apply(my_mtcars_centered_scaled, 2, mean)
+apply(my_mtcars_centered_scaled, 2, sd)
+```
+
+```{r}
+my_mtcars_centered_scaled <- as.data.frame(my_mtcars_centered_scaled) 
+my_mtcars_centered_scaled$cyl <- factor(mtcars$cyl)
+ggplot(my_mtcars_centered_scaled,
+       aes(x = mpg, y = wt, col = cyl)) +
+  geom_point(size = 3) +
+  theme(text = element_text(size = 30))
+```
+
+```{r}
+ggplot(mtcars,
+       aes(x = mpg, y = wt, col = factor(cyl))) +
+  geom_point(size = 3) +
+  theme(text = element_text(size = 30)) +
+  scale_color_discrete(name = "cyl")
+```
+
+mtcars PCA
+=============================================
+
+```{r}
+library(ade4)
+library(factoextra)
+my_mtcars <- select(mtcars, mpg, wt, disp, hp, qsec, drat)
+pca_mtcars = dudi.pca(my_mtcars, scannf = FALSE, nf = 3)
+fviz_eig(pca_mtcars, geom = "bar", bar_width = 0.7) + ggtitle("")
+```
+
+
+```{r fig.size = 4, fig.width = 10}
+fviz_pca_ind(pca_mtcars, repel = FALSE) +
+  coord_fixed() + 
+  ylim(-3.5, 3.5) + xlim(-5, 5) +
+  theme(text = element_text(size = 15))
+```
+
+```{r, fig.size = 4, fig.width = 10}
+fviz_pca_ind(pca_mtcars,
+             col.ind = factor(mtcars$am), 
+             repel = TRUE) + # TRUE to avoid text overlapping (slow if many points)
+  coord_fixed() +
+  ylim(-3.5, 3.5) + xlim(-5, 5) +
+  theme(text = element_text(size = 15))
+
+```
+
+
+
+
+```{r}
+fviz_pca_biplot(pca_mtcars, repel = TRUE, arrowsize = 1) +
+  coord_fixed() +
+  ylim(-3.5, 3.5) + xlim(-5, 5) +
+  theme(text = element_text(size = 15))
+```
+
+
+```{r}
+fviz_pca_biplot(pca_mtcars, 
+                geom = "point",
+                arrowsize = 1,
+                pointsize = 2) +
+  coord_fixed() +
+  ylim(-3.5, 3.5) + xlim(-5, 5) +
+  theme(text = element_text(size = 15))
+```
+
+
+```{r}
+fviz_pca_biplot(pca_mtcars, 
+                col.ind = factor(mtcars$cyl),
+                palette = c("#00AFBB", "#E7B800", "#FC4E07"),
+                geom = "point",
+                arrowsize = 1,pointsize = 2, 
+                addEllipses = TRUE, 
+                ellipse.level = 0.6,
+#                ellipse.type = "confidence",
+                legend.title = "No. cylinders") +
+  coord_fixed() +
+  ylim(-3.5, 3.5) + xlim(-5, 5) +
+  theme(text = element_text(size = 15))
+```
+
+
+
+## Correlation Circle
+
+```{r}
+cor(as.matrix(my_mtcars)) %>% round(1)
+```
+
+
+```{r}
+fviz_pca_var(pca_mtcars) 
+```
+
+
+```{r}
+# Color by cos2 values: quality on the factor map
+fviz_pca_var(pca_mtcars, col.var = "cos2",
+             gradient.cols = viridis::viridis(100)[1:95], 
+             repel = TRUE # Avoid text overlapping
+             )
+```
+
+
+
+Mass Spec Data PCA
+=============================================
+
+```{r}
+library(ade4)
+library(factoextra)
+
+load("mat1xcms.RData")
+pcamat1 = dudi.pca(t(mat1), scannf = FALSE, nf = 3)
+fviz_eig(pcamat1, geom = "bar", bar_width = 0.7) + ggtitle("")
+```
+
+```{r}
+dfmat1 = cbind(pcamat1$li, tibble(
+    label = rownames(pcamat1$li),
+    number = substr(label, 3, 4),
+    type = factor(substr(label, 1, 2))))
+pcsplot = ggplot(dfmat1, 
+  aes(x=Axis1, y=Axis2, label=label, group=number, colour=type)) +
+  geom_text(size = 4, vjust = -0.5) + geom_point(size = 3) 
+pcsplot + geom_hline(yintercept = 0, linetype = 2) +
+  geom_vline(xintercept = 0, linetype = 2) +
+  coord_fixed()
+```
+
+```{r}
+fviz_pca_ind(pcamat1) + ggtitle("")
+```
+
+```{r}
+fviz_pca_var(pcamat1, col.circle="black") + ggtitle("")
+```
+
+# Weighted PCA
+
+```{r}
+data("x", package = "Hiiragi2013")
+xwt = x[, x$genotype == "WT"]
+sel = order(genefilter::rowVars(Biobase::exprs(xwt)), decreasing = TRUE)[1:100]
+xwt = xwt[sel, ]
+tab = table(xwt$sampleGroup)
+tab
+```
+
+```{r}
+pcaMouse = dudi.pca(as.data.frame(t(Biobase::exprs(xwt))),
+                    center = TRUE, scale = TRUE, nf = 2, 
+                    scannf = FALSE)
+fviz_eig(pcaMouse)
+```
+
+```{r}
+xwt$weight = 1 / as.numeric(tab[xwt$sampleGroup])
+pcaMouse_wt = dudi.pca(as.data.frame(t(Biobase::exprs(xwt))),
+                    row.w = xwt$weight,
+                    center = TRUE, scale = TRUE, nf = 2, 
+                    scannf = FALSE)
+fviz_eig(pcaMouse_wt)
+```
+
+
+
+```{r}
+fviz_pca_ind(pcaMouse, geom = "point", col.ind = xwt$sampleGroup) +
+  coord_fixed() 
+```
+
+```{r}
+fviz_pca_ind(pcaMouse_wt, geom = "point", col.ind = xwt$sampleGroup) +
+  coord_fixed() 
+```
+
+
+# Wine example
+
+
+```{r}
+library("pheatmap")
+load("wine.RData")
+load("wineClass.RData")
+head(wine)
+```
+
+```{r}
+load("wine.RData")
+apply(wine, 2, mean)
+apply(wine, 2, sd)
+```
+
+
+```{r}
+wine_scaled = scale(wine)
+apply(wine_scaled, 2, mean)
+apply(wine_scaled, 2, sd)
+```
+
+
+```{r warning=FALSE, message=FALSE}
+library(pheatmap)
+pheatmap(1 - cor(wine))
+```
+
+
+
+```{r}
+wine_scaled <- as.data.frame(wine_scaled)
+GGally::ggpairs(wine_scaled)
+```
+
+
+```{r}
+library(ade4)
+winePCA = dudi.pca(wine, nf = 5, scale = TRUE, center = TRUE, scannf=FALSE)
+```
+
+```{r}
+class(winePCA)
+```
+
+
+```{r}
+names(winePCA)
+```
+
+
+```{r}
+library(factoextra)
+fviz_eig(winePCA)
+```
+
+
+```{r}
+#eig_ratio <- winePCA$eig[2]/winePCA$eig[1]
+fviz_pca_ind(winePCA) + 
+  coord_fixed() 
+```
+
+```{r}
+load("wineClass.RData")
+table(wine.class)
+```
+
+
+```{r}
+fviz_pca_ind(winePCA, col.ind = wine.class,
+  palette = c("#E41A1C", "#377EB8", "#4DAF4A")) + 
+  coord_fixed() 
+```
+
+```{r}
+fviz_pca_ind(winePCA, col.ind = wine.class,
+  palette = c("#E41A1C", "#377EB8", "#4DAF4A"),
+  addEllipses = TRUE, ellipse.level = 0.9) + 
+  coord_fixed() 
+```
+
+
+```{r}
+fviz_pca_ind(winePCA, axes = 2:3, col.ind = wine.class,
+  palette = c("#E41A1C", "#377EB8", "#4DAF4A")) + 
+  coord_fixed() 
+```
+
+
+```{r}
+fviz_pca_var(winePCA) 
+```
+
+```{r}
+fviz_contrib(winePCA, choice = "var", axes = 1)
+```
+
+
+```{r}
+fviz_contrib(winePCA, choice = "var", axes = 2)
+```
+
+
+```{r}
+fviz_contrib(winePCA, choice = "var", axes = 1:2)
+```
+
+
+
+```{r}
+fviz_pca_biplot(
+  winePCA, geom = "point", 
+  col.ind = wine.class, 
+  col.var = "#c07d44", 
+  addEllipses = TRUE, ellipse.level = 0.7) +
+  coord_fixed() +
+  scale_color_brewer(palette = "Set1")
+```
+
+
+
+```{r}
+sessionInfo()
+```
+
