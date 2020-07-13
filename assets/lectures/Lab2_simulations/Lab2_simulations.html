@@ -377,7 +377,7 @@ system.time({
   x1 = apply(m, 2, sum)
 })</code></pre>
 <pre><code>##    user  system elapsed 
-##   0.118   0.007   0.212</code></pre>
+##   0.119   0.004   0.286</code></pre>
 <pre class="r"><code>head(x1) </code></pre>
 <pre><code>## [1] 38.00576 42.63594 85.13355 58.20710 16.67390 81.43056</code></pre>
 <pre class="r"><code>x2 = colSums(m)
@@ -513,7 +513,7 @@ compute_power(4, 0.5, 10000) # So it looks like 4 samples will do it.</code></pr
 <ol style="list-style-type: lower-alpha">
 <li><p>If you invest, what is the probability of the price doubling over the next hundred days?</p></li>
 <li><p>How long does it typically take for the price to double?</p></li>
-<li><p>Imagine a strategy where at day 1, you invest 100 dollars. You then cash out whenever your investment doubles, and re-invest 100 dollars. At the end of the 100 days, you sell what you have at the current price. What is your expected profit after 100 days? What is the probability that the profit exceeds 2,000 dollars? The probability that you loose money?</p></li>
+<li><p>Imagine a strategy where at day 1, you invest 100 dollars, buying 100 options at 1 dollar. You then cash out whenever your investment doubles, and re-invest 100 dollars. At the end of the 100 days, you sell what you have at the current price. What is your expected profit after 100 days? What is the probability that the profit exceeds 2,000 dollars? The probability that you loose money?</p></li>
 </ol>
 <ol start="2" style="list-style-type: decimal">
 <li>Your friend in the department of psychology is running an experiment to assess the negative effect of sugar on memory task. For that purpose, he wants to find two (equal) groups of people, who will be asked to remember a series of associations, one, after drinking a sugar-heavy ice-tea, and the other, after drinking a ``diet'' version of the previous with synthetic sugar. He supposes that the range of scores (from 0 to 50) will be normally distributed for each group and wants to detect a difference of at least 2 points. Preliminary results indicate that the standard deviation within the groups is roughly 5 points, and the mean for the control is roughly 60. How many candidates should he pick to be 95% sure that there is a difference? In other words, how many candidates should he pick to ensure that the difference in means in greater than what chance would yield in 95% of cases if the two groups were identically distributed?</li>
