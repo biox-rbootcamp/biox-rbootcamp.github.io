@@ -13,12 +13,7 @@ No prior knowledge of R or of statistics is required. This is not a graded class
 
 ## [](#announcements) Announcements
 
-**Solution for Lab 7 are posted!**
-
-**TO DO for session 8 (Wednesday, July 15th):** 
-
-* Watch the video lectures for the session 
-* Complete Lab 8 **prior to the discussion.**
+**Solution for Lab 8 is posted!**
 
 **TO DO for session 9 (Thursday, July 16th):** 
 
@@ -53,15 +48,15 @@ _Objectives:_ getting familiar with R, Rstudio, R markdown, and basic statistics
 
 **Week 3:** Simulation & Graphics
 
-**Week 4:** Mixture Models
+**Week 4:** Testing
 
-**Week 5:** Clustering
+**Week 5:** Regression
 
-**Week 6:** Testing 
+**Week 6:** Mixtures and Bootstrap
 
-**Week 7:** Multivariate Analysis
+**Week 7:** Clustering
 
-**Week 8:** Network & Trees
+**Week 8:** Multivariate Analysis, High-dimensional Statistics, Networks
 
 
 ## [](#textbook) Optional textbooks

@@ -1,7 +1,5 @@
 ---
-title: "Lab 3: Graphics Solutions"
-author: "Bios 221: Modern Statistics for Modern Biology"
-date: "10/3/2019"
+title: "Lab 8 Solutions"
 output: 
   html_document:
     toc: true
