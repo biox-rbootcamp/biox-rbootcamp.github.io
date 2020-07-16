@@ -1,7 +1,7 @@
 ---
 title: "Graphics Solutions"
 author: "bioX"
-date: "07/15/2020"
+date: "07/16/2020"
 
 output: 
   html_document:
@@ -448,7 +448,7 @@ Use the dataset to plot the World's yearly $CO_2$ emission in Gt.
 ```{r}
 yearlyCO2 <- emissions %>% 
     group_by(Year) %>%
-    summarise(total_CO2 = sum(`Emission_CO2`))
+    summarise(total_CO2 = sum(`Total CO2 emissions from fossil-fuels and cement production (thousand metric tons of C)`))
 yearlyCO2
 ```
 
@@ -460,7 +460,7 @@ b. Find the top 10 countries with highest emission after year 2000 (including
 top10 <- emissions %>% 
     filter(Year >= 2000) %>%
     group_by(Nation) %>%
-    summarise(CountryCO2Post200 = sum(Emission_CO2)) %>%
+    summarise(CountryCO2Post200 = sum(`Total CO2 emissions from fossil-fuels and cement production (thousand metric tons of C)`)) %>%
     top_n(10) %>%
     .[["Nation"]]
 ```
@@ -474,7 +474,7 @@ i.e. divide the total emissions by 10^6.
 ggplot(
     emissions %>% 
         filter(Nation %in% top10),
-    aes(x = Year, y = Emission_CO2/1e6)) +
+    aes(x = Year, y = `Total CO2 emissions from fossil-fuels and cement production (thousand metric tons of C)`/1e6)) +
     geom_line(aes(color = Nation)) +
     ylab("Total CO2 emission in Gt") +
     theme_bw()
@@ -490,7 +490,7 @@ with areas colored by countries.
 df <- emissions %>% filter(Nation %in% top10)
 ordered_countries <- df %>% 
     filter(Year == max(Year)) %>% 
-    arrange(Emission_CO2) %>% .[["Nation"]]
+    arrange(`Total CO2 emissions from fossil-fuels and cement production (thousand metric tons of C)`) %>% .[["Nation"]]
 df <- df %>%
     mutate(Nation = factor(Nation, levels = ordered_countries))
 ```
@@ -502,7 +502,7 @@ library(RColorBrewer)
 colors10 <- colorRampPalette(brewer.pal(9, "Set2"))(10)
 ggplot(
     df,
-    aes(x = Year, y = Emission_CO2/1e6)) +
+    aes(x = Year, y = `Total CO2 emissions from fossil-fuels and cement production (thousand metric tons of C)`/1e6)) +
     geom_area(aes(fill = Nation), position = "stack") +
     ylab("Total CO2 emission in Gt") +
     scale_fill_manual(values = colors10) +
