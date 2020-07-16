@@ -1,7 +1,11 @@
 ---
+<<<<<<< HEAD
 title: "Graphics Solutions"
 author: "bioX"
 date: "07/15/2020"
+=======
+title: "Lab 8 Solutions"
+>>>>>>> 77f0b89758dda6dd98502446aa1a23f1bde0c20d
 output: 
   html_document:
     toc: true
