@@ -13,6 +13,8 @@ No prior knowledge of R or of statistics is required. This is not a graded class
 
 ## [](#announcements) Announcements
 
+**Please fill out the [feedback survey](https://forms.gle/8KvSVjxn9bfxLSKJA) if you haven't!**
+
 **Solution for Lab 8 are posted!**
 
 **TO DO for session 10 (Monday, July 20th):** 
