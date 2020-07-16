@@ -15,20 +15,20 @@ No prior knowledge of R or of statistics is required. This is not a graded class
 
 **Solution for Lab 8 are posted!**
 
-**TO DO for session 7 (Monday, July 13th):** 
+**TO DO for session 10 (Monday, July 20th):** 
 
 * Watch the video lectures for the session 
-* Complete Lab 7 **prior to the discussion.**
+* Complete Lab 10 **prior to the discussion.**
 
-**TO DO for session 8 (Wednesday, July 15th):** 
-
-* Watch the video lectures for the session 
-* Complete Lab 8 **prior to the discussion.**
-
-**TO DO for session 9 (Thursday, July 16th):** 
+**TO DO for session 11 (Wednesday, July 22nd):** 
 
 * Watch the video lectures for the session 
-* Complete Lab 9 **prior to the discussion.**
+* Complete Lab 11 **prior to the discussion.**
+
+**TO DO for session 12 (Thursday, July 23rd):** 
+
+* Watch the video lectures for the session 
+* Complete Lab 12 **prior to the discussion.**
 
 
 ## [](#logistics) Logistics
