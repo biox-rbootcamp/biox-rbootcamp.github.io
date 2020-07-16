@@ -58,6 +58,7 @@ In this lab, we will work through a few different statistical tests for building
 __Your assignment  before the discussion:__
 
 - Begin by watching these videos on hypothesis testing:
+
     - [Null Hypothesis](https://crumplab.github.io/statistics/foundations-for-inference.html#videos-3)
     - [Types of Errors](https://crumplab.github.io/statistics/foundations-for-inference.html#types-of-errors).
 
@@ -118,7 +119,7 @@ If we want to be more restrictive, we can make the simulation go to 1,000, or 10
 
 Let's use 10,000 times here.
 
-#### Run the simluation
+#### Run the simulation
 
 Code the Monte Carlo simulation described above. Plot the histogram of the differences between groups A and B obtained by chance alone.
 
@@ -449,9 +450,21 @@ The t-test was devised by William Gosset (1908), a chemist at **the Guiness brew
 - Comparing the means of two populations
 - Comparing the slope of a regression line to a constant
 
-Indeed, suppose you have observations $X_1, \cdots X_n$ for the control group in your experiment, and $Y_1, \cdots Y_n$ for the treatment group. You want to measure the existence of a difference between the two groups.
+#### The one-sample t-test
 
-Step 1. Defining a test-statistic : $T = |\bar{X} - \bar{Y}|$. .
+Commonly, the one-sample t-test is used to estimate the chances that your sample came from a particular population. Specifically, you might want to know whether the mean that you found from your sample, could have come from a particular population having a particular mean.
+
+Indeed, suppose you have observations $X_1, \cdots X_n$ for the treatment group in your experiment. You want to measure the existence of a difference between the two groups $\Delta = \bar{X} -u$, where u is some mean (maybe the population mean, or a value that you fix). The problem is that without some notion of how much inherent variability there is in the data, this difference makes little sense: you need to scale it on the scale of the inherent noise of the data. This is pretty much the idea behind the t-test:
+$$t =\frac{\text{measure of effect}}{\text{measure of error}}$$
+$$t =\frac{\text{Mean difference}}{\text{standard error}}$$
+
+$$t =\frac{\bar{X}- u}{\text{S}_X}$$
+ 
+where $S_X$ is the standard deviation of the sample. In this case, theory tells us that the behaviour of that statistic under the null follows a $t$-distribution with $N-1$ degrees of freedom and non-centrality parameter equal to 0 (under the null, $\bar{X}-u$ is centered) . The t-distribution has indeed two parameters: the first, called the degrees of freedom, and the second, called the non-centrality parameter (by default 0).
+
+Let's now write this recipe mathematically. The mathematical recipe behind the t-test is as follows:
+
+Step 1. Defining a test-statistic : $T = |\bar{X} - \bar{Y}|$. 
 
 Step 2. Null distribution: Under the null, there is no difference between $\bar{X}$ and $\bar{Y}$ and they are sampled from the same distribution. Now, let's figure out what would be the distribution of our statistic under the null. 
 
@@ -477,6 +490,7 @@ Step 3. Compute the associated p-value using `pt` for instance. For reference, t
 ```{r, fold.plot=FALSE, echo=FALSE, out.width='50%'}
 knitr::include_graphics('./t-statistic.png')
 ```
+
 
 
 

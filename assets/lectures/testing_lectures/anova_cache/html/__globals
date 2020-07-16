@@ -3,19 +3,69 @@ unnamed-chunk-3	melatonin
 unnamed-chunk-4	~	melatonin	t.test
 unnamed-chunk-5	~	$	melatonin	t.test
 unnamed-chunk-6	~	boxplot	melatonin
-unnamed-chunk-7	==	~	$	abline	aov	boxplot	c	curve	dnorm	factor	glance	LETTERS	library	list	max	mean	min	plot	rep	rnorm	rug	segments	stripchart	x
+unnamed-chunk-7	[[	==	~	$	abline	aov	boxplot	c	curve	dnorm	factor	LETTERS	library	list	max	mean	min	plot	rep	rnorm	rug	segments	stripchart	summary	x
 unnamed-chunk-8	c	library	manipulate	mu_a	mu_b	mu_c	n	par	plot_anova	sigma	slider
 unnamed-chunk-9	c	par	plot_anova	set.seed
-unnamed-chunk-10	c	par	plot_anova	set.seed
+unnamed-chunk-10	$	p1	paste0	print
 unnamed-chunk-11	c	par	plot_anova	set.seed
-unnamed-chunk-12	c	par	plot_anova	set.seed
-unnamed-chunk-13	~	coagulation	library	names	plot
-unnamed-chunk-14	~	aov	coagulation	summary
-unnamed-chunk-15	$	coag_aov	coagulation	data.frame	predict	unique
-unnamed-chunk-16	~	$	aov	as.factor	c	data.frame	is.factor	rep	rnorm	set.seed	summary
-unnamed-chunk-17	[[	~	$	aov	c	curve	data.frame	df	hist	ifelse	library	rep	replicate	rnorm	summary	x
-unnamed-chunk-18	<	mean	replicate	sim_anova
-unnamed-chunk-19	<	mean	replicate	sim_anova
-unnamed-chunk-20	<	mean	replicate	sim_anova
-unnamed-chunk-21	coag	coagulation	diet	pairwise.t.test	with
-unnamed-chunk-22	coag	coagulation	diet	pairwise.t.test	with
+unnamed-chunk-12	$	p2	paste0	print
+unnamed-chunk-13	c	par	plot_anova	set.seed
+unnamed-chunk-14	$	p3	paste0	print
+unnamed-chunk-15	c	par	plot_anova	set.seed
+unnamed-chunk-16	$	p4	paste0	print
+unnamed-chunk-17	~	coagulation	library	names	plot
+unnamed-chunk-18	~	aov	coagulation	summary
+unnamed-chunk-19	$	coag_aov	coagulation	data.frame	predict	unique
+unnamed-chunk-20	~	$	aov	as.factor	c	data.frame	is.factor	rep	rnorm	set.seed	summary
+unnamed-chunk-21	[[	~	$	aov	c	curve	data.frame	df	hist	ifelse	library	rep	replicate	rnorm	summary	x
+unnamed-chunk-22	<	mean	replicate	sim_anova
+unnamed-chunk-23	<	mean	replicate	sim_anova
+unnamed-chunk-24	<	mean	replicate	sim_anova
+unnamed-chunk-25	coag	coagulation	diet	pairwise.t.test	with
+unnamed-chunk-26	coag	coagulation	diet	pairwise.t.test	with
+unnamed-chunk-27	<	~	$	any	c	glance	mean	p.adjust	rep	replicate	rnorm	set.seed	t.test
+unnamed-chunk-28	coag_aov	TukeyHSD
+unnamed-chunk-29	coag_aov	plot	TukeyHSD
+unnamed-chunk-30	$	levels	rats
+unnamed-chunk-31	c	interaction.plot	par	poison	rats	time	treat	with
+unnamed-chunk-32	~	aov	rats
+unnamed-chunk-33	$	expand.grid	matrix	paste0	rats	unique
+unnamed-chunk-34	c	colnames<-	matrix	predict	rownames<-
+unnamed-chunk-35	::	get_est_means	rats_int	rats_table
+unnamed-chunk-36	model.tables	rats_int
+unnamed-chunk-37	::	get_est_means	rats_add	rats_table
+unnamed-chunk-38	get_est_means	rats_add	rats_table
+unnamed-chunk-39	get_est_means	rats_int	rats_table
+unnamed-chunk-40	::	get_est_means	rats_pois	rats_table
+unnamed-chunk-41	::	get_est_means	rats_table	rats_treat
+unnamed-chunk-42	::	get_est_means	rats_null	rats_table
+unnamed-chunk-43	~	aov	rats	summary
+unnamed-chunk-44	~	aov	rats	TukeyHSD
+unnamed-chunk-45	
+unnamed-chunk-46	breaks	c	interaction.plot	par	tension	warpbreaks	with	wool
+unnamed-chunk-47	~	aov	summary	warpbreaks
+unnamed-chunk-48	~	aov	TukeyHSD	warpbreaks
+unnamed-chunk-49	fread	library
+unnamed-chunk-50	all_data	dfSummary	library	view
+unnamed-chunk-51	$	$<-	as.factor	c	levels<-
+unnamed-chunk-52	%>%	aes	all_data	Condition	Days_One_to_Seven_Number_of_Intrusions	geom_bar	geom_errorbar	geom_point	ggplot	group_by	length	library	mean	means	sd	SEs	sqrt	summarise	ylab
+unnamed-chunk-53	~	all_data	aov
+unnamed-chunk-54	~	all_data	aov	summary
+unnamed-chunk-55	::	~	all_data	aov	library	summary	xtable
+unnamed-chunk-56	::	%>%	all_data	Condition	Days_One_to_Seven_Number_of_Intrusions	group_by	length	mean	sd	sqrt	summarise
+unnamed-chunk-57	%>%	==	~	all_data	c	Condition	filter	t.test
+unnamed-chunk-58	%>%	==	~	all_data	c	Condition	filter	t.test
+unnamed-chunk-59	%>%	==	~	all_data	c	Condition	filter	t.test
+unnamed-chunk-60	%>%	==	~	all_data	c	Condition	filter	t.test
+unnamed-chunk-61	::	%>%	all_data	Condition	Days_One_to_Seven_Number_of_Intrusions	group_by	length	mean	sd	sqrt	summarise
+unnamed-chunk-62	::	%>%	<	==	~	aes	aov	c	Condition	Days_One_to_Seven_Number_of_Intrusions	filter	geom_bar	geom_errorbar	geom_point	ggplot	group_by	length	mean	means	sd	SEs	sqrt	summarise	summary	t.test	xtable	ylab
+unnamed-chunk-63	fread	library
+unnamed-chunk-64	all_data	c	dfSummary	library	view
+unnamed-chunk-65	$	all_data	hist
+unnamed-chunk-66	%>%	<	==	$	$<-	aes	as.factor	Block	c	Correct	factor	filter	geom_errorbar	geom_line	geom_point	ggplot	group_by	length	levels<-	library	mean	mean_rt	means	Order	PureRTs	sd	SEs	sqrt	Stimulus	Subject	summarise	theme_classic	xlab	ylab
+unnamed-chunk-67	%>%	<	==	$	$<-	aes	all_data	as.factor	c	Correct	factor	filter	geom_errorbar	geom_line	geom_point	ggplot	group_by	length	mean	mean_rt	means	Order	PureRTs	sd	SEs	sqrt	Stimulus	Subject	summarise	theme_classic	xlab	ylab
+unnamed-chunk-68	::	%>%	<	==	~	$	$<-	all_data	aov	as.factor	Correct	filter	group_by	library	mean	Order	PureRTs	Stimulus	Subject	summarise	summary	xtable
+unnamed-chunk-69	::	%>%	<	==	$	$<-	all_data	as.factor	Correct	filter	group_by	length	mean	mean_rt	Order	PureRTs	sd	sqrt	Stimulus	Subject	summarise
+unnamed-chunk-70	!=	%>%	~	filter	Stimulus	subject_means	t.test
+unnamed-chunk-71	!=	%>%	~	filter	Stimulus	subject_means	t.test
+unnamed-chunk-72	%>%	<	==	>	all_data	Correct	filter	group_by	mean	Order	PureRTs	Stimulus	Subject	summarise

@@ -6,16 +6,66 @@ unnamed-chunk-6
 unnamed-chunk-7	plot_anova
 unnamed-chunk-8	
 unnamed-chunk-9	p1
-unnamed-chunk-10	p2
-unnamed-chunk-11	p3
-unnamed-chunk-12	p4
-unnamed-chunk-13	
-unnamed-chunk-14	coag_aov
-unnamed-chunk-15	diets
-unnamed-chunk-16	bad	good	group	response
-unnamed-chunk-17	f_stats	sim_anova
-unnamed-chunk-18	p_vals
-unnamed-chunk-19	p_vals
-unnamed-chunk-20	p_vals
-unnamed-chunk-21	
-unnamed-chunk-22	
+unnamed-chunk-10	
+unnamed-chunk-11	p2
+unnamed-chunk-12	
+unnamed-chunk-13	p3
+unnamed-chunk-14	
+unnamed-chunk-15	p4
+unnamed-chunk-16	
+unnamed-chunk-17	
+unnamed-chunk-18	coag_aov
+unnamed-chunk-19	diets
+unnamed-chunk-20	bad	good	group	response
+unnamed-chunk-21	f_stats	sim_anova
+unnamed-chunk-22	p_vals
+unnamed-chunk-23	p_vals
+unnamed-chunk-24	p_vals
+unnamed-chunk-25	
+unnamed-chunk-26	
+unnamed-chunk-27	get_p_val
+unnamed-chunk-28	
+unnamed-chunk-29	
+unnamed-chunk-30	
+unnamed-chunk-31	
+unnamed-chunk-32	rats_add	rats_int	rats_null	rats_pois	rats_treat
+unnamed-chunk-33	rats_table
+unnamed-chunk-34	get_est_means
+unnamed-chunk-35	
+unnamed-chunk-36	
+unnamed-chunk-37	
+unnamed-chunk-38	additive_means
+unnamed-chunk-39	interaction_means
+unnamed-chunk-40	
+unnamed-chunk-41	
+unnamed-chunk-42	
+unnamed-chunk-43	
+unnamed-chunk-44	
+unnamed-chunk-45	
+unnamed-chunk-46	
+unnamed-chunk-47	
+unnamed-chunk-48	
+unnamed-chunk-49	all_data
+unnamed-chunk-50	
+unnamed-chunk-51	all_data
+unnamed-chunk-52	descriptive_df
+unnamed-chunk-53	
+unnamed-chunk-54	
+unnamed-chunk-55	aov_out	summary_out
+unnamed-chunk-56	descriptive_df
+unnamed-chunk-57	comparison_df
+unnamed-chunk-58	comparison_df
+unnamed-chunk-59	comparison_df
+unnamed-chunk-60	comparison_df
+unnamed-chunk-61	descriptive_df
+unnamed-chunk-62	all_data	aov_out	comparison_df	descriptive_df	summary_out
+unnamed-chunk-63	all_data
+unnamed-chunk-64	
+unnamed-chunk-65	
+unnamed-chunk-66	all_data	plot_means	subject_means
+unnamed-chunk-67	plot_means	subject_means
+unnamed-chunk-68	aov_out	subject_means	summary_out
+unnamed-chunk-69	plot_means	subject_means
+unnamed-chunk-70	comparison_df
+unnamed-chunk-71	comparison_df
+unnamed-chunk-72	

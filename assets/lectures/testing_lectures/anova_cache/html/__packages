@@ -1,3 +1,7 @@
 base
 broom
 faraway
+data.table
+dplyr
+ggplot2
+xtable

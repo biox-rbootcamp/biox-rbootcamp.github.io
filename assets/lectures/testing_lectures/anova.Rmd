@@ -9,9 +9,26 @@ output:
 ---
 
 
-
-```{r, include = FALSE}
-knitr::opts_chunk$set(cache = TRUE, autodep = TRUE, fig.align = "center")
+```{r, include = FALSE, echo=FALSE}
+hooks = knitr::knit_hooks$get()
+hook_foldable = function(type) {
+  force(type)
+  function(x, options) {
+    res = hooks[[type]](x, options)
+    
+    if (isFALSE(options[[paste0("fold.", type)]])) return(res)
+    
+    paste0(
+      "<details><summary>", type, "</summary>\n\n",
+      res,
+      "\n\n</details>"
+    )
+  }
+}
+knitr::knit_hooks$set(
+  output = hook_foldable("output"),
+  plot = hook_foldable("plot")
+)
 ```
 
 <style type="text/css">
@@ -24,32 +41,49 @@ knitr::opts_chunk$set(cache = TRUE, autodep = TRUE, fig.align = "center")
 }
 </style>
 
-<!-- TODO: use kable styling instead of custom CSS -->
+# Introduction and goals
 
 > "To find out what happens when you change something, it is necessary to change it."
 >
 > --- **Box, Hunter, and Hunter**, Statistics for Experimenters (1978)
 
-Thus far, we have built models for numeric responses, when the predictors are all numeric. We'll take a minor detour to go back and consider models which *only* have **categorical** predictors. A categorical predictor is a variable which takes only a finite number of values, which are not ordered. For example a variable which takes possible values `red`, `blue`, `green` is categorical. In the context of using a categorical variable as a predictor, it would place observations into different groups (categories).
 
-We've also mostly been dealing with observational data. The methods in this section are most useful in experimental settings, but still work with observational data. (However, for determining causation, we require experiments.)
+Thus far, we have built tests when we wanted to compare two things --- let us now generalize to multiple groups, a generalization which is known as ANOVA.
+
+ANOVA stands for Analysis Of Variance. It is a widely used technique for assessing the likelihood that differences found between means in sample data could be produced by chance. You might be thinking, well don’t we have  t-tests for that? Why do we need the ANOVA, what do we get that’s new that we didn’t have before?
+
+What’s new with the ANOVA, is the ability to test a wider range of means beyond just two. In all of the  t-test examples we were always comparing two things. For example, we might ask whether the difference between two sample means could have been produced by chance. What if our experiment had more than two conditions or groups? We would have more than 2 means. We would have one mean for each group or condition. That could be a lot depending on the experiment. How would we compare all of those means? What should we do, run a lot of t-tests, comparing every possible combination of means? Actually, you could do that. Or, you could do an ANOVA.
+
+In practice, we will combine both the ANOVA test and t-tests when analyzing data with many sample means (from more than two groups or conditions). Just like the t-test, there are different kinds of ANOVAs for different research designs. There is one for between-subjects designs, and a slightly different one for repeated measures designs. We talk about both, beginning with the ANOVA for between-subjects designs.
+
+## Video and assignment before the discussion
+
+Watch the following video on the [analysis of of variance](https://www.youtube.com/watch?v=CS_BKChyPuc).
+
+# Methodology: what is ANOVA?
+
+
+Let's start by providing a little bit of context by talking about experiments.
 
 ## Experiments
 
 The biggest difference between an observational study and an experiment is *how* the predictor data is obtained. Is the experimenter in control?
 
 - In an **observational** study, both response and predictor data are obtained via observation.
-- In an **experiment**, the predictor data are values determined by the experimenter. The experiment is run and the response is observed.
+- In an **experiment**, the predictor data are values determined by the experimenter. The experiment is run and the response is observed. 
 
 In an experiment, the predictors, which are controlled by the experimenter, are called **factors**. The possible values of these factors are called **levels**. Subjects are *randomly* assigned to a level of each of the factors.
 
-The design of experiments could be a course by itself. The Wikipedia article on [design of experiments](https://en.wikipedia.org/wiki/Design_of_experiments){target="_blank"} gives a good overview. Originally, most of the methodology was developed for agricultural applications by [R. A. Fisher](https://en.wikipedia.org/wiki/Ronald_Fisher){target="_blank"}, but are still in use today, now in a wide variety of application areas. Notably, these methods have seen a resurgence as a part of "A/B Testing."
+The design of experiments could be a course by itself. The Wikipedia article on [design of experiments](https://en.wikipedia.org/wiki/Design_of_experiments){target="_blank"} gives a good overview. Originally, most of the methodology was developed for agricultural applications by [R. A. Fisher](https://en.wikipedia.org/wiki/Ronald_Fisher){target="_blank"}, but are still in use today, now in a wide variety of application areas. Notably, these methods have seen a resurgence as a part of "A/B Testing." Perhaps the main distinction between observational studies and experiments is the notion of time: observational studies can typically make use of already existing data, and thus control less the assignment of the samples to the different groups. Experiments are thought of before and implemented by the experimenter, who typically has more control over the predictors.
 
+At the end of the day, this experimental setting gives us a variable, which is the group assignment.We want to use this variable to account for differences in the measurements  and show the effect of the group/condition on the outcome.
 <!-- TODO: In the future, discuss the Morrow Plots: http://cropsci.illinois.edu/research/morrow -->
 
-## Two-Sample t-Test
+## Reminder: Two-Sample t-Test
 
-The simplest example of an experimental design is the setup for a two-sample $t$-test. There is a single factor variable with two levels which split the subjects into two groups. Often, one level is considered the **control**, while the other is the **treatment**. The subjects are randomly assigned to one of the two groups. After being assigned to a group, each subject has some quantity measured, which is the response variable.
+The simplest example of an experimental design is the setup for a two-sample $t$-test, that we've seen in the previous lecture. Because this material is new to you, let's go over it again, and contrast it with the ANOVA. 
+
+There is a single factor variable with two levels which split the subjects into two groups. Often, one level is considered the **control**, while the other is the **treatment**. The subjects are randomly assigned to one of the two groups. After being assigned to a group, each subject has some quantity measured, which is the response variable.
 
 Mathematically, we consider the model
 
@@ -195,27 +229,75 @@ Alternatively, we could write
 H_0: \alpha_1 = \alpha_2 = \ldots = \alpha_g = 0 \quad \text{vs} \quad H_1: \text{ Not all } \alpha_i \text{ are } 0.
 \]
 
-This test is called **Analysis of Variance**. Analysis of Variance (ANOVA) compares the variation due to specific sources (between groups) with the variation among individuals who should be similar (within groups). In particular, ANOVA tests whether several populations have the same mean by comparing how far apart the sample means are with how much variation there is within the samples. We use variability of means to test for equality of means, thus the use of *variance* in the name for a test about means.
+This test is called **Analysis of Variance**. Analysis of Variance (ANOVA) compares the variation due to specific sources (between groups) with the variation among individuals who should be similar (within groups).The one-factor ANOVA is sometimes also called a between-subjects ANOVA, an independent factor ANOVA, or a one-way ANOVA (which is a bit of a misnomer as we discuss later). The critical ingredient for a one-factor, between-subjects ANOVA, is that you have one independent variable, with at least two-levels.  ANOVA tests whether several populations have the same mean by comparing how far apart the sample means are with how much variation there is within the samples. We use variability of means to test for equality of means, thus the use of *variance* in the name for a test about means.
 
+This property of the ANOVA is why the ANOVA is sometimes called __the omnibus test__.  The meaning of omnibus, according to the dictionary, is "comprising several items". The ANOVA is, in a way, __one omnibus test__, comprising several little tests.
+
+For example, if you had three groups, A, B, and C. You get could differences between
+
+- A and B
+- B and C
+- A and C
+That’s three possible differences you could get. You could run separate  t-tests, to test whether each of those differences you might have found could have been produced by chance. Or, you could run an ANOVA, like what we have been doing, to ask one more general question about the differences. Here is one way to think about what the omnibus test is testing:
+
+- Hypothesis of no differences anywhere: $ A = B = C $
+
+- Any differences anywhere:
+
+$ A \neq B = C $
+$ A = B \neq C $
+$ A\neq C = B $
+The $\neq$ symbol means "does not equal"", it’s an equal sign with a cross through it (no equals allowed!).
+  
+
+### The F-statistic
+
+ANOVA is the name of the procedure. The statistical test that it uses is called the F-test, and measures the variability within and across groups. Remember how in the t-test, we basically scale the difference in means to the natural variability of the data. The same thing is true about  F.
+
+F is computed directly from the data. In fact, the idea behind F is the same basic idea that goes into making t. Here is the general idea behind the formula, it is again a ratio of the effect we are measuring (in the numerator), and the variation associated with the effect (in the denominator).
+
+$$\text{name of statistic} = \frac{\text{measure of effect}}{\text{measure of error}}=\frac{\text{measure of effect}}{\text{measure of inherent variability}}$$
+ 
+And here:
+
+$$F = \frac{\text{measure of effect}}{\text{measure of error}}=\frac{\text{measure of effect}}{\text{measure of inherent variability}}$$
+ 
+
+The difference with  $F$, is that we use variances to describe both the measure of the effect and the measure of error. So, $F$ is a ratio of two variances.
+
+Remember what we said about how these ratios work. When the variance associated with the effect is the same size as the variance associated with sampling error, we will get two of the same numbers, this will result in an  $F$-value of 1. When the variance due to the effect is larger than the variance associated with sampling error, then $F$ will be greater than 1. When the variance associated with the effect is smaller than the variance associated with sampling error,$F$ will be less than one.
+
+Let’s rewrite in plainer English. We are talking about two concepts that we would like to measure from our data. 1) A measure of what we can explain (via the group assignments), and 2) a measure of error, or stuff about our data we can’t explain. So, the  $F$ formula looks like this:
+$$F = \frac{\text{Can Explain}}{\text{Can't Explain}}$$
+ 
+
+When we can explain as much as we can’t explain,  $F= 1$. This isn’t that great of a situation for us to be in. It means we have a lot of uncertainty. When we can explain much more than we can’t we are doing a good job,  $F$ will be greater than 1. When we can explain less than what we can’t, we really can’t explain very much,  $F$ will be less than 1. That’s the concept behind making  F.
+
+If you saw an  F in the wild, and it was .6. Then you would automatically know the researchers couldn’t explain much of their data. If you saw an  F of 5, then you would know the researchers could explain 5 times more than the couldn’t, that’s pretty good. And the point of this is to give you an intuition about the meaning of an  F-value, even before you know how to compute it.
+
+
+### Computating the F-statistics
+
+Now that we've seen the concept behind $F$, let's see how this translate into a mathematical formula.
 We'll leave out most of the details about how the estimation is done, but we'll see later, that it is done via least squares. We'll use `R` to obtain these estimates, but they are actually rather simple. We only need to think about the sample means of the groups.
 
 - $\bar{y}_i$ is the sample mean of group $i$.
 - $\bar{y}$ is the overall sample mean.
 - $s_{i}^{2}$ is the sample variance of group $i$.
 
-We'll then decompose the variance, as we've seen before in regression. The **total** variation measures how much the observations vary about the overall sample mean, *ignoring the groups*.
+We'll then decompose the variance, according to what we can and can't explain with the groups. The **total** variation measures how much the observations vary about the overall sample mean, *ignoring the groups*.
 
 \[
 SST = \sum_{i = 1}^{g} \sum_{j = 1}^{n_i} (y_{ij} - \bar{y})^2
 \]
 
-The variation **between** groups looks at how far the individual sample means are from the overall sample mean.
+The variation **between** groups looks at how far the individual sample means are from the overall sample mean. That's the variance that we can explain, the variability due to the different groups --- since we know the groups, we can explain this account for this variability.
 
 \[
 SSB = \sum_{i = 1}^{g} \sum_{j = 1}^{n_i} (\bar{y}_i - \bar{y})^2 = \sum_{i = 1}^{g} n_i (\bar{y}_i - \bar{y})^2
 \]
 
-Lastly, the **within** group variation measures how far observations are from the sample mean of its group.
+Lastly, the **within** group variation measures how far observations are from the sample mean of its group. That's the variance that we can't explain, the inherent variability which is left after we've accounted for the groups.
 
 \[
 SSW = \sum_{i = 1}^{g} \sum_{j = 1}^{n_i} (y_{ij} - \bar{y}_i)^2 = \sum_{i = 1}^{g} (n_i - 1) s_{i}^{2}
@@ -223,15 +305,26 @@ SSW = \sum_{i = 1}^{g} \sum_{j = 1}^{n_i} (y_{ij} - \bar{y}_i)^2 = \sum_{i = 1}^
 
 This could also be thought of as the error sum of squares, where $y_{ij}$ is an observation and $\bar{y}_i$ is its fitted (predicted) value from the model. 
 
-To develop the test statistic for ANOVA, we place this information into an ANVOA table.
+### Degrees of freedom
+
+Degrees of freedom come into play again with ANOVA. This time, their purpose is a little bit more clear.  Degrees of freedom can be fairly simple when we are doing a relatively simple ANOVA like this one, but they can become complicated when designs get more complicated.
+
+Let’s talk about the degrees of freedom for the $SSW$ and $SWB$.
+
+The formula for the degrees of freedom for  $SSB$ is $DFB = \text{Groups}-1$, where Groups is the number of groups in the design. When we estimate the grand mean (the overall mean), we are taking away a degree of freedom for the group means. Two of the group means can be anything they want (they have complete freedom), but in order for all three to be consistent with the Grand Mean, the last group mean has to be fixed.
+
+The formula for the degrees of freedom for   $SSB$ is  $DFW= N - \text{Groups}$, or the number of points minus the number of groups.  
+  
+
+To develop the test statistic for ANOVA, we place this information into an ANOVA table.
 
 | Source  | Sum of Squares | Degrees of Freedom | Mean Square | $F$         |
 |---------|--------------|----------------|------------|-------------|
-| Between | SSB            | $g - 1$            | SSB / DFB | MSB / MSW |
-| Within  | SSW            | $N - g$            | SSW / DFW |             |
+| Between | SSB            | DFB= $g - 1$            | MSB= SSB / DFB | MSB / MSW |
+| Within  | SSW            | DFW= $N - g$            | MSW= SSW / DFW |             |
 | Total   | SST            | $N - 1$            |             |             |
 
-We reject the null (equal means) when the $F$ statistic is large. This occurs when the variation between groups is large compared to the variation within groups. Under the null hypothesis, the distribution of the test statistic is $F$ with degrees of freedom $g - 1$ and $N - g$.
+As previously stated, reject the null (equal means) when the $F=\frac{MSB}{MSW}$ statistic is large. This occurs when the variation between groups is large compared to the variation within groups. Under the null hypothesis, the distribution of the test statistic is $F$ with degrees of freedom $g - 1$ and $N - g$.
 
 ```{r, echo = FALSE}
 library(broom)
@@ -277,10 +370,11 @@ plot_anova = function(n = 20, mu_a = 0, mu_b = 0, mu_c = 0, sigma = 1) {
   segments(x0 = 2.6, x1 = 3.4, y0 = mean(response[group == "C"]), y1 = mean(response[group == "C"]), lwd = 2, lty = 2, col = "black")
 
   aov_results = aov(response ~ group)
-  f_stat = glance(aov_results)$statistic
-  p_val  = glance(aov_results)$p.value
-  list(f = f_stat, p = p_val)
-  # summary(aov_results)
+  f_stat = summary(aov_results)[[1]]$F[1]
+  p_val  = summary(aov_results)[[1]]$P[1]
+  summary(aov_results)
+  return(list(f = f_stat, p = p_val)
+         )
 }
 ```
 
@@ -288,7 +382,9 @@ plot_anova = function(n = 20, mu_a = 0, mu_b = 0, mu_c = 0, sigma = 1) {
 <!-- TODO: Should output entire ANOVA table. -->
 <!-- TODO: Do with ggplot2 and custom boxplots with show min, sd, mean, sd, max -->
 
-```{r, echo = FALSE, eval = FALSE}
+Run the following chunk of code. Evaluate the impact of the different parameters.
+
+```{r, echo = TRUE, eval = FALSE, fold.code=FALSE}
 library(manipulate)
 par(mfrow = c(1, 2))
 manipulate(plot_anova(n, mu_a, mu_b, mu_c, sigma), 
@@ -301,13 +397,14 @@ manipulate(plot_anova(n, mu_a, mu_b, mu_c, sigma),
 
 Let's see what this looks like in a few situations. In each of the following examples, we'll consider sampling 20 observations ($n_i = 20$) from three populations (groups).
 
-First, consider $\mu_A = -5, \mu_B = 0, \mu_C = 5$ with $\sigma = 1$.
+First, consider $\mu_A = -5, \mu_B = 0, \mu_C = 5$ with $\sigma = 1$. Run the following R-chunk and observe the result.
 
-```{r, fig.height = 5, fig.width = 10, echo = FALSE}
+```{r, fig.height = 5, fig.width = 10, echo = FALSE, fold.code=FALSE}
 set.seed(42)
 par(mfrow = c(1, 2))
 p1 = plot_anova(n = 20, mu_a = -5, mu_b = 0, mu_c = 5, sigma = 1)
 ```
+
 
 The left panel shows the three normal distributions we are sampling from. The ticks along the $x$-axis show the randomly sampled observations. The right panel, re-displays only the sampled values in a boxplot. Note that the mid-line of the boxes is usually the sample median. These boxplots have been modified to use the sample mean.
 
@@ -315,10 +412,16 @@ Here the sample means vary a lot around the overall sample mean, which is the so
 
 As a result, we we obtain a *large* test statistic, thus *small* p-value. 
 
-- $F = `r p1$f`$
-- $\text{p-value} = `r p1$p`$
+```{r}
+print(paste0("F= ", p1$f, " p-value= ", p1$p))
+```
 
-Now consider $\mu_A = 0, \mu_B = 0, \mu_C = 0$ with $\sigma = 1$. That is, equal means for the groups.
+Now consider $\mu_A = 0, \mu_B = 0, \mu_C = 0$ with $\sigma = 1$. That is, equal means for the groups. 
+
+__Question__ Repeat the procedure and observe the result. What has changed? Is the p-value significant?
+
+  <details>
+  <summary>Click to see the answer!</summary>
 
 ```{r, fig.height = 5, fig.width = 10, echo = FALSE}
 set.seed(1337)
@@ -330,35 +433,50 @@ Here the sample means vary only a tiny bit around the overall sample mean. Withi
 
 As a result, we we obtain a *small* test statistic, thus *large* p-value. 
 
-- $F = `r p2$f`$
-- $\text{p-value} = `r p2$p`$
+```{r}
+print(paste0("F= ", p2$f, " p-value= ", p2$p))
+```
 
-The next two examples show different means, with different levels of noise. Notice how these affect the test statistic and p-value.
+</details>
 
-- $\mu_A = -1, \mu_B = 0, \mu_C = 1, \sigma = 1$
+The next two examples will show you different means, with different levels of noise. Notice how these affect the test statistic and p-value.
 
+- Repeat the previous simulation with $\mu_A = -1, \mu_B = 0, \mu_C = 1, \sigma = 1$
+
+  <details>
+  <summary>Click to see the answer!</summary>
+  
 ```{r, fig.height = 5, fig.width = 10, echo = FALSE}
 set.seed(42)
 par(mfrow = c(1, 2))
 p3 = plot_anova(n = 20, mu_a = -1, mu_b = 0, mu_c = 1, sigma = 1)
 ```
 
-- $F = `r p3$f`$
-- $\text{p-value} = `r p3$p`$
+```{r}
+print(paste0("F= ", p3$f, " p-value= ", p3$p))
+```
+
 
 Above, there isn't obvious separation between the groups like the first example, but it is still obvious the means are different. Below, there is more noise. Visually it is somewhat hard to tell, but the test still suggests a difference of means. (At an $\alpha$ of 0.05.)
 
-- $\mu_A = -1, \mu_B = 0, \mu_C = 1, \sigma = 2$
-- $n_i = 20$ for each group.
+</details>
 
+-__Question__ Repeat with $\mu_A = -1, \mu_B = 0, \mu_C = 1, \sigma = 2$, and  $n_i = 20$ for each group.
+
+  <details>
+  <summary>Click to see the answer!</summary>
+  
 ```{r, fig.height = 5, fig.width = 10, echo = FALSE}
 set.seed(42)
 par(mfrow = c(1, 2))
 p4 = plot_anova(n = 20, mu_a = -1, mu_b = 0, mu_c = 1, sigma = 2)
 ```
 
-- $F = `r p4$f`$
-- $\text{p-value} = `r p4$p`$
+```{r}
+print(paste0("F= ", p4$f, " p-value= ", p4$p))
+```
+
+</details>
 
 Let's consider an example with real data. We'll use the `coagulation` dataset from the `faraway` package. Here four different diets (`A`, `B`, `C`, `D`) were administered to a random sample of 24 animals. The subjects were randomly assigned to one of the four diets. For each, their blood coagulation time was measured in seconds.
 
@@ -411,7 +529,7 @@ is.factor(bad$group)  # 1, 2, and 3 are numbers.
 is.factor(good$group) # 1, 2, and 3 are labels.
 ```
 
-### Some Simulation
+### Some Simulations
 
 Here we verify the distribution of the test statistic under the null hypothesis. We simulate from a null model (equal variance) to obtain an empirical distribution of the $F$ statistic. We add the curve for the expected distribution.
 
@@ -469,15 +587,22 @@ A number of things can affect the power of a test:
 - **Sample size**. Large samples means easier to detect effects.
 - **Balanced design**. An equal number of observations per group leads to higher power.
 
-The following simulations look at the effect of significance level, effect size, and noise level on the power of an ANOVA $F$-test. Homework will look into sample size and balance.
+The following simulations look at the effect of significance level, effect size, and noise level on the power of an ANOVA $F$-test. 
+
 
 ```{r}
 p_vals = replicate(n = 1000, sim_anova(mu_a = -1, mu_b = 0, mu_c = 0, mu_d = 1, 
                                      sigma = 1.5, stat = FALSE))
-mean(p_vals < 0.05)
+mean(p_vals < 0.05) ## This is the power of the test for alpha=0.05
 mean(p_vals < 0.01)
 ```
 
+Your turn:
+1. Increase the value of $\sigma$ and observe its effect on the power. 
+
+  <details>
+  <summary>Click to see the answer!</summary>
+  
 ```{r}
 p_vals = replicate(n = 1000, sim_anova(mu_a = -1, mu_b = 0, mu_c = 0, mu_d = 1, 
                                      sigma = 2.0, stat = FALSE))
@@ -485,6 +610,13 @@ mean(p_vals < 0.05)
 mean(p_vals < 0.01)
 ```
 
+ </details>
+ 
+ 2.Increase the value of effect size and observe its effect on the power for $\alpha =0.01$ and $\alpha=0.05$.
+ 
+   <details>
+  <summary>Click to see the answer!</summary>
+  
 ```{r}
 p_vals = replicate(n = 1000, sim_anova(mu_a = -2, mu_b = 0, mu_c = 0, mu_d = 2, 
                                      sigma = 2.0, stat = FALSE))
@@ -492,6 +624,8 @@ mean(p_vals < 0.05)
 mean(p_vals < 0.01)
 ```
 
+ </details>
+ 
 ## Post Hoc Testing
 
 Suppose we reject the null hypothesis from the ANOVA test for equal means. That tells us that the means are different. But which means? All of them? Some of them? The obvious strategy is to test all possible comparisons of two means. We can do this easily in `R`.
@@ -505,11 +639,11 @@ Notice the `pairwise.t.test()` function does not have a `data` argument. To avoi
 
 Also note that we are using the argument `p.adj = "none"`. What is this? An adjustment (in this case not an adjustment) to the p-value of each test. Why would we need to do this?
 
-The adjustment is an attempt to correct for the [multiple testing problem](https://en.wikipedia.org/wiki/Multiple_comparisons_problem){target="_blank"}. (See also: [Relevant XKCD](https://xkcd.com/882/){target="_blank"}. ) Imagine that you knew ahead of time that you were going to perform 100 $t$-tests. Suppose you wish to do this with a false positive rate of $\alpha = 0.05$. If we use this significance level for each test, for 100 tests, we then expect 5 false positives. That means, with 100 tests, we're almost guaranteed to have at least one error.
+The adjustment is an attempt to correct for the [multiple testing problem](https://en.wikipedia.org/wiki/Multiple_comparisons_problem){target="_blank"} that we have seen in the previous discussion (See also: [Relevant XKCD](https://xkcd.com/882/){target="_blank"}. ) To remind you: Imagine that you knew ahead of time that you were going to perform 100 $t$-tests. Suppose you wish to do this with a false positive rate of $\alpha = 0.05$. If we use this significance level for each test, for 100 tests, we then expect 5 false positives. That means, with 100 tests, we're almost guaranteed to have at least one error.
 
 What we'd really like, is for the [family-wise error rate](https://en.wikipedia.org/wiki/Family-wise_error_rate){target="_blank"} to be 0.05. If we consider the 100 tests to be a single "experiment" the FWER is the rate of one or more false positives for in the full experiment (100 tests). Consider it an error rate for an entire procedure, instead of a single test.
 
-With this in mind, one of the simplest adjustments we can make, is to increase the p-values for each test, depending on the number of tests. In particular the Bonferroni correction simply multiplies by the number of tests.
+With this in mind, one of the simplest adjustments we can make, is to increase the p-values for each test, depending on the number of tests. In particular the Bonferroni correction (see previous discussion) simply multiplies by the number of tests.
 
 \[
 \text{p-value-bonf} = \min(1, n_{tests} \cdot \text{p-value})
@@ -783,7 +917,7 @@ We reject the null when the $F$ statistic is large. Under the null hypothesis, t
 
 These tests should be performed according to the model **hierarchy**. First consider the test of interaction. If it is significant, we select the interaction model and perform no further testing. If interaction is not significant, we then consider the necessity of the individual factors of the additive model.
 
-![Model Hierarchy](images/hierarchy.png)
+![Model Hierarchy](/Users/cdonnat/Dropbox/biox-rbootcamp.github.io/assets/lectures/images/hierarchy.png)
 
 ```{r}
 summary(aov(time ~ poison * treat, data = rats))
@@ -791,9 +925,7 @@ summary(aov(time ~ poison * treat, data = rats))
 
 Using a significance level of $\alpha = 0.05$, we see that the interaction is not significant. Within the additive model, both factors are significant, so we select the additive model.
 
-<!-- - TODO: mention no replication, interaction issue -->
-<!-- - TODO: correct if int is not significant? -->
-<!-- - TODO: here we pick the full additive model -->
+
 
 Within the additive model, we could do further testing about the main effects.
 
@@ -825,13 +957,801 @@ summary(aov(breaks ~ wool * tension, data = warpbreaks))
 
 Using an $\alpha$ of $0.05$ the ANOVA test finds that the interaction is significant, so we use the interaction model here.
 
-<!-- TODO: two-way calculation details in an appendix -->
 
 ```{r, echo = FALSE, eval = FALSE}
 TukeyHSD(aov(breaks ~ wool * tension, data = warpbreaks))
 ```
 
 
+# Practical: One-way ANOVA: How to not think about bad memories by playing Tetris
+
+<script>
+$("#coverpic").hide();
+</script>
+
+<span class="newthought">
+The analysis of variance is not a mathematical theorem, but rather a convenient method of arranging the arithmetic.
+---R. A. Fisher
+</span>
+
+
+<div class="marginnote">
+This lab is modified and extended from [Open Stats Labs](https://sites.trinity.edu/osl). Thanks to Open Stats Labs (Dr. Kevin P. McIntyre) for their fantastic work.
+</div>
+This lab activity uses the open data from Experiment 2 of James et al. (2015) to teach one-way ANOVA with planned comparisons. Results of the activity provided below should exactly reproduce the results described in the paper.
+
+### STUDY DESCRIPTION
+
+Following traumatic experiences, some people have flashbacks, which are also called "intrusive memories"" and are characterized by involuntary images of aspects of the traumatic event. Although people often try to simply forget traumatic memories, this approach is not very effective. Instead, previous research suggests that a better approach may be to try to change aspects of the memory after it is formed. For example, some research shows that traumatic memories can be altered and weakened to the point that they are no longer intrusive.
+
+Because intrusive memories of trauma are often visual in nature, James and colleagues (2015) sought to explore whether completing a visuospatial task (e.g., Tetris) after a memory was formed would interfere with the storage of that memory, and thereby reduce the frequency of subsequent intrusions. They hypothesized that  only participants who complete a visuo-spatial task after reactivation of the traumatic memories would experience a  reduction in intrusive memories. In comparison, simply completing a visuo-spatial task (without reactivation) or reactivation (without a visuo-spatial task), would not reduce the occurrence intrusive memories.
+
+In other words, if you play Tetris shortly after you were remembering bad memories, playing Tetris might weaken those memories, which could cause you experience those kinds of intrusive memories less often in the future.
+
+### Study Methods
+
+To test their hypothesis, the  authors conducted an experiment ( N = 72,  n = 18 per condition). The procedure is summarized as follows:
+
+**Trauma Film**: All participants viewed a series of video clips of graphic violence (e.g., a person getting hit by a van while using his phone as he crosses the road) as a way to create memories that should become intrusive memories. Participants then went home and recorded the number of intrusive memories they experienced over the next 24 hours. Because this is before the experimental manipulations, all groups were predicted to have an  equal occurrence of intrusive memories during the first 24-hours (called Day 0).
+
+**Experimental Task**: After this 24-hour period, the participants returned to the lab and completed the experimental task. The experimenters randomly assigned participants to ONE of the following conditions:
+
+1. No-task control: These participants completed a 10-minute music filler task.
+2. Reactivation + Tetris: These participants were shown a series of images from the trauma film to reactivate the traumatic memories (i.e., reactivation task). After a 10-minute music filler task, participants played the video game Tetris for 12 minutes.
+3. Tetris Only: These participants played Tetris for 12 minutes, but did not complete the reactivation task.
+4. Reactivation Only: These participants completed the reactivation task, but did not play Tetris.
+
+**Intrusive Memories**: All participants were asked to record the number of intrusive memories that they experienced over the next seven days (Days 1 to 7).
+
+After the seven days had passed, participants completed an Intrusion-Provocation Task, in which they were shown blurred images from the trauma film and asked to indicate whether the blurred image triggered an intrusive memory.
+
+
+__References__:
+
+- citation: James, E. L., Bonsall, M. B., Hoppitt, L., Tunbridge, E. M., Geddes, J. R., Milton, A. L., & Holmes, E. A. (2015). Computer game play reduces intrusive memories of experimental trauma via re-consolidation-update mechanisms. Psychological Science, 26, 1201-1215.
+- [Link to .pdf of article](http://journals.sagepub.com/stoken/default+domain/hQ2W4fbPrZVJ7eyNJaqu/full)
+- <a href="https://raw.githubusercontent.com/CrumpLab/statisticsLab/master/data/Jamesetal2015Experiment2.csv" download>Data in .csv format</a>
+
+
+## R
+
+### Load the data
+
+Remember that any line with a \# makes a comment and the code does not run. Below is how to load the .csv data from the online repository, or from a local file (you need to change the file path to where the local file is, if you downloaded it). The data contains all of the measures and conditions from Experiment 2 in the paper.
+
+```{r}
+library(data.table)
+#fread("https://raw.githubusercontent.com/CrumpLab/statisticsLab/master/data/Jamesetal2015Experiment2.csv")
+all_data <- fread("~/Downloads/Jamesetal2015Experiment2.csv")
+```
+
+### Inspect the dataframe
+
+This will give you a big picture of the data frame. Click the button to view it in your browser, then take a look to see what is in it. 
+
+```{r, eval=F}
+library(summarytools)
+view(dfSummary(all_data))
+```
+
+### Get the data you need
+
+Again we have only the data from Experiment 2, so we don't need to get rid of any rows of the data. But we do need look at the columns to see how the independent variable and dependent variables were coded. 
+
+#### The independent variable
+
+There was one important independent variable, and it had four levels. The first column in the data frame is called condition, and it has four levels. The levels are 1, 2, 3, and 4 in the data-frame. These will correspond to the four levels in shown in figure: 
+
+- No-task control
+- Reactivation Plus Tetris
+- Tetris only
+- Reactivation only
+
+Each of these refer to what subjects did after they watched the traumatic film. But, which of these correspond to the numbers 1 to 4 in the data-frame? It turns out the are in the right order, and 1 to 4 refer to:
+
+1. No-task control
+2. Reactivation Plus Tetris
+3. Tetris only
+4. Reactivation only
+
+Let's do ourselves a favor and rename the levels of the `Condition` column with words so we know what they refer to. First, convert the `Condition` column to a factor, then rename the levels. Then.
+
+
+```{r}
+all_data$Condition <- as.factor(all_data$Condition)
+levels(all_data$Condition) <- c("Control",
+                                "Reactivation+Tetris", 
+                                "Tetris_only",
+                                "Reactivation_only")
+```
+
+#### The dependent variable
+
+The authors showed two figures, one where they analysed intrusive memory frequency as the mean for the week, and the other where the used intrusive memory frequency on Day 7. In this tutorial, we will do the steps to run an ANOVA on the mean for the week data, and you will follow these steps to run another ANOVA on the Day 7 data.
+
+The mean for the week data for each subject is apparently coded in the column `Days_One_to_Seven_Number_of_Intrusions`.
+
+### Look at the data
+
+Remember before we do any analysis, we always want to "look" at the data. This first pass let's us know if the data "look right". For example, the data file could be messed up and maybe there aren't any numbers there, or maybe the numbers are just too weird. 
+
+In the last two labs, we saw how to show all the data we are interested in looking at in one go. We can do the same things here. For example, in one little piece of code, we can display the means in each condition, the standard errors of the mean, and the individual scores for each subject in each condition. This is a lot to look at, but it's everything we want to look at for starters all in the same place. Looking at the data this way will also give us intuitions about what our ANOVA will tell us before we run the ANOVA. This is helpful for determining whether the results of your ANOVA are accurate or not. Let's do it...also notice that the code is very similar to what we did for the independent t-test. In fact, all I did was copy and paste that code right here, and edited it a little bit. This is really fast, and shows the efficiency of doing things this way.
+
+```{r}
+library(dplyr)
+library(ggplot2)
+# get means and SEs
+descriptive_df <- all_data %>% 
+                    group_by(Condition) %>% 
+                    summarise(means= mean(Days_One_to_Seven_Number_of_Intrusions),
+                              SEs = sd(Days_One_to_Seven_Number_of_Intrusions)/sqrt(length(Days_One_to_Seven_Number_of_Intrusions)))
+# Make the plot
+ggplot(descriptive_df, aes(x=Condition, y=means))+ 
+  geom_bar(stat="identity", aes(fill=Condition))+ # add means
+  geom_errorbar(aes(ymin=means-SEs,               # add error bars
+                    ymax=means+SEs), width=.1) +
+  geom_point(data=all_data, aes(x=Condition, y=Days_One_to_Seven_Number_of_Intrusions), alpha=.5)+
+  geom_point(alpha=.25)+
+  ylab("Intrusive Memories (Mean for Week)")
+```
+
+
+There we have it. A nice graph showing us everything. We can see there was a lot of differences at the level of individual subjects. Some subjects had a mean of 15 intrusive memories for the week. Some had 0. Lots of differences.
+
+And, to be completely honest, this data seems a bit weird to me. It might not be weird, but it might be. The wording in the manuscript is that this data is the mean frequency of intrusive memories over the week. For the people who had 15, this means that every day they had on average 15 intrusive memories. Some people had on average 0 per day. This could be the data. But, it also seems like the data might just be frequency counts and not means at all. For example, the data could be that some people had a total of 15 intrusive over the week. The data might make more sense if these were frequency counts. Otherwise the differences between people are truly very large. For example the person who had an average of 15 intrusive memories per week, must have had 15*7 = 105 intrusive memories, which is a lot more than zero. In any case, this kind of wondering about the data is what happens when you start to notice how numbers work. It's useful develop your data sense.
+
+Let's move on to the ANOVA. By looking at the above graph do you have an intuition about what the ANOVA will tell us? I do, it should easily tell us that we are going to get an F-value that is bigger than one, and a p-value that is probably smaller than .05? How do I know this? I looked at the error bars, which represent the standard errors of the mean. If we look across conditions we can see that that the error bars don't always overlap. This suggests there are differences in the data that don't happen very often by chance. So, we expect a smallish p-value. Why do you think I expect the F-value to be greater than 1? If you can answer this question with a justification and explanation of how F works, pat yourself on the back!
+
+### Conduct the ANOVA
+
+Conducting an ANOVA in R is pretty easy. As you've seen in the first part, it's one line of code, just like the t-test.
+
+It's worth knowing that there are a few different packages out there to do an ANOVA, for example Mike Lawrence's `ezANOVA` package is pretty popular. 
+
+For this tutorial we'll stick to running the ANOVA using the `aov` function from base R (comes pre-installed). This is pretty "easy" too. If you want to see the help file for `aov`, just type `?aov()` into the console, and press enter. You will see an "explanation" of how the `aov` function is supposed to work. You can use the same trick for any R function, like this `?name_of_function()`. To be clear, you have to replace the letters `name_of_function`, with the name of the function.  Usually, at the bottom of the help file, there are some examples, and these are helpful, but sometimes they are missing the example you need, and you are expected to generalize your knowledge of how `aov` works, to make it work for your problem. 
+
+So, with that digression, let's explain the syntax for the aov function. It looks like this:
+
+`aov(DV ~ IV, dataframe)`
+
+That probably looks really foreign. Let me explain. First you need write `aov()`. `aov` is the name of the function, followed by the brackets. The brackets are a sandwich. Sandwiches have a top and a bottom, and they enclose the things you put in the sandwich. We then put things inside the `()`, in specific ways to make the `aov` sandwich. The `DV` stands for the name of the dependent variable in the data frame. For us, this will be `Days_One_to_Seven_Number_of_Intrusions`. So, when we add that, our function will look like:
+
+
+`aov(Days_One_to_Seven_Number_of_Intrusions ~ IV, dataframe)`
+
+Next, the `~` (tilda) stands for the word 'by'. We are saying we want to analyse the Dependent variable **by** the conditions of the independent variable.
+
+The `IV` stands for the name of the column that is your independent variable. Our's is called `Condition`. Adding that in, our formula looks like:
+
+`aov(Days_One_to_Seven_Number_of_Intrusions ~ Condition, dataframe)`
+
+Finally, the last part is the name of the data-frame we are using. The `aov` function only works on long-form data, where each score on the dependent variable has its own row. Ours is already set up this way! The name of our data-frame is `all_data`. We add that in, and it looks like:
+
+`aov(Days_One_to_Seven_Number_of_Intrusions ~ Condition, all_data)`
+
+In English, this means, do an ANOVA on the dependent variable as a function of the independent variable, and use the data in my data frame.
+
+This is it for now. The `aov` function is very flexible because you can define different kinds of formulas (the `DV ~ IV` part). We'll see other examples later. For now, this is all we need. Also, what's cool, is that this will work for any single IV with any number of levels (conditions) 2 or greater. 
+
+```{r}
+aov(Days_One_to_Seven_Number_of_Intrusions ~ Condition, all_data)
+```
+
+What is this garbage? I don't see an ANOVA table, what is this? You are seeing the raw print out of the aov function. Clearly, this is not helpful, it's not what we want to see.
+
+Fortunately, R comes with another function called `summary`. What it does is summarize the results of functions like `aov`, and prints them out in a nicer way. Let's see the summary function do it's thing:
+
+```{r}
+summary(aov(Days_One_to_Seven_Number_of_Intrusions ~ Condition, all_data))
+```
+
+Alright, now we have an ANOVA table we can look at. However, it still looks ugly, at least to me. When you are working inside an R Markdown document, you have some more options to make it look nice. We can use the `kable` and `xtable` function together, like this. 
+
+```{r}
+library(xtable)
+aov_out<-aov(Days_One_to_Seven_Number_of_Intrusions ~ Condition, all_data)
+summary_out<-summary(aov_out)
+knitr::kable(xtable(summary_out))
+```
+
+Now we see a nicer print out. Especially if we `knit` the document into a webpage.
+
+### Reporting the ANOVA results
+
+First, let's look at how we might report the results. There are three very important parts to this. 
+
+1. Saying what test you did to what data
+2. Reporting the inferential statistics
+3. Reporting the pattern in the means
+
+Here is part 1, we need to say what data we used, and what kind of test we used on that data:
+
+
+> We submitted the mean intrusive memories for the week from each subject in each condition to a one-factor betwee-subjects ANOVA, with Intervention type (No-task control, Reactivation Plus tetris, Tetris only, Reactivation only) as the sole independent variable. 
+Part 2 is saying what the results of the test were. Specifically, we report the values from the inferential test (see the textbook for why these values). Also, you should be able to answer this question: why do we report the values that we do?
+
+> We found a main effect of Intervention type, F(3, 68) = 3.79, MSE = 10.09, p = 0.014.
+Part 3 is saying what the pattern was in the means. Remember, that in the ANOVA, a significant effect refers to the global variation among the means. In other words, we can say that there are some differences between the means, but we can't specifically say which pairs of means are different, or which groups of means are different from one another. How can we report this, where are the means? In fact, we already found them when we plotted the data earlier. So, we can copy paste that code, and print out the means, rather than the figure:
+
+```{r}
+# get means and SEs
+descriptive_df <- all_data %>% 
+                    group_by(Condition) %>% 
+                    summarise(means= mean(Days_One_to_Seven_Number_of_Intrusions),
+                              SEs = sd(Days_One_to_Seven_Number_of_Intrusions)/sqrt(length(Days_One_to_Seven_Number_of_Intrusions)))
+knitr::kable(descriptive_df)
+```
+
+No we have to use a sentence to describe these means.
+
+> Refer to table 1 for the means and standard errors of the mean in each condition
+or,
+
+> Mean intrusive memories per week were 5.11 (SE = .99); 1.89 (SE = .41); 3.89 (SE = .68); and 4.83 (SE= .78), in the Control, Reaction plus Tetris, Tetris Only, and Reactivation only conditions, respectively
+Ugh, what a mouthful. Be mindful of how you write results. The above is not helpful because you see a list of numbers, and then a list of conditions, and the reader has to do a lot of work to keep everything straight. I like the table option.
+
+I also like this other kind of option:
+
+> Mean intrusive memories were significantly different between the Control (M = 5.11, SE = .99), Reactivation plus Tetris (M = 3.89, SE = .68), Tetris only (M= 3.89, SE = .68), and Reactivation only (M = 4.83, .78) conditions.
+That's a little bit better. Let's put it all in one place to see what it look like:
+
+> We submitted the mean intrusive memories for the week from each subject in each condition to a one-factor betwee-subjects ANOVA, with Intervention type (No-task control, Reactivation Plus tetris, Tetris only, Reactivation only) as the sole independent variable. We found a main effect of Intervention type, F(3, 68) = 3.79, MSE = 10.09, p = 0.014. Mean intrusive memories were significantly different between the Control (M = 5.11, SE = .99), Reactivation plus Tetris (M = 3.89, SE = .68), Tetris only (M= 3.89, SE = .68), and Reactivation only (M = 4.83, .78) conditions.
+### Individual comparisons
+
+
+
+The only complicated part in ANOVA is determining exactly what you "should" do to make the comparison. It turns out there are lots of recommendations and disagreements about what you should do. There are also lots of tests that you can do, so you have a lot of options. We are not going to show you here all of the tests. This is beyond the scope of what we are trying to teach you. Instead, we will use tests that you already know, the t-test for independent samples from the last lab. It will do the job for this data.
+
+We think that before you can make good decisions about the kind of comparison test you want to use, you have to have a solid understanding of **what you are comparing** and **what you are not comparing** when you use different tests. We think this understanding is more important than what test you use. More important, is that you know what means you want to compare. In this case, we will talk about what means we want to compare, and then just do a t-test.
+
+#### What did the ANOVA tell us
+
+Remember, the ANOVA we conducted is termed the **omnibus** test. What means was it comparing? It wasn't comparing specific means. It was asking a kind of blind and very general question: Are any of these means different. Our answer was yes. Our next question is: What means were different from what other means? The ANOVA doesn't know the answer to this question. It just says I don't know...
+
+#### Comparing specific means and the experimental question
+
+Notice there are 4 means to compare. So, there are (4-1)! = 3! = 3x2x1 = 6 total different comparisons. The ! stands for factorial. What's more important is recognizing that when you have more than two conditions (where you can only make one comparison, A vs. B), you get increasingly more comparisons. For four conditions, A, B, C, D, you get six comparisons, they are:
+
+`AB, AC, AD, BC, BD, and CD` where each letter pair refers to A compared to B (AB), A compared to C (AC), and so on.
+
+Do we actually care about all of these comparisons? Perhaps. What was the point of the experiment? Remember, the experiment was asking a questions, that's why they set-up the condition necessary to produce these means. What question were they asking? What did they want to know? 
+
+They wanted to find out if various interventions after watching the scary movie, would change how many bad intrusive memories people would experience in the week following the movie. They discuss the idea that a memory can become malleable when it is re-activated. They want to "Re-activate" the bad memories, and then while they were changeable, do something to them to make them less likely to be intrusive later on. The big idea was that doing a bit of "re-activation" AND then playing Tetris (which takes up visual cognitive bandwidth) could cause changes to the re-activated memories, that would decrease the number of intrusive memories later on. With that reminder, let's go through some different comparisons that we can make, and talk about what they might mean.
+
+#### Control vs. Reactivation_only
+
+There was a control group that did not do anything special after watching the traumatic movie. The mean number of intrusive memories for the control group, gives some idea of the amount of intrusive memories we would expect to measure, when you do nothing to change that number.
+
+Comparing to the control group is a very sensible thing do to for each of the other groups. If one of the manipulations worked, it should show a different mean (something changed) than the control group.
+
+So, did the Reaction_only group have less intrusive memories over the control group? First we use the `filter` function from `dplyr` to select only the rows from the data frame that have the Control and Reactivation_only conditions. Then we run a t-test
+
+```{r}
+comparison_df <- all_data %>% 
+                  filter(Condition %in% c('Control','Reactivation_only')==TRUE)
+                        
+t.test(Days_One_to_Seven_Number_of_Intrusions ~ Condition, 
+       comparison_df,
+       var.equal=TRUE)
+```
+
+The means are both basically 5, not a big difference!. The p-value is large, suggesting that change could easily have produced the tiny differences between the means. In other words, it doesn't look like the "re-activation" phase did anything to suppress the amount of intrusive memories that people would have over one week, compared to control.
+
+Notice, this was a comparison we could make. But, was it an informative one about the goal of the study? Not really. 
+
+#### Control vs. Reactivation+Tetris
+
+What we really want to know is if Reactivation+Tetris cause fewer intrusive memories...but compared to what? Well, if it did something, it should have a smaller mean than the Control group. So, let's do that comparison:
+
+Note: we just change the one level name to the level we want `Reactivation+Tetris`.
+
+```{r}
+comparison_df <- all_data %>% 
+                  filter(Condition %in% c('Control','Reactivation+Tetris')==TRUE)
+                        
+t.test(Days_One_to_Seven_Number_of_Intrusions ~ Condition, 
+       comparison_df,
+       var.equal=TRUE)
+```
+
+There is a bigger difference now, roughly 5.1 intrusive memories for control, and 1.9 for Reactivation+Tetris. The p-value is quite small, indicating this difference was not likely produced by chance. Now, we have some evidence that Reactivation+Tetris caused something to change, that condition produced fewer intrusive memories than control. 
+
+#### Control vs. Tetris_only
+
+Now we can really start wondering what caused the difference. Was it just playing Tetris? It wasn't just doing the reactivation, we already found out that didn't do anything. Does just playing Tetris reduce the number of intrusive memories during the week? Let's compare that to control:
+
+```{r}
+comparison_df <- all_data %>% 
+                  filter(Condition %in% c('Control','Tetris_only')==TRUE)
+                        
+t.test(Days_One_to_Seven_Number_of_Intrusions ~ Condition, 
+       comparison_df,
+       var.equal=TRUE)
+```
+
+There's mean difference of about 1, but the p-value isn't very small. This suggests chance produces a difference of this size fairly often. If we claimed that just playing Tetris caused a difference based on this data, we could  easily be making a type I error (claiming the result is real when it is not, a false-positive). Still, the difference was in the right direction wasn't it.
+
+#### Tetris_only vs. Reactivation + Tetris
+
+Finally, we might ask if the Reactivation+Tetris group had fewer unwanted memories than the Tetris_only group. Did putting the two things together (reactivation AND Tetris) really do something special here, beyond just playing Tetris.
+
+```{r}
+comparison_df <- all_data %>% 
+                  filter(Condition %in% c('Tetris_only','Reactivation+Tetris')==TRUE)
+                        
+t.test(Days_One_to_Seven_Number_of_Intrusions ~ Condition, 
+       comparison_df,
+       var.equal=TRUE)
+```
+
+Well, according to the t-test, the p-value is again fairly small. Suggesting that the difference between Reactivation+Tetris (M=1.89) and Tetris_only (3.89), was not likely to be produced by chance. So, on the basis of this, there is some evidence that Reactivation+Tetris, really does cause fewer intrusive memories.
+
+### Writing it all up.
+
+Because we have spent so much time on individual comparisons, we won't do a full write up of the results. A full write-up would include telling the reader what data was used, what test was conducted, the results of the test, and the pattern of the means, AND then, the results of specific comparisons of interest. You can read the paper to see how the authors did it.
+
+
+### Food for thought
+
+Think about what we did here. We almost blindly just downloaded the data and ran the same analysis as the authors did. Sure, we looked at the data first, and then did the analysis. But, did we really look? Did you notice anything about what you looked at? What did we not look closely at that might make you skeptical of the conclusions from the research...
+
+Here's a hint. Sample-size. We know that is important. Let's ask the question, was there an equal number of participants in each of the 4 conditions. We can use `dplyr` again to do this. We'll add the `length` function, which counts the number of subjects in each condition:
+
+```{r}
+descriptive_df <- all_data %>% 
+                    group_by(Condition) %>% 
+                    summarise(means= mean(Days_One_to_Seven_Number_of_Intrusions),
+                              SEs = sd(Days_One_to_Seven_Number_of_Intrusions)/sqrt(length(Days_One_to_Seven_Number_of_Intrusions)),
+                              count = length(Days_One_to_Seven_Number_of_Intrusions))
+knitr::kable(descriptive_df)
+```
+
+The answer is YES, there were an equal number of subjects. That's good. We should have checked that before. Lesson for next time. For example, if there were only 9 subjects in the Reactivation+Tetris group, we might be suspicious that they got lucky, and accidentally (by chance) assigned people to that group who are unlikely to report having intrusive memories. After all, different people are different, and not everybody is as susceptible to intrusive memories.
+
+Let's do one more thing for fun, and to see everything in action all in one place. Let's consider the role of outliers. Looking at the first graph we can see that most people in all the groups had fewer than 10 intrusive memories (mean we assume) per week. It looks like 5 people had more than that, and they just happened to be in the other groups. Maybe Reactivation+Tetris made those people have way less intrusive memories (which is why no one is above 10), or maybe the researchers got a little bit unlucky, and accidentally didn't get any "outliers" (people with extreme values on the measure) in that group. 
+
+Let's re-run the analysis, but remove anybody with a mean higher than 10. This will only remove 5 subjects, so we will still have a lot left. What happens?
+
+Before we find out, let me point out again the beauty of R. All we need to do is copy and paste our previous code. Then, just filter the data once to remove the outliers, then voila, we redo everything all in one go. It's much more complicated and time consuming to do this in many other software programs. You are lucky to be learning R.
+
+```{r}
+# get rid out of outliers
+all_data  <- all_data %>%
+             filter(Days_One_to_Seven_Number_of_Intrusions < 10)
+# get means and SEs
+descriptive_df <- all_data %>% 
+                    group_by(Condition) %>% 
+                    summarise(means= mean(Days_One_to_Seven_Number_of_Intrusions),
+                              SEs = sd(Days_One_to_Seven_Number_of_Intrusions)/sqrt(length(Days_One_to_Seven_Number_of_Intrusions)))
+# Make the plot
+ggplot(descriptive_df, aes(x=Condition, y=means))+ 
+  geom_bar(stat="identity", aes(fill=Condition))+ # add means
+  geom_errorbar(aes(ymin=means-SEs,               # add error bars
+                    ymax=means+SEs), width=.1) +
+  geom_point(data=all_data, aes(x=Condition, y=Days_One_to_Seven_Number_of_Intrusions), alpha=.5)+
+  geom_point(alpha=.25)+
+  ylab("Intrusive Memories (Mean for Week)")
+# run and report the ANOVA
+aov_out<-aov(Days_One_to_Seven_Number_of_Intrusions ~ Condition, all_data)
+summary_out<-summary(aov_out)
+knitr::kable(xtable(summary_out))
+# conduct critical comparisons
+## control vs reactivation+Tetris
+comparison_df <- all_data %>% 
+                  filter(Condition %in% c('Control','Reactivation+Tetris')==TRUE)
+                        
+t.test(Days_One_to_Seven_Number_of_Intrusions ~ Condition, 
+       comparison_df,
+       var.equal=TRUE)
+## Tetris_only vs reactivation+Tetris
+comparison_df <- all_data %>% 
+                  filter(Condition %in% c('Tetris_only','Reactivation+Tetris')==TRUE)
+                        
+t.test(Days_One_to_Seven_Number_of_Intrusions ~ Condition, 
+       comparison_df,
+       var.equal=TRUE)
+```
+
+The take home is that yes, even after removing outliers, the same basic pattern in the data is observed. Overall, this is a small n study, and ideally the basic findings should be replicated in another lab before we really have full confidence in them. But, I'd say the trends here look promising.
+
+That's ANOVA. Come back next week for another ANOVA tutorial, this time using within-subject data. It's called a repeated measures ANOVA, and it's what's happening next week.
+
+### Generalization Exercise
+
+Your task is to conduct the ANOVA using `Day_Zero_Number_of_Intrusions` as the dependent variable. Report the ANOVA table, a figure to show the means, and a short write-up of the results.
+
+
+__Answer the following questions:__
+
+1. Explain why the ANOVA is called an omnibus test, and how the omnibus test is different from comparing specific means with t-tests. 
+
+2. Explain the general similarity between the ratios that are used to calculate the F value and the t-value.
+
+
+
+# In class (time allowing): Repeated Measures ANOVA
+
+<script>
+$("#coverpic").hide();
+</script>
+
+<span class="newthought">
+However, perhaps the main point is that you are under no obligation to analyse variance into its parts if it does not come apart easily, and its unwillingness to do so naturally indicates that one’s line of approach is not very fruitful.
+---R. A. Fisher
+</span>
+
+## Betcha can't type JHDBZKCO very fast on your first try
+
+This lab activity uses the data from Behmer & Crump (2017) to teach one-factor repeated measures ANOVA with-up follow comparisons
+
+### STUDY DESCRIPTION
+
+Behmer & Crump (2017) used the everyday task of typing on a computer keyboard to ask questions about how people learn to put sequences of actions together. Whenever you type a series of letters on the keyboard, you are putting a sequence of actions together, so typing is task that could be used to measure skilled sequencing. Typing also happens to be a convenient task for measuring sequencing. For example, every time a person types a letter, the timing of the button press and the letter pressed can be measured and stored for later analysis.
+
+Behmer & Crump were interested in asking a few different questions, however, we will simplify everything and talk about replication. First we describe an interesting finding from previous research. Behmer & Crump repeated an experiment that should also produce this same finding. If they succeed in doing this, it means the finding can be replicated, and that it happens in more than one lab.
+
+**Finding from previous resaearch:** Prior research showed that typists do something funny. Skilled typists can type normal words very fast. This suggests they know how to locate all of the letters on the keyboard, and can press each letter very quickly to type words. That part isn't particularly funny. However, if you take really skilled typists and make them type random letters like this:  kwitb dhhgjtryq xkldpt mazhyffdt, guess what happens? They slow down a lot. It's kind of weird that a typist would slow down, after all they can type letters really fast when they appear in words, but not when they appear in random orders...what gives? Last, it turns out that typists are kind of in the middle in terms of speed, if you ask them to type non-words that have similar properties to words, such as: quenp hamlke phwempy.
+
+To summarize, prior research showed that typing speed changes as a function of the structure of the text, roughly in this order from fastest to slowest.
+
+(FASTEST)  Normal Words < Word-like Non-words < Random strings  (SLOWEST)
+
+**Replication question:** Behmer & Crump also measured typists while they typed words, non-words that were English-like, and random strings. They had some additional things they were interested in, but for us, we are interested in whether they would show the same effect. Would they replicate the pattern: Normal words (Fastest) < Word-like Non-words (medium) <- Random strings (Slowest)?
+
+
+### Study Methods
+
+The authors conducted a repeated measures experiment. A total of 38 subjects were used for the analysis.
+
+**Independent Variable**: The IV Stimulus or typing material had three levels: Normal, Bigrams, and Random. Normal refers to normal 5 letter English words (like truck, or plant). Bigrams refers to non-words that have properties similar to words (e.g., phemt quilp). Random refers to 5 letter strings whose letters were totally random (qmklt gdrzn lprni).
+
+**Dependent Variables**: There were three dependent variables, that all measured different aspects of typing performance. Reaction times (RTs) were defined as the temporal interval between seeing a stimulus (to type), and then starting to type it (first key press). Inter-keystroke intervals (IKSIs) are the times between each key-press. Last, accuracy was also measured (correct or incorrect key-presses)
+
+**The task**: Participants (who happened to also be students from Brooklyn College) sat in front a computer. They were presented with one stimulus (word, bigrams, or random) at a time. As soon as they saw the string of letters, they typed it as quickly and accurately as they could, then they moved on to the next trial. 
+
+Reminder, this is a repeated measures design because each participant typed letter strings from the word, bigrams, and random conditions.
+
+__References__
+- citation: Behmer, Lawrence P., Crump, M. J. C. (2017). Spatial Knowledge during Skilled Action Sequencing: Hierarchical versus Non-Hierarchical Representations. Attention, Perception & Psychophysics, 79, 2435-2448.
+- [Link to .pdf of article](https://github.com/CrumpLab/CrumpLab.github.io/raw/master/files/8753/Behmer%20and%20Crump%20-%202017.pdf)
+- <a href="https://github.com/CrumpLab/statisticsLab/raw/master/data/exp1_BehmerCrumpAPP.csv" download>Data in .csv format</a>
+
+
+## R
+
+### Load the data
+
+Remember that any line with a \# makes a comment and the code does not run. Below is how to load the .csv data from the online repository, or from a local file (you need to change the file path to where the local file is, if you downloaded it). The data contains all of the measures and conditions from Experiment 1 in the paper.
+
+```{r}
+library(data.table)
+all_data <- fread("https://github.com/CrumpLab/statisticsLab/raw/master/data/exp1_BehmerCrumpAPP.csv")
+#all_data <- fread("data/exp1_BehmerCrumpAPP.csv")
+```
+
+### Inspect the dataframe
+
+This will give you a big picture of the data frame. Click the button to view it in your browser, then take a look to see what is in it. 
+
+```{r, eval=F}
+library(summarytools)
+view(dfSummary(all_data[,c(1:7,10:20)]))
+```
+
+Note, there is some weird stuff in code above. Normally, we would just write `view(dfSummary(all_data))`, why we add this: `all_data[,c(1:7,10:20)]`? It turns out the dfSummary function didn't like some of the data. In particular it didn't like the data in columns 8 an 9 (notice those numbers are missing, the range inside c is 1 to 7 and 10 to 20). It doesn't mean the data isn't there, just that it didn't want to display it in the viewer.
+
+### Get the data you need
+
+This data file contains all of the data from Experiment 1 in the paper. So, we don't need to get rid of any rows. 
+
+There are numerous columns, some of them we don't need for the analysis. But, we'll just ignore these later when we use `dplyr` to group by the columns we want.
+
+The structure of this data a file is in long form. Every row described a measurement for a single key-press. For example, the first 5 rows, have data for the timing of the first 5 key-presses, that the first subject made to type the first string of letters they saw. In total there were 85,410 key-presses made. That's quite a lot. 
+
+#### The independent variable
+
+The important independent variable is in the column `Stimulus`.
+
+- Normal (5 letter English words)
+- Bigrams (5 letter strings that kind of looked like words)
+- Random (5 letter strings that were random)
+
+It is also important to know that the `Order` column codes the position for each letter, from 1 to 5.
+
+Note: there was another independent variable in the study as well. We talk about this later. The second IV is coded in the `Block` column. 
+
+- Baseline (normal typing, keyboard is visible while typing)
+- Manipulation (occluded typing, keyboard is covered while typing)
+
+#### The dependent variables
+
+1. `TimeFromOnset` : This column records the temporal interval in milliseconds between the onset of the word and each key-press. When order is 1 (first keystroke), the number here is the reaction time to start typing.
+2. `PureRTs` : This column contains keystroke intervals. The first interval is between the onset of the word and the first key-press (order 1), the second interval is between the first and second key-press (order 2), and so on. `PureRTs` for orders 2 to 5, represent the inter-keystroke intervals reported in  paper.
+3. `AllCorrect` : 0 means incorrect (wrong letter was typed), 1 means correct (correct letter was typed)
+
+### Look at the data
+
+Remember before we do any analysis, we always want to "look" at the data. This first pass let's us know if the data "look right". For example, the data file could be messed up and maybe there aren't any numbers there, or maybe the numbers are just too weird. 
+
+For example, this study involves reaction times: the time between seeing something and responding to it. If you had done a study like this before, you would know that it usually doesn't take people that long to start responding. Most reaction times will be under a second (or 1000 milliseconds). But, sometime people are little slow, and sometimes they do funny things like check their phone in the middle of an experiment.
+
+Before I analyze reaction time data, I often make a histogram of all of the RT data, like this:
+
+```{r}
+hist(all_data$PureRTs)
+```
+
+
+We can see that almost all of the reaction times are well below 5000 milliseconds (5 seconds), which is good. Most of the time people were paying attention and not "checking their phone". Notice, the range of the histogram goes out to 15,000 milliseconds. You can't see any bars out there (too small to notice), but there must be at least a few trials where somebody took 15 seconds to start responding. These are called outliers. We will remove them before we conduct our analysis
+
+### Look at the means
+
+As part of looking at the data, we might as well make a figure that shows the mean reaction times in each condition, and some error bars to look at the spread in each condition. The following code takes three important steps:
+
+1. Get the means for each subject in each condition. These are put into the data frame called `subject_means`.
+2. Get the means for each condition, by averaging over the means for each subject. These are put into the data frame called `plot_means`.
+3. Make a graph with the `plot_means` data frame using ggplot2. 
+
+
+```{r}
+library(dplyr)
+library(ggplot2)
+
+all_data$Block<-as.factor(all_data$Block)
+levels(all_data$Block) <- c("Visible keyboard","Covered Keyboard")
+
+## get subject mean RTs
+
+subject_means <- all_data %>%
+                 filter(Order==1, Correct==1, PureRTs<5000) %>%
+                 group_by(Subject, Block, Stimulus) %>%
+                 summarise(mean_rt = mean(PureRTs))
+
+subject_means$Subject<-as.factor(subject_means$Subject)
+subject_means$Block<-as.factor(subject_means$Block)
+subject_means$Stimulus<-as.factor(subject_means$Stimulus)
+
+## get condition mean RTs
+
+plot_means <- subject_means %>%
+              group_by(Block, Stimulus) %>%
+              summarise(means = mean(mean_rt),
+                        SEs = sd(mean_rt)/sqrt(length(mean_rt)))
+
+## plot the condition means
+
+# re-order stimulus factor for plotting
+plot_means$Stimulus <- factor(plot_means$Stimulus, levels = c("Normal", "Bigrams", "Random"))
+
+ggplot(plot_means, aes(x=Stimulus, y=means, group=Block, color=Block))+
+  geom_point()+
+  geom_line()+
+  geom_errorbar(aes(ymin=means-SEs, ymax=means+SEs), width=.2)+
+  theme_classic()+
+  ylab("Mean Reaction Time (ms)")+
+  xlab("Typing Material")
+
+```
+
+Alright, we made things a little bit more complicated than they need to be. Our primary question is whether reaction times followed this pattern: Normal < Bigrams < Random. We can see the means do follow this pattern. However, shouldn't we only be looking at three means, why are their six means, and two lines?
+
+The above code included the second independent variable `Block`. As a result, you are seeing the means for Typing material when subjects could see the keyboard, and when the couldn't see the keyboard. We will come back to this later. For now, let's ignore the Block condition, and find the means for the Typing Material IV by averaging over the Block conditions. We run the same code as above, by take out `Block`, in the `group_by` function. We also take `Block` out the ggplot function.
+
+**VERY IMPORTANT**: We did something in the above code that we didn't point out. We filtered the data before we found the means. For most of the data sets in other labs, we given you data that is more or less ready to analyse. More often than not data needs to be pre-processed, or filtered before you analyze it. We can use the `filter` function in `dplyr` to do our filtering. `filter` filters the rows for us, so we will only include the rows that we want.
+
+1. We want to analyze the time between the onset of the stimulus and the first keystroke. The reaction times for this value are in the `PureRTs` column, but this column contains other RTs that we do not want to analyse. For example, the `Order` column codes for the letter position in the string. We only want to analyze the rows that contain a `1`, for the first position. So, that is why we add `Order==1` to the filter function below.
+
+2. We want to analyze only the reaction times that are correct. That is, when the subject typed the first letter correctly, and did not make a typo. Accuracy is coded in the `Correct` column, with 1 = correct, and 0 = incorrect. We add `Correct==1` to the filtering function.
+
+Note the use of `==`, that is two equal signs in a row. In R, two equal signs in a row has a special meaning. It means conduct a `logic` test to determine if one thing is the same as another. 
+
+3. We want to analyze only reaction times that are "sensible" to analyze. What does sensible mean? We don't want to analyze data that is clearly garbage data. For example, if someone fell asleep at the computer and didn't respond for 15 seconds, that kind of data is not what we want to analyze. If we were to filter the data, and exclude these kinds of `outliers`, we would be conducting an outlier elimination procedure. Behmer & Crump (2017) did this, and it is commonly done in many different kinds of studies. We skip an extended discussion of outlier elimination for this lab. But, we do introduce the idea of doing it. We want to keep as much of the data as possible. So, what we do is keep all of the RTs that are less than 5000 ms (that's 5 seconds). To do this, we add `PureRTs<5000` to the filter function.
+
+```{r}
+## get subject mean RTs
+
+subject_means <- all_data %>%
+                 filter(Order==1, Correct==1, PureRTs<5000) %>%
+                 group_by(Subject, Stimulus) %>%
+                 summarise(mean_rt = mean(PureRTs))
+
+subject_means$Subject<-as.factor(subject_means$Subject)
+subject_means$Stimulus<-as.factor(subject_means$Stimulus)
+
+## get condition mean RTs
+
+plot_means <- subject_means %>%
+              group_by(Stimulus) %>%
+              summarise(means = mean(mean_rt),
+                        SEs = sd(mean_rt)/sqrt(length(mean_rt)))
+
+## plot the condition means
+
+# re-order stimulus factor for plotting
+plot_means$Stimulus <- factor(plot_means$Stimulus, levels = c("Normal", "Bigrams", "Random"))
+
+ggplot(plot_means, aes(x=Stimulus, y=means, group=1))+
+  geom_point()+
+  geom_line(stat="identity")+
+  geom_errorbar(aes(ymin=means-SEs, ymax=means+SEs), width=.2)+
+  theme_classic()+
+  ylab("Mean Reaction Time (ms)")+
+  xlab("Typing Material")
+
+```
+
+### Conduct the repeated Measures ANOVA
+
+We use the same `aov` function as we used last time. The only difference is that we add in a new part to the formula. Remember the formula for a one-factor between subjects ANOVA looked like this:
+
+`aov( DV ~ IV , dataframe)`, where DV is the name of the column with your independent variable, IV is the name of the column with your independent variable, and `dataframe` is the name of your data frame containing the means in each condition.
+
+The formula for a repeated-measures ANOVA looks like this:
+
+`aov( DV ~ IV + Error(Subject/IV), dataframe)`. We have added `+ Error(Subject/IV)`. This tells R to use the appropriate error term for the repeated measures ANOVA. In the formula, `Subject` refers to the name of the column coding your subjects (make sure this is a factor in R), and `IV` is the name of the column for your independent variable.
+
+The formula for our data would be: `aov( mean_rt ~ Stimulus + Error(Subject/Stimulus), subject_means)`.
+
+Here is the code below. Just as reminder, the raw data codes every single key press on each row. We don't want to submit this as the data frame to the `aov` function. Instead, we need to calculate the data frame for the subject means in each condition. We did that above as a step toward making the graphs. We do it again here to remind you that you need to do this.
+
+```{r}
+
+# get subject means
+
+subject_means <- all_data %>%
+                 filter(Order==1, Correct==1, PureRTs<5000) %>%
+                 group_by(Subject, Stimulus) %>%
+                 summarise(mean_rt = mean(PureRTs))
+
+# Make sure IV and Subject are coded as factors
+subject_means$Subject  <- as.factor(subject_means$Subject)
+subject_means$Stimulus <- as.factor(subject_means$Stimulus)
+
+# Conduct the anova
+
+aov_out <- aov( mean_rt ~ Stimulus + Error(Subject/Stimulus), subject_means)
+summary_out <- summary(aov_out)
+
+library(xtable)
+knitr::kable(xtable(summary_out))
+```
+
+Great, we have conducted the ANOVA. We could write up the results of the ANOVA like this:
+
+> For each subject we computed mean reactions for correct keystrokes in each condition of the Stimulus factor. These means were submitted to a one-factor repeated-measures ANOVA, with Stimulus (Normal, Bigrams, and Random) as the sole factor. The effect of Stimulus was signficant, F(2, 74) = 230.58, MSE = 2510.98, p < 0.001.
+
+Note, the p-value shows up as a zero, that's because it is so small that R doesn't want to print the actual number 0.000000000000000...1.
+
+What does this tell us? 
+
+1. The $F$ value we obtained (230.58) almost never occurs by chance. More specifically, the sampling distribution of F from the distribution of no differences virtually never produces a huge F like 230.58
+
+2. It is super-duper unlikely that chance (sampling error) could have produced the difference we observed.
+
+3. We reject the idea that chance caused the differences, and are very confident that the manipulation (changing the kinds of letters that people have to type), has a causal influence on reaction time in typing.
+
+#### Report the means too
+
+Remember, the important goal when conducting analyses, and then writing about them, is to tell people what you did and what you found. This involves more than one step. For this example, we might do three basic things. 1) make a figure to show the means, 2) report the ANOVA so people know if there is support for the inference that the differences between the means are not caused by chance, and 3) report descriptives for the means, so people know what the numbers are (the figure doesn't show the exact values).
+
+We've already made the figure and done the ANOVA, let's report the condition means. To do this, we need to find the means for each condition, collapsing over the means for each subject in each condition. Note that, we already did this to make the figure. Here's the code again:
+
+```{r}
+## get subject mean RTs
+
+subject_means <- all_data %>%
+                 filter(Order==1, Correct==1, PureRTs<5000) %>%
+                 group_by(Subject, Stimulus) %>%
+                 summarise(mean_rt = mean(PureRTs))
+
+subject_means$Subject<-as.factor(subject_means$Subject)
+subject_means$Stimulus<-as.factor(subject_means$Stimulus)
+
+## get condition mean RTs
+
+plot_means <- subject_means %>%
+              group_by(Stimulus) %>%
+              summarise(means = mean(mean_rt),
+                        SEs = sd(mean_rt)/sqrt(length(mean_rt)))
+
+knitr::kable(plot_means)
+
+```
+Now, our full write-up of the results would look like this.
+
+> For each subject we computed mean reactions for correct keystrokes in each condition of the Stimulus factor. These means were submitted to a one-factor repeated-measures ANOVA, with Stimulus (Normal, Bigrams, and Random) as the sole factor. The effect of Stimulus was signficant, F(2, 74) = 230.58, MSE = 2510.98, p < 0.001. The mean reaction time was fastest in the Normal condition (M = 833 ms, SE = 24 ms), followed by the Bigram condition, (M = 924 ms, SE = 27 ms) and slowest in the Random Condition (M = 1078 ms, SE = 32 ms).
+
+### Follow-up comparisons
+
+The ANOVA tells us that the differences between the means are unlikely to be due to chance. But, remember, this is an omnibus test. It does not tell us if specific pairs of means are different from one another. To determine whether the difference between two specific means is not likely due to chance, we need to conduct follow-up tests. 
+
+Because this is a repeated-measures design, we can use the paired-samples t-test for follow-up tests. Let's do two follow-up tests to confirm that the RTs for Normal words were indeed faster than the RTs for the Bigram condition (word-like non-words); and then, let's confirm that the RTs for the Bigram condition were indeed faster than the RTs for the Random condition.
+
+#### Normal vs Bigrams
+
+We use the `subject_means` data frame. But, we want to rid of all the rows containing the means from the Random condition. We use filter to do that, then we conduct the paired-samples t-test.
+
+```{r}
+comparison_df <- subject_means %>%
+                  filter(Stimulus != "Random")
+
+t.test(mean_rt~Stimulus, 
+       paired=TRUE, 
+       var.equal=TRUE, 
+       data = comparison_df)
+
+```
+
+####  Bigrams vs Random
+
+We use the `subject_means` data frame. But, we want to rid of all the rows containing the means from the Normal condition. We use filter to do that, then we conduct the paired-samples t-test.
+
+```{r}
+comparison_df <- subject_means %>%
+                  filter(Stimulus != "Normal")
+
+t.test(mean_rt~Stimulus, 
+       paired=TRUE, 
+       var.equal=TRUE, 
+       data = comparison_df)
+
+```
+
+### Reporting everything
+
+Now we can look at some write-ups that report everything we did, and everything we want to know. I'll show you two ways to do it. 
+
+#### First way
+
+In the first way, we embed the results of the t-test into the description of the mean reaction times.
+
+For each subject we computed mean reactions for correct keystrokes in each condition of the Stimulus factor. These means were submitted to a one-factor repeated-measures ANOVA, with Stimulus (Normal, Bigrams, and Random) as the sole factor. The effect of Stimulus was significant, F(2, 74) = 230.58, MSE = 2510.98, p < 0.001. The mean reaction time was significantly faster in the Normal condition (M = 833 ms, SE = 24 ms), compared to the Bigram condition, (M = 924 ms, SE = 27 ms), t(37) = 12.14, p<0.001. Additionally, mean reactions in the Bigram condition were significantly faster than the Random Condition (M = 1078 ms, SE = 32 ms), t(37) = 14.21, p < 0.001.
+
+
+#### Second way
+
+In the second way, we first report the means as we did the very first time, and then after that we report the t-test results to highlight the size the of the differences between each comparison.
+
+For each subject we computed mean reactions for correct keystrokes in each condition of the Stimulus factor. These means were submitted to a one-factor repeated-measures ANOVA, with Stimulus (Normal, Bigrams, and Random) as the sole factor. The effect of Stimulus was significant, F(2, 74) = 230.58, MSE = 2510.98, p < 0.001. The mean reaction time was fastest in the Normal condition (M = 833 ms, SE = 24 ms), followed by the Bigram condition, (M = 924 ms, SE = 27 ms) and slowest in the Random Condition (M = 1078 ms, SE = 32 ms). Mean reaction times were significantly faster (M = 91 ms) in the Normal than Bigrams condition, t(37) = 12.14, p < 0.001. And, mean reaction times were significantly faster (M = 152 ms) in the Bigrams than Random condition, t(37) = 14.21, p < 0.01.
+
+There are other ways to write-up statistical results. These are just some example recipes. The important thing is to:
+
+1. Say what the numbers were that you are analyzing
+2. Say what the statistical test was
+3. Say the results of the statistical test
+4. Say what the patterns of means were
+5. Say what the follow-up tests were when you test differences between specific means.
+6. Add a table or figure so it is easier to "see" the results.
+
+### Generalization Exercise
+
+Your task is to conduct another repeated-measures ANOVA. Rather than using the reaction time for the first-keystroke as the dependent measure, you will use the reaction times between all of the keystrokes in each word, these are called interkeystroke intervals. The `Order` variable is used to code keystroke position (1 to 5). You will want to analyze only the `PureRTs` that have an `Order` greater than 1. For example, you could use the following code to get the subject_means for the mean interkeystroke intervals.
+
+```{r, eval=FALSE}
+subject_means <- all_data %>%
+                 filter(Order > 1, Correct==1, PureRTs<5000) %>%
+                 group_by(Subject, Stimulus) %>%
+                 summarise(mean_rt = mean(PureRTs))
+
+```
+
+A. Make a figure for the new DV
+B. Report the ANOVA table for the new repeated measures ANOVA
+C. Discuss whether the general pattern is the same as before.
+
+Follow-up questions:
+
+
+1. Explain the concept of $SS_\text{Total}$
+
+2. Explain the concept of partitioning SS_\text{Total} into smaller pieces. What is the goal of the spitting? 
+
+3. Explain the major difference between a between-subjects ANOVA and repeated-measures ANOVA in terms of what is being partioned.
+
+
+
+
 __Acknowledgments__
 
 Lab material pulled from [David Dalpiaz's website](https://daviddalpiaz.github.io/appliedstats/analysis-of-variance.html#two-way-anova)
+and [Matt Crump's course and lab](https://crumplab.github.io/statistics/anova.html#anova-is-analysis-of-variance).

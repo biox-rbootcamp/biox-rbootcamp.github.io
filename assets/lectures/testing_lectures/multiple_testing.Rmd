@@ -16,7 +16,7 @@ opts_chunk$set(fig.path=paste0("figure/", sub("(.*).Rmd","\\1",basename(knitr:::
 ## Goal
 
 The goal of this lecture is to introduce you to the challenges of dealings with multiple hypotheses to test at the same time.
-Watch the [following videos on Youtube]:
+Watch the following videos on Youtube:
 
 - [The challenge of multiple testing](https://www.youtube.com/watch?v=yobqXdAts14)
 - [randomness of the p-values](https://www.youtube.com/watch?v=EASx5PljTW8)

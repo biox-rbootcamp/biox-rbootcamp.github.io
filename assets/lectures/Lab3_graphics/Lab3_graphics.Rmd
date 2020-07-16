@@ -841,14 +841,14 @@ change the span argument in `geom_smooth` to a low value and see what happens.
 Hint: use `geom_smooth` with an appropriate method argument. 
 6. Facet the previous plot by `Region`.
 
-### Exercise 2: Distribution of categorical variables
+### Part 2: Distribution of categorical variables
 
 1. Generate a bar plot showing the number of countries included in the
 dataset from each `Region`.
 2. Rotate the plot so the bars are horizontal
 
 
-### Exercise 3: Distribution of continuous variables
+### Part 3: Distribution of continuous variables
 
 1. Create boxplots of SEDA scores, `SEDA.Current.level` separately 
 for each `Region`.
@@ -856,5 +856,43 @@ for each `Region`.
 3. The points you added are on top of each other, in order to distinguish 
 them jitter each point by a little bit in the horizontal direction.
 4. Now substitute your boxplot with a violin plot.
+
+
+# In-class Exercise 2 (time allowing)
+
+The following url:
+"http://cdiac.ess-dive.lbl.gov/ftp/ndp030/CSV-FILES/nation.1751_2014.csv"
+contains data on fossil fuel emissions. Read data to R. Note that rows 1-3 contain information on the dataset itself. We delete these rows as they do not contain relevant information.
+
+```{r}
+library(readr)
+url <- "http://cdiac.ess-dive.lbl.gov/ftp/ndp030/CSV-FILES/nation.1751_2014.csv"
+emissions <- read_csv(url)
+emissions <- emissions[-(1:3), ]
+emissions[emissions == "."] <- NA
+emissions <- type_convert(emissions)
+emissions
+```
+
+a. Use  `dplyr` functions to compute the total yearly $CO_2$ emissions (column `Total.CO2.emissions.from.fossil.fuels.and.cement.production..thousand.metric.
+tons.of.C.`) summed over all countries (the world total $CO_2$ emission). 
+Use the dataset to plot the World's yearly $CO_2$ emission in Gt.
+
+
+b. Find the top 10 countries with highest emission after year 2000 (including 
+2000). Plot the yearly total CO2 emissions of these top 10 countries
+with a different color for each country. Use billion tonnes (Gt) units, 
+i.e. divide the total emissions by 10^6.
+
+
+
+c. Use `geom_area()` to generate a plot similar to the one you generated
+above but, with emission levels stacked on top
+of each other (summing to the total for the ten countries)
+with areas colored by countries.
+
+
+
+![Source: https://ourworldindata.org/grapher/annual-co-emissions-by-region](annual-co-emissions-by-region.png)
 
 
