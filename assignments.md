@@ -11,9 +11,9 @@ layout: cme195
 - [Lab 5](./biox-rbootcamp.github.io/assets/lectures/session5.html): Probability Models Part I [Lab Exercise Template](./biox-rbootcamp.github.io/assets/lectures/session5.Rmd)
 - [Lab 6](./biox-rbootcamp.github.io/assets/lectures/session6.html):  Probability Models Part II [Lab Exercise Template](./biox-rbootcamp.github.io/assets/lectures/session6.Rmd)
 - [Lab 7](./biox-rbootcamp.github.io/assets/lectures/Lab2_simulations/Lab2_simulations.html): Simulations
-- Lab 8: 
+- [Lab 8](./biox-rbootcamp.github.io/assets/lectures/Lab3_graphics/Lab3_graphics.html): ggplot2 
 - [Lab 9](./biox-rbootcamp.github.io/assets/lectures/Lab3_graphics/Lab3_graphics.html): ggplot2
-- Lab 10:
+- [Lab 10](./biox-rbootcamp.github.io/assets/lectures/testing_lectures/lab13_hypothesis_testing.html): Hypothesis testing
 - Lab 11: 
 - Lab 12: 
 - Lab 13:

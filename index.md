@@ -13,7 +13,7 @@ No prior knowledge of R or of statistics is required. This is not a graded class
 
 ## [](#announcements) Announcements
 
-**Solution for Lab 6 are posted!**
+**Solution for Lab 8 are posted!**
 
 **TO DO for session 7 (Monday, July 13th):** 
 
