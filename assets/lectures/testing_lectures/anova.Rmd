@@ -240,14 +240,15 @@ For example, if you had three groups, A, B, and C. You get could differences bet
 - A and C
 That’s three possible differences you could get. You could run separate  t-tests, to test whether each of those differences you might have found could have been produced by chance. Or, you could run an ANOVA, like what we have been doing, to ask one more general question about the differences. Here is one way to think about what the omnibus test is testing:
 
-- Hypothesis of no differences anywhere: $ A = B = C $
+- Hypothesis of no differences anywhere: $$A = B = C $$
 
 - Any differences anywhere:
 
-$ A \neq B = C $
-$ A = B \neq C $
-$ A\neq C = B $
-The $\neq$ symbol means "does not equal"", it’s an equal sign with a cross through it (no equals allowed!).
+$$ A \neq B = C $$
+$$ A = B \neq C $$
+$$ A \neq C = B $$
+
+The $\neq$ symbol means "does not equal", it’s an equal sign with a cross through it (no equals allowed!).
   
 
 ### The F-statistic

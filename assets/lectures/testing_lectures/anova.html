@@ -435,10 +435,11 @@ H_0: \alpha_1 = \alpha_2 = \ldots = \alpha_g = 0 \quad \text{vs} \quad H_1: \tex
 <li>A and B</li>
 <li>B and C</li>
 <li><p>A and C That’s three possible differences you could get. You could run separate t-tests, to test whether each of those differences you might have found could have been produced by chance. Or, you could run an ANOVA, like what we have been doing, to ask one more general question about the differences. Here is one way to think about what the omnibus test is testing:</p></li>
-<li><p>Hypothesis of no differences anywhere: $ A = B = C $</p></li>
+<li><p>Hypothesis of no differences anywhere: <span class="math display">\[A = B = C \]</span></p></li>
 <li><p>Any differences anywhere:</p></li>
 </ul>
-<p>$ A B = C $ $ A = B C $ $ AC = B $ The <span class="math inline">\(\neq\)</span> symbol means &quot;does not equal&quot;&quot;, it’s an equal sign with a cross through it (no equals allowed!).</p>
+<p><span class="math display">\[ A \neq B = C \]</span> <span class="math display">\[ A = B \neq C \]</span> <span class="math display">\[ A \neq C = B \]</span></p>
+<p>The <span class="math inline">\(\neq\)</span> symbol means &quot;does not equal&quot;, it’s an equal sign with a cross through it (no equals allowed!).</p>
 <div id="the-f-statistic" class="section level3">
 <h3>The F-statistic</h3>
 <p>ANOVA is the name of the procedure. The statistical test that it uses is called the F-test, and measures the variability within and across groups. Remember how in the t-test, we basically scale the difference in means to the natural variability of the data. The same thing is true about F.</p>

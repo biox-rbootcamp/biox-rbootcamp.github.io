@@ -58,16 +58,15 @@ _Objectives:_ getting familiar with R, Rstudio, R markdown, and basic statistics
 
 **Week 3:** Simulation & Graphics
 
-**Week 4:** Mixture Models
+**Week 4:** Testing 
 
-**Week 5:** Clustering
+**Week 5:** Linear Models
 
-**Week 6:** Testing 
+**Week 6:** Mixtures and permutations 
 
-**Week 7:** Multivariate Analysis
+**Week 7:** Clustering
 
-**Week 8:** Network & Trees
-
+**Week 8:** Multivariate Analysis
 
 ## [](#textbook) Optional textbooks
 
