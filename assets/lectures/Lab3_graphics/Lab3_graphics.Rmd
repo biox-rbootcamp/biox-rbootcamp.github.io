@@ -858,7 +858,7 @@ them jitter each point by a little bit in the horizontal direction.
 4. Now substitute your boxplot with a violin plot.
 
 
-# In-class Exercise 2 (time allowing)
+## In-class Exercise 2 (time allowing)
 
 The following url:
 "http://cdiac.ess-dive.lbl.gov/ftp/ndp030/CSV-FILES/nation.1751_2014.csv"
