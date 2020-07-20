@@ -746,6 +746,17 @@ data$Treatment_1 = data$Treatment_0 + rnorm(150, -7, 5)</code></pre>
                   &quot;Treatment_0&quot;= rnorm(15, 175, 25))
 data1$Control_1 = data1$Control_0 + rnorm(15, 0, 5)
 data1$Treatment_1 = data1$Treatment_0 + rnorm(15, -7, 5)</code></pre>
+<p><strong>Question 3: two-sample test</strong></p>
+<p>Assume <span class="math inline">\(X \sim N(\mu_1, \sigma^2)\)</span> and <span class="math inline">\(Y \sim N(\mu_2, \sigma^2)\)</span>. Given <span class="math inline">\(n=6\)</span> observations of <span class="math inline">\(X\)</span></p>
+<pre class="r"><code>x = c(70, 82, 78, 74, 94, 82)
+n = length(x)</code></pre>
+<p>and 8 of <span class="math inline">\(Y\)</span>:</p>
+<pre class="r"><code>y = c(64, 72, 60, 76, 72, 80, 84, 68)
+m = length(y)</code></pre>
+<ol style="list-style-type: lower-alpha">
+<li><p>We want to test whether the means are equal vs different. Write down the hypothesis and the alternative. What test would you use? Explain the assumptions you're making.</p></li>
+<li><p>We want to test whether <span class="math inline">\(\mu_2&gt;\mu_1\)</span>. Same question as before. What changes?</p></li>
+</ol>
 <p><strong>Acknowledgedments</strong>:</p>
 <p>This lab was:</p>
 <ul>

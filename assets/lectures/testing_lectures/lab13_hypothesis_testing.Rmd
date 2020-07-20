@@ -633,6 +633,28 @@ data1 = data.frame("Control_0"= rnorm(15, 175, 25),
 data1$Control_1 = data1$Control_0 + rnorm(15, 0, 5)
 data1$Treatment_1 = data1$Treatment_0 + rnorm(15, -7, 5)
 ```
+
+__Question 3: two-sample test__
+
+
+Assume $X \sim N(\mu_1, \sigma^2)$ and $Y \sim N(\mu_2, \sigma^2)$.  Given $n=6$ observations of $X$
+```{r}
+x = c(70, 82, 78, 74, 94, 82)
+n = length(x)
+```
+
+and  8 of $Y$:
+
+```{r}
+y = c(64, 72, 60, 76, 72, 80, 84, 68)
+m = length(y)
+
+```
+
+a. We want to test whether the means are equal vs different. Write down the hypothesis and the alternative. What test would you use? Explain the assumptions you're making.
+
+b. We want to test whether $\mu_2>\mu_1$. Same question as before. What changes?
+
 __Acknowledgedments__:
 
 This lab was:
