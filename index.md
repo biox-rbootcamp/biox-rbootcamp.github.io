@@ -13,15 +13,7 @@ No prior knowledge of R or of statistics is required. This is not a graded class
 
 ## [](#announcements) Announcements
 
-**Please fill out the [feedback survey](https://forms.gle/8KvSVjxn9bfxLSKJA) if you haven't!**
-
-**Solution for Lab 8 and 9 are posted!**
-(Note: the solution of lab 9 contains a fun part of how to exactly replicate the Economist style plot in the in-class exericse)
-
-**TO DO for session 10 (Monday, July 20th):** 
-
-* Watch the video lectures for the session 
-* Complete Lab 10 **prior to the discussion.**
+**Solution for Lab 10 is posted!**
 
 **TO DO for session 11 (Wednesday, July 22nd):** 
 

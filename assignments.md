@@ -14,8 +14,8 @@ layout: cme195
 - [Lab 8](./biox-rbootcamp.github.io/assets/lectures/Lab3_graphics/Lab3_graphics.html): ggplot2 
 - [Lab 9](./biox-rbootcamp.github.io/assets/lectures/Lab3_graphics/Lab3_graphics.html): ggplot2
 - [Lab 10](./biox-rbootcamp.github.io/assets/lectures/testing_lectures/lab13_hypothesis_testing.html): Hypothesis testing
-- Lab 11: 
-- Lab 12: 
+- [Lab 11](./biox-rbootcamp.github.io/assets/lectures/testing_lectures/multiple_testing.html): Multiple hypothesis testing
+- [Lab 12](./biox-rbootcamp.github.io/assets/lectures/testing_lectures/anova.html): ANOVA 
 - Lab 13:
 - Lab 14: 
 - Lab 15:
