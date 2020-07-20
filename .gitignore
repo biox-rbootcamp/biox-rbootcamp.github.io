@@ -1,3 +1,16 @@
 *.rdb
 *.Rhistory
-*cache
+*cache/
+
+# R projects
+.R*
+
+# Tex files.
+#*.tex
+*.log
+*.aux
+*.synctex*
+*.fdb_latexmk
+*.out
+*.toc
+*.fls
