@@ -43,9 +43,16 @@ mpg2008 <- mpg %>%
 
 b. Test whether cars from 2008 have mean the highway miles per gallon, `hwy`, 
 equal to 30 mpg.
+H0: mu = 30,
+HA: mu > 30 
 
 ```{r}
 t.test(mpg2008$hwy, mu = 30, alternative = "two.sided")
+```
+
+
+```{r}
+length(mpg2008$hwy)
 ```
 
 c. Test whether cars from 2008 with 4 cylinders have mean `hwy` equal to 30 mpg.
@@ -66,9 +73,9 @@ transmission group.
 ```{r}
 t.test(data = mpg2008, hwy ~ transmission, alternative = "less")
 # or
-# t.test(x = mpg2008 %>% filter(transmission == "auto") %>% pull(hwy),
-#        y = mpg2008 %>% filter(transmission == "manual") %>% pull(hwy), 
-#        alternative = "less")
+ t.test(x = mpg2008 %>% filter(transmission == "auto") %>% pull(hwy),
+        y = mpg2008 %>% filter(transmission == "manual") %>% pull(hwy), 
+        alternative = "less")
 ```
 
 ```{r}
@@ -98,9 +105,113 @@ ggplot(mpg, aes(x = factor(year), y = hwy)) +
 
 ## In-class
 
+__Question 1. Diet exercise__ Suppose you want to test the efficiency of diet A vs diet B (which will be just a placebo, so no change expected). You have a group of 150 people in each group. You measure their weight on day 1, and then 3 months later.
+
+a. What variable would you use to check the efficiency of the diet? What summary statistic would you use to compare the groups?
+
+*Solution*: we should look at the difference in weights for each individual, that is, define:
+$$ \Delta_{ig} = X_{ig}^{(1)} - X_{ig}^{(2)}$$ the difference between the weights of individual $i$ in group $g$ between time 1 and 2.
+
+The summary statistic for each group would then be the mean average difference:$\hat{\Delta}_g$.
+This allows to focus on the efficiency of the treatment (number of pounds lost) while controlling for the patients' different "offsets"/start weights.
+
+b. Write down the null hypothesis.
+
+Under the null: $H_0: \Delta_A - \Delta_B =0 $, vs $H_a: \Delta_A \neq \Delta_B$
+
+c. i. Suppose you want to check if diet A is efficient. What test would you use? 
+This would be simply checking: $\Delta_A = 0$ vs $H_a: \Delta_A \neq 0$. We would thus use a one-sample t-test, with a two-sided alternative.
+
+c. ii. Suppose you want to check if diet A is as efficient as diet B. What test would you use? We would use a two-sample t-test since we're comparing two groups.
+
+d. Run the previous tests on the following (simulated data).
 
 
+```{r}
+data = data.frame("Control_0"= rnorm(150, 175, 25),
+                  "Treatment_0"= rnorm(150, 175, 25))
+data$Control_1 = data$Control_0 + rnorm(150, 0, 5)
+data$Treatment_1 = data$Treatment_0 + rnorm(150, -7, 5)
 
+print(t.test(data$Treatment_1 - data$Treatment_0,
+       mu = 0,
+       alternative="two.sided"))
+
+print(t.test(data$Control_1 - data$Control_0, 
+       data$Treatment_1 - data$Treatment_0,
+       alternative="two.sided"))
+```
+
+
+__Question 2: signed rank test__
+
+Consider the previous example. Except, instead of a 150 people, you only have 15.
+
+a. What does the small sample size entail?
+
+The parametric assumptions around which the test is built are going to fail... We have little data.
+
+
+b. In this context, it is preferable to use a non-parametric test. For instance, suppose we look at the sign of the difference in weight, and want to devise a test based on the distibution of these signs.
+
+That is, consider $T_g = \sum_{i=1}^{n_g}\frac{1}{2} (\text{sign}(X_{i1} - X_{i0}) + 1)$.
+
+i. Under the null, what is the distribution of this test?
+
+Under the null, there is a fifty-fifty chance of having a negative or positive sign. Thus each $Y_i = \frac{1}{2} (\text{sign}(X_{i1} - X_{i0}) + 1)$ can be considered as a bernouilli variable, taking value 0 with probability 0.5 and 1 with probability 0.5.  Thus, the sign distribution $T_g$ follows a binomial distribution with parameter p=0.5.
+
+ii. Using the following simulated data, assess whether or not you can reject the null by computing the rejection region and comparing it to your statistic.
+
+```{r}
+data1 = data.frame("Control_0"= rnorm(12, 175, 25),
+                  "Treatment_0"= rnorm(12, 175, 25))
+data1$Control_1 = data1$Control_0 + rnorm(12, 0, 5)
+data1$Treatment_1 = data1$Treatment_0 + rnorm(12, -3, 5)
+
+T_Treat = sum(data1$Treatment_1 - data1$Treatment_0 < 0)
+## rejection region under the null 
+print(paste0("Rejection region: [", qbinom(0.025, 12, 0.5), ", ", qbinom(0.975, 12, 0.5), "]"))
+print(paste0("My stat:", T_Treat))
+```
+
+Let's compare this to the one-sample t-test,
+```{r}
+print(t.test(data1$Treatment_1 - data1$Treatment_0,
+       mu = 0,
+       alternative="two.sided"))
+```
+
+__Question 3: two-sample test__
+
+
+Assume $X \sim N(\mu_1, \sigma^2)$ and $Y \sim N(\mu_2, \sigma^2)$.  Given $n=6$ observations of $X$
+```{r}
+x = c(70, 82, 78, 74, 94, 82)
+n = length(x)
+```
+
+and  8 of $Y$:
+
+```{r}
+y = c(64, 72, 60, 76, 72, 80, 84, 68)
+m = length(y)
+
+```
+
+a. We want to test whether the means are equal vs different. Write down the hypothesis and the alternative. What test would you use? Explain the assumptions you're making.
+
+*Solution*:
+$H_0: \mu_Y = \mu_X$ vs $H_A: \mu_Y \neq \mu_X$.
+We could assume that the groups have equal variance. This is an important assumption (results in a difference in how the $s$ (estimated standard deviation) is computed).
+
+```{r}
+t.test(x=x, y=y,alternative="two.sided", var.equal = TRUE)
+```
+b. We want to test whether $\mu_2>\mu_1$. Same question as before. What changes?
+
+```{r}
+t.test(x=x, y=y,alternative="greater", var.equal = TRUE)
+```
 
 
 
