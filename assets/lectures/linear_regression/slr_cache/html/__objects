@@ -1,0 +1,88 @@
+unnamed-chunk-2	
+unnamed-chunk-3	
+unnamed-chunk-4	
+unnamed-chunk-5	
+unnamed-chunk-6	
+underfit_plot	underfit_model
+overfit_plot	overfit_model	x
+goodfit_plot	stop_dist_model
+unnamed-chunk-7	x	y
+unnamed-chunk-8	Sxx	Sxy	Syy
+unnamed-chunk-9	beta_0_hat	beta_1_hat
+unnamed-chunk-10	
+unnamed-chunk-11	
+unnamed-chunk-12	
+unnamed-chunk-13	
+unnamed-chunk-14	
+unnamed-chunk-15	
+unnamed-chunk-16	
+unnamed-chunk-17	
+unnamed-chunk-18	
+unnamed-chunk-19	e	n	s2_e	y_hat
+unnamed-chunk-20	s_e
+unnamed-chunk-21	SSE	SSReg	SST
+unnamed-chunk-22	
+unnamed-chunk-23	
+unnamed-chunk-24	R2
+unnamed-chunk-25	generate_data	plot_exp_dev	plot_total_dev	plot_total_dev_prop	plot_unexp_dev
+unnamed-chunk-26	plot_data	.Random.seed
+unnamed-chunk-27	
+unnamed-chunk-28	plot_data
+unnamed-chunk-29	
+unnamed-chunk-30	stop_dist_model
+unnamed-chunk-31	
+unnamed-chunk-32	
+unnamed-chunk-33	
+unnamed-chunk-34	
+unnamed-chunk-35	
+unnamed-chunk-36	
+unnamed-chunk-37	
+unnamed-chunk-38	
+unnamed-chunk-39	
+unnamed-chunk-40	
+unnamed-chunk-41	
+unnamed-chunk-42	
+unnamed-chunk-43	
+unnamed-chunk-44	
+unnamed-chunk-45	
+unnamed-chunk-46	beta_0	beta_1	num_obs	sigma
+unnamed-chunk-47	epsilon
+unnamed-chunk-48	x_vals
+unnamed-chunk-49	y_vals
+unnamed-chunk-50	sim_fit
+unnamed-chunk-51	
+unnamed-chunk-52	sim_slr
+unnamed-chunk-53	sim_data
+unnamed-chunk-54	
+unnamed-chunk-55	sim_fit
+unnamed-chunk-56	
+unnamed-chunk-57	
+unnamed-chunk-58	stop_dist_model
+unnamed-chunk-59	
+unnamed-chunk-60	sample_size	Sxx	x
+unnamed-chunk-61	beta_0	beta_1	sigma
+unnamed-chunk-62	var_beta_0_hat	var_beta_1_hat
+unnamed-chunk-63	beta_0_hats	beta_1_hats	eps	i	num_samples	sim_model	y
+unnamed-chunk-64	
+unnamed-chunk-65	
+unnamed-chunk-66	
+unnamed-chunk-67	
+unnamed-chunk-68	
+unnamed-chunk-69	x
+unnamed-chunk-70	stop_dist_model
+unnamed-chunk-71	
+unnamed-chunk-72	
+unnamed-chunk-73	
+unnamed-chunk-74	beta_0_hat	beta_0_hat_pval	beta_0_hat_se	beta_0_hat_t	beta_1_hat	beta_1_hat_pval	beta_1_hat_se	beta_1_hat_t	stop_dist_model_test_info
+unnamed-chunk-75	
+unnamed-chunk-76	
+unnamed-chunk-77	x	y
+unnamed-chunk-78	
+unnamed-chunk-79	
+unnamed-chunk-80	beta_1_hat	beta_1_hat_se	crit
+unnamed-chunk-81	new_speeds
+unnamed-chunk-82	
+unnamed-chunk-83	dist_ci_band	dist_pi_band	speed_grid
+unnamed-chunk-84	
+unnamed-chunk-85	
+unnamed-chunk-86	

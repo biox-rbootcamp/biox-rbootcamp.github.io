@@ -1,0 +1,378 @@
+---
+title: "GLM"
+author: "Claire Donnat"
+date: "7/19/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Introduction
+Logistic Regression
+Poisson Regression
+Reference
+Generalized Linear Models (GLM)
+Logistic and Poisson Regression using R.
+Michael Foley
+2019-09-17
+Machine learning (ML) develops algorithms to identify patterns in data (unsupervised ML) or make predictions and inferences (supervised ML).
+
+Supervised ML trains the machine to learn from prior examples to predict either a categorical outcome (classification) or a numeric outcome (regression), or to infer the relationships between the outcome and its explanatory variables.
+
+Two early forms of supervised ML are linear regression (OLS) and generalized linear models (GLM) (Poisson regression and logistic regression). These methods have been improved with advanced linear methods, including stepwise selection, regularization (ridge, lasso, elastic net), principal components regression, and partial least squares. With greater computing capacity, non-linear models are now in use, including polynomial regression, step functions, splines, and generalized additive models (GAM). Decision trees (bagging, random forests, and, boosting) are additional options for regression and classification, and support vector machines is an additional option for classification.
+
+These notes cover GLMs, including logistic regression, and the similarly structured Poisson regression. Both are generalizations of multiple linear regression, the first for categorical responses, the second for count responses.
+
+Introduction
+In generalized linear models, the modeled response is a function of the mean of Y, not Y itself. This function is called a link function. The purpose of the link function is to 1) convert the response value from a range [0,1] in logistic and probit and [0,+∞] for Poisson to a value ranging from [−∞,+∞], and 2) create a linear relationship with the predictor variables.
+
+For a standard linear regression, the link function is the indentity function,
+
+f(μY)=μY.
+
+The standard linear regression is thus a spacial case of the GLM. For a logistic regression, the link funciton is
+
+f(μY)=ln(π1−π).
+
+For a probit regression, the link function is
+
+f(μY)=Φ−1(π).
+
+For a Poisson regression, the link function is
+
+f(μY)=ln(λ).
+
+The difference between logistic and probit link function is theoretical - the practical significance is slight. Logistic regression has the advantage that it can be back-tranformed from log odds to odds ratios.
+
+In R, specify a GLM just like an linear model, but with the glm() function, specifying the distribution with the family parameter.
+
+family = "gaussian": linear regression
+family = "binomial": logistic regression
+family = binomial(link = "probit"): probit
+family = "poisson": Poisson regression
+Logistic Regression
+Logistic regression estimates the probability of a particular level of a categorical response variable given a set of predictors. The response levels can be binary, nominal (multiple categories), or ordinal (multiple levels).
+
+The binary logistic regression model is
+
+y=Xβ=ln(π1−π)
+
+where π is the “success probability” that an observation is in a specified category of the binary Y variable. You can solve this for π to get
+
+π=exp(Xβ)1+exp(Xβ).
+
+The model predicts the log odds of the response variable. For a sample of size n, the likelihood function is
+
+L(β;y,X)=∏i=1nπyii(1−πi)(1−yi).
+
+The log-likelihood is
+
+l(β)=∑i=1n(yiXiβ−log(1+exp(Xiβ))).
+
+Maximizing the log-likelihood has no closed-form solution, so the coefficient estimates are found through interatively reweighted least squares.
+
+Example
+Dataset leuk contains response variable REMISS indicating whether leukemia remission occurred (1|0) and several explanatory variables.
+
+```{r}
+#download.file(url = "https://newonlinecourses.science.psu.edu/stat501/sites/onlinecourses.science.psu.edu.stat501/files/data/leukemia_remission/index.txt", destfile = "./Data/leukemia_remission.txt")
+leuk <- read.delim(file = "./Data/leukemia_remission.txt", sep = "\t")
+str(leuk)
+```
+
+
+I’ll just compare REMISS ~ LI. In a situation like this where there the relationship is bivariate, start with a visualization.
+
+```{r}
+ggplot(leuk, aes(x = LI, y = REMISS)) +
+  geom_jitter() +
+  geom_smooth(method = "glm", method.args = list(family = "binomial")) +
+  labs(title = "Remmissions by LI")
+```
+
+Fit a logistic regression in R using glm(formula, data, family = binomial) where family = binomial specifies a binomial error distribution. For simplicity, model REMISS ~ LI.
+
+```{r}
+m1 <- glm(REMISS ~ LI, family = binomial, data = leuk)
+summary(m1)
+```
+
+The predicted value ŷ  is the estimated log odds of the response variable,
+
+ŷ =Xβ̂ =ln(π1−π).
+
+Suppose LI is 1.0, then the log odds of REMISS is ŷ =−3.777+2.897=−0.880.
+
+```{r}
+predict(m1, newdata = data.frame(LI = 1))
+```
+
+The log odds is not easy to interpet, but it is convenient for updating prior probabilities in Bayesian analyses. See this article in Statistics How To. Exponentiate the log odds to get the more intuitive odds.
+
+exp(ŷ )=exp(Xβ̂ )=π1−π.
+
+In this case, the odds of REMISS when LI = 1 is exp(ŷ )=0.415. You can solve the equation for π to get the probability.
+
+π=exp(Xβ)1+exp(Xβ)
+
+In this case, the probability of REMISS when LI = 1 is π=0.293. The predict() function for a logistic model returns log-odds, but can also return π with parameter type = "response".
+
+predict(m1, newdata = data.frame(LI = 1), type = "response")
+##         1 
+## 0.2932034
+It is common to express the results in terms of the odds ratio. The odds ratio is the ratio of the odds before and after an increment to the predictors. It tells you how much the odds would be multiplied after a X1−X0 unit increase in X.
+
+θ=π/(1−π)|X=X1π/(1−π)|X=X0=exp(X1β̂ )exp(X0β̂ )=exp((X1−X0)β̂ )=exp(δβ̂ )
+
+In this simple bi-variate case, increasing LI by 10% increases the odds of REMISS by a factor of exp(0.1⋅2.897)=1.336. The odds ratio can be calculated from the model using oddsratio::or_glm(), or by using the tidy() function with exponentiate = TRUE. Note that δ is 1, so if you want to see a .1 increase, change the model from y ~ x to y ~ I(x*10).
+
+```{r}
+
+tidy(glm(REMISS ~ I(LI*10), data = leuk, family = "binomial"), exponentiate = TRUE, conf.int = TRUE)
+```
+
+```{r}
+library(oddsratio)
+or_glm(data = leuk, model = m1, incr = list(LI = 0.1))
+## # A tibble: 1 x 5
+##   predictor oddsratio `CI_low (2.5)` `CI_high (97.5)` increment
+##   <chr>         <dbl>          <dbl>            <dbl> <chr>    
+## 1 LI             1.34           1.09             1.77 0.1
+The predicted values can also be expressed as the probabilities π. This produces the familiar signmoidal shape of the binary relationship.
+
+augment(m1, type.predict = "response") %>%
+  ggplot(aes(x = LI, y = REMISS)) +
+  geom_point() +
+  geom_line(aes(y = .fitted), color = "red") + 
+  labs(x = "LI",
+       y = "Probability of Event",
+       title = "Binary Fitted Line Plot")
+```
+
+Whereas in linear regression the the coefficient p-values use the t test (t statistic), logistic regression coefficient p-values use the Wald test **Z*-statistic).
+
+Z=βi^SE(β̂ i)
+
+round((z <- m1$coefficients / summary(m1)$coefficients[,"Std. Error"]), 3)
+## (Intercept)          LI 
+##      -2.740       2.441
+round(pnorm(abs(z), lower.tail = FALSE) * 2, 3)
+## (Intercept)          LI 
+##       0.006       0.015
+Evaluate a logistic model fit with an analysis of deviance. Deviance is defined as -2 times the log-likelihood −2l(β). The null deviance is the deviance of the null model and is analagous to SST in ANOVA. The residual deviance is analagous to SSE in ANOVA.
+
+logLik(glm(REMISS ~ ., data = leuk, family = "binomial")) * (-2)
+## 'log Lik.' 21.59385 (df=7)
+anova(m1)
+## Analysis of Deviance Table
+## 
+## Model: binomial, link: logit
+## 
+## Response: REMISS
+## 
+## Terms added sequentially (first to last)
+## 
+## 
+##      Df Deviance Resid. Df Resid. Dev
+## NULL                    26     34.372
+## LI    1   8.2988        25     26.073
+m1
+## 
+## Call:  glm(formula = REMISS ~ LI, family = binomial, data = leuk)
+## 
+## Coefficients:
+## (Intercept)           LI  
+##      -3.777        2.897  
+## 
+## Degrees of Freedom: 26 Total (i.e. Null);  25 Residual
+## Null Deviance:       34.37 
+## Residual Deviance: 26.07     AIC: 30.07
+summary(m1)
+## 
+## Call:
+## glm(formula = REMISS ~ LI, family = binomial, data = leuk)
+## 
+## Deviance Residuals: 
+##     Min       1Q   Median       3Q      Max  
+## -1.9448  -0.6465  -0.4947   0.6571   1.6971  
+## 
+## Coefficients:
+##             Estimate Std. Error z value Pr(>|z|)   
+## (Intercept)   -3.777      1.379  -2.740  0.00615 **
+## LI             2.897      1.187   2.441  0.01464 * 
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 34.372  on 26  degrees of freedom
+## Residual deviance: 26.073  on 25  degrees of freedom
+## AIC: 30.073
+## 
+## Number of Fisher Scoring iterations: 4
+The deviance of the null model (no regressors) is 34.372. The deviance of the full model is 26.073.
+
+glance(m1)
+## # A tibble: 1 x 7
+##   null.deviance df.null logLik   AIC   BIC deviance df.residual
+##           <dbl>   <int>  <dbl> <dbl> <dbl>    <dbl>       <int>
+## 1          34.4      26  -13.0  30.1  32.7     26.1          25
+Use the GainCurvePlot() function to plot the gain curve (background on gain curve at Data Science Central from the model predictions. The x-axis is the fraction of items seen when sorted by the predicted value, and the y-axis is the cumulative summed true outcome. The “wizard” curve is the gain curve when the data is sorted by the true outcome. If the model’s gain curve is close to the wizard gain curve, then the model sorted the response variable well. The grey area is the gain over a random sorting.
+
+augment(m1) %>% data.frame() %>% 
+  GainCurvePlot(xvar = ".fitted", truthVar = "REMISS", title = "Logistic Model")
+## Warning in ggplot2::geom_abline(mapping = ggplot2::aes(x = pctpop, y = pct_outcome, : Using `intercept` and/or `slope` with `mapping` may not have the desired result as mapping is overwritten if either of these is specified
+
+
+REMISS equals 1 in 9 of the 27 responses.
+
+The wizard curve shows that after sorting the responses it encounters all 9 1s (100%) after looking at 9 of the 27 response (33%).
+The bottom of the grey diagonal shows that after making random predictions and sorting the predictions, it encounters only 3 1s (33%) after looking at 9 of the 27 responses (33%). It has to look at all 27 responses (100%) to encounter all 9 1s (100%).
+The gain curve encounters 5 1s (55%) after looking at 9 of the 27 responses (33%). It has to look at 14 responses to encounter all 9 1s (100%).
+Another way to evaluate the predictive model is the ROC curve. It evaluates all possible thresholds for splitting predicted probabilities into predicted classes. This is often a much more useful metric than simply ranking models by their accuracy at a set threshold, as different models might require different calibration steps (looking at a confusion matrix at each step) to find the optimal classification threshold for that model.
+
+library(caTools)
+## Warning: package 'caTools' was built under R version 3.6.1
+colAUC(m1$fitted.values, m1$data$REMISS, plotROC = TRUE)
+
+
+##              [,1]
+## 0 vs. 1 0.8549383
+Poisson Regression
+Poisson models count data, like “traffic tickets per day”, or “website hits per day”. The response is an expected rate or intensity. For count data, specify the generalized model, this time with family = poisson or family = quasipoisson.
+
+Recall that the probability of achieving a count y when the expected rate is λ is distributed
+
+P(Y=y|λ)=e−λλyy!.
+
+The poisson regression model is
+
+λ=exp(Xβ).
+
+You can solve this for y to get
+
+y=Xβ=ln(λ).
+
+That is, the model predicts the log of the response rate. For a sample of size n, the likelihood function is
+
+L(β;y,X)=∏i=1ne−exp(Xiβ)exp(Xiβ)yiyi!.
+
+The log-likelihood is
+
+l(β)=∑i=1n(yiXiβ−∑i=1nexp(Xiβ)−∑i=1nlog(yi!).
+
+Maximizing the log-likelihood has no closed-form solution, so the coefficient estimates are found through interatively reweighted least squares.
+
+Poisson processes assume the variance of the response variable equals its mean. “Equals” means the mean and variance are of a similar order of magnitude. If that assumption does not hold, use the quasi-poisson. Use Poisson regression for large datasets. If the predicted counts are much greater than zero (>30), the linear regression will work fine. Whereas RMSE is not useful for logistic models, it is a good metric in Poisson.
+
+Example
+Dataset fire contains response variable injuries counting the number of injuries during the month and one explanatory variable, the month mo.
+
+```{r}
+fire <- read_csv(file = "./Data/CivilInjury_0.csv")
+
+fire <- fire %>% 
+  mutate(mo = as.POSIXlt(`Injury Date`)$mon + 1) %>%
+  rename(dt = `Injury Date`,
+         injuries = `Total Injuries`)
+str(fire)
+```
+
+In a situation like this where there the relationship is bivariate, start with a visualization.
+
+```{r}
+ggplot(fire, aes(x = mo, y = injuries)) +
+  geom_jitter() +
+  geom_smooth(method = "glm", method.args = list(family = "poisson")) +
+  labs(title = "Injuries by Month")
+```
+
+Fit a poisson regression in R using glm(formula, data, family = poisson). But first, check whether the mean and variance of injuries are the same magnitude? If not, then use family = quasipoisson.
+
+mean(fire$injuries)
+## [1] 1.36
+var(fire$injuries)
+## [1] 1.020468
+They are of the same magnitude, so fit the regression with family = poisson.
+
+m2 <- glm(injuries ~ mo, family = poisson, data = fire)
+summary(m2)
+## 
+## Call:
+## glm(formula = injuries ~ mo, family = poisson, data = fire)
+## 
+## Deviance Residuals: 
+##     Min       1Q   Median       3Q      Max  
+## -0.3987  -0.3473  -0.3034  -0.2502   4.3185  
+## 
+## Coefficients:
+##             Estimate Std. Error z value Pr(>|z|)  
+## (Intercept)  0.22805    0.10482   2.176   0.0296 *
+## mo           0.01215    0.01397   0.870   0.3844  
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## (Dispersion parameter for poisson family taken to be 1)
+## 
+##     Null deviance: 139.87  on 299  degrees of freedom
+## Residual deviance: 139.11  on 298  degrees of freedom
+## AIC: 792.08
+## 
+## Number of Fisher Scoring iterations: 5
+The predicted value ŷ  is the estimated log of the response variable,
+
+ŷ =Xβ̂ =ln(λ).
+
+Suppose mo is January (mo = ), then the log ofinjuries` is ŷ =0.323787. Or, more intuitively, the expected count of injuries is exp(0.323787)=1.38
+
+predict(m2, newdata = data.frame(mo=1))
+##         1 
+## 0.2401999
+predict(m2, newdata = data.frame(mo=1), type = "response")
+##        1 
+## 1.271503
+Here is a plot of the predicted counts in red.
+
+augment(m2, type.predict = "response") %>%
+  ggplot(aes(x = mo, y = injuries)) +
+  geom_point() +
+  geom_point(aes(y = .fitted), color = "red") + 
+  scale_y_continuous(limits = c(0, NA)) +
+  labs(x = "Month",
+       y = "Injuries",
+       title = "Poisson Fitted Line Plot")
+
+
+Evaluate a logistic model fit with an analysis of deviance.
+
+(perf <- glance(m2))
+## # A tibble: 1 x 7
+##   null.deviance df.null logLik   AIC   BIC deviance df.residual
+##           <dbl>   <int>  <dbl> <dbl> <dbl>    <dbl>       <int>
+## 1          140.     299  -394.  792.  799.     139.         298
+(pseudoR2 <- 1 - perf$deviance / perf$null.deviance)
+## [1] 0.005413723
+The deviance of the null model (no regressors) is 139.9. The deviance of the full model is 132.2. The psuedo-R2 is very low at .05. How about the RMSE?
+
+RMSE(pred = predict(m2, type = "response"), obs = fire$injuries)
+## [1] 1.006791
+The average prediction error is about 0.99. That’s almost as much as the variance of injuries - i.e., just predicting the mean of injuries would be almost as good! Use the GainCurvePlot() function to plot the gain curve.
+
+augment(m2, type.predict = "response") %>%
+  ggplot(aes(x = injuries, y = .fitted)) +
+  geom_point() +
+  geom_smooth(method ="lm") +
+  labs(x = "Actual",
+       y = "Predicted",
+       title = "Poisson Fitted vs Actual")
+
+
+augment(m2) %>% data.frame() %>% 
+  GainCurvePlot(xvar = ".fitted", truthVar = "injuries", title = "Poisson Model")
+## Warning in ggplot2::geom_abline(mapping = ggplot2::aes(x = pctpop, y = pct_outcome, : Using `intercept` and/or `slope` with `mapping` may not have the desired result as mapping is overwritten if either of these is specified
+
+
+It seems that mo was a poor predictor of injuries.
+

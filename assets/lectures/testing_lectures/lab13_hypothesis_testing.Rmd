@@ -343,7 +343,7 @@ What we want to know is whether chance could produce a difference of 14%, or .14
 
 Now we can plug our numbers in to the simulation.
 
-1. We run the simulation 100 times
+1. We run the simulation 1000 times
 2. Our sample N is 40
 3. The mean of our distribution is .49
 4. The standard deviation of the distribution is .168
@@ -352,7 +352,7 @@ What do you conclude?
 
 ```{r}
 # set paramaters of simulation
-sims_to_run <- 100
+sims_to_run <- 1000
 sample_n   <- 40
 dist_mean  <- .49
 dist_sd    <- .168
@@ -590,8 +590,49 @@ for `hwy` for each year group.
 
 
 
+## In-class exercise
+
+__Question 1. Diet exercise__ Suppose you want to test the efficiency of diet A vs diet B (which will be just a placebo, so no change expected). You have a group of 150 people in each group. You measure their weight on day 1, and then 3 months later.
+
+a. What variable would you use to check the efficiency of the diet? What summary statistic would you use to compare the groups?
+
+b. Write down the null hypothesis.
+
+c. i. Suppose you want to check if diet A is efficient. What test would you use? 
+
+c. ii. Suppose you want to check if diet A is as efficient as diet B. What test would you use? 
+
+d. Run the previous tests on the following (simulated data).
 
 
+```{r}
+data = data.frame("Control_0"= rnorm(150, 175, 25),
+                  "Treatment_0"= rnorm(150, 175, 25))
+data$Control_1 = data$Control_0 + rnorm(150, 0, 5)
+data$Treatment_1 = data$Treatment_0 + rnorm(150, -7, 5)
+```
+
+
+__Question 2: signed rank test__
+
+Consider the previous example. Except, instead of a 150 people, you only have 15.
+
+a. What does the small sample size entail?
+
+b. In this context, it is preferable to use a non-parametric test. For instance, suppose we look at the sign of the difference in weight, and want to devise a test based on the distibution of these signs.
+
+That is, consider $T_g = \sum_{i=1}^{n_g} \text{sign}(X_{i1} - X_{i0})$.
+
+i. Under the null, what is the distribution of this test?
+
+ii. Using the following simulated data, assess whether or not you can reject the null.
+
+```{r}
+data1 = data.frame("Control_0"= rnorm(15, 175, 25),
+                  "Treatment_0"= rnorm(15, 175, 25))
+data1$Control_1 = data1$Control_0 + rnorm(15, 0, 5)
+data1$Treatment_1 = data1$Treatment_0 + rnorm(15, -7, 5)
+```
 __Acknowledgedments__:
 
 This lab was:
