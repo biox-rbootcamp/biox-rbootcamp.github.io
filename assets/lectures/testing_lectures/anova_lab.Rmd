@@ -1487,14 +1487,11 @@ Remember before we do any analysis, we always want to "look" at the data. This f
 
 For example, this study involves reaction times: the time between seeing something and responding to it. If you had done a study like this before, you would know that it usually doesn't take people that long to start responding. Most reaction times will be under a second (or 1000 milliseconds). But, sometime people are little slow, and sometimes they do funny things like check their phone in the middle of an experiment.
 
-Before I analyze reaction time data, I often make a histogram of all of the RT data, like this:
-
-```{r}
-hist(all_data$PureRTs)
-```
+__Question 1__ Before analyzing reaction time (RT) data, make a histogram of all of the RT data.
 
 
-We can see that almost all of the reaction times are well below 5000 milliseconds (5 seconds), which is good. Most of the time people were paying attention and not "checking their phone". Notice, the range of the histogram goes out to 15,000 milliseconds. You can't see any bars out there (too small to notice), but there must be at least a few trials where somebody took 15 seconds to start responding. These are called outliers. We will remove them before we conduct our analysis
+
+You should be able to see that almost all of the reaction times are well below 5000 milliseconds (5 seconds), which is good. Most of the time people were paying attention and not "checking their phone". Notice, the range of the histogram goes out to 15,000 milliseconds. You can't see any bars out there (too small to notice), but there must be at least a few trials where somebody took 15 seconds to start responding. These are called outliers. We will remove them before we conduct our analysis
 
 ### Look at the means
 
@@ -1504,8 +1501,7 @@ As part of looking at the data, we might as well make a figure that shows the me
 2. Get the means for each condition, by averaging over the means for each subject. These are put into the data frame called `plot_means`.
 3. Make a graph with the `plot_means` data frame using ggplot2. 
 
-
-```{r}
+```{r, eval=FALSE}
 library(dplyr)
 library(ggplot2)
 
@@ -1524,32 +1520,22 @@ subject_means$Block<-as.factor(subject_means$Block)
 subject_means$Stimulus<-as.factor(subject_means$Stimulus)
 
 ## get condition mean RTs
-
-plot_means <- subject_means %>%
-              group_by(Block, Stimulus) %>%
-              summarise(means = mean(mean_rt),
-                        SEs = sd(mean_rt)/sqrt(length(mean_rt)))
+???
 
 ## plot the condition means
 
 # re-order stimulus factor for plotting
 plot_means$Stimulus <- factor(plot_means$Stimulus, levels = c("Normal", "Bigrams", "Random"))
 
-ggplot(plot_means, aes(x=Stimulus, y=means, group=Block, color=Block))+
-  geom_point()+
-  geom_line()+
-  geom_errorbar(aes(ymin=means-SEs, ymax=means+SEs), width=.2)+
-  theme_classic()+
-  ylab("Mean Reaction Time (ms)")+
-  xlab("Typing Material")
+???
 
 ```
 
 Alright, we made things a little bit more complicated than they need to be. Our primary question is whether reaction times followed this pattern: Normal < Bigrams < Random. We can see the means do follow this pattern. However, shouldn't we only be looking at three means, why are their six means, and two lines?
 
-The above code included the second independent variable `Block`. As a result, you are seeing the means for Typing material when subjects could see the keyboard, and when the couldn't see the keyboard. We will come back to this later. For now, let's ignore the Block condition, and find the means for the Typing Material IV by averaging over the Block conditions. We run the same code as above, by take out `Block`, in the `group_by` function. We also take `Block` out the ggplot function.
+The above code included the second independent variable `Block`. As a result, you are seeing the means for Typing material when subjects could see the keyboard, and when the couldn't see the keyboard. We will come back to this later. For now, let's ignore the Block condition, and find the means for the Typing Material IV by averaging over the Block conditions. We run the same code as above, by taking out `Block`, in the `group_by` function. We also take `Block` out the ggplot function.
 
-**VERY IMPORTANT**: We did something in the above code that we didn't point out. We filtered the data before we found the means. For most of the data sets in other labs, we given you data that is more or less ready to analyse. More often than not data needs to be pre-processed, or filtered before you analyze it. We can use the `filter` function in `dplyr` to do our filtering. `filter` filters the rows for us, so we will only include the rows that we want.
+
 
 1. We want to analyze the time between the onset of the stimulus and the first keystroke. The reaction times for this value are in the `PureRTs` column, but this column contains other RTs that we do not want to analyse. For example, the `Order` column codes for the letter position in the string. We only want to analyze the rows that contain a `1`, for the first position. So, that is why we add `Order==1` to the filter function below.
 
@@ -1604,9 +1590,9 @@ The formula for a repeated-measures ANOVA looks like this:
 
 The formula for our data would be: `aov( mean_rt ~ Stimulus + Error(Subject/Stimulus), subject_means)`.
 
-Here is the code below. Just as reminder, the raw data codes every single key press on each row. We don't want to submit this as the data frame to the `aov` function. Instead, we need to calculate the data frame for the subject means in each condition. We did that above as a step toward making the graphs. We do it again here to remind you that you need to do this.
+__Question__ Based on this, fill the code below. Just as reminder, the raw data codes every single key press on each row. We don't want to submit this as the data frame to the `aov` function. Instead, we need to calculate the data frame for the subject means in each condition. We did that above as a step toward making the graphs. We do it again here to remind you that you need to do this.
 
-```{r}
+```{r, eval=FALSE}
 
 # get subject means
 
@@ -1621,26 +1607,18 @@ subject_means$Stimulus <- as.factor(subject_means$Stimulus)
 
 # Conduct the anova
 
-aov_out <- aov( mean_rt ~ Stimulus + Error(Subject/Stimulus), subject_means)
+aov_out <- aov( ????)
 summary_out <- summary(aov_out)
 
 library(xtable)
 knitr::kable(xtable(summary_out))
 ```
 
-Great, we have conducted the ANOVA. We could write up the results of the ANOVA like this:
+__Question__ Once you have conducted the ANOVA, write up the results of the ANOVA like this:
 
-> For each subject we computed mean reactions for correct keystrokes in each condition of the Stimulus factor. These means were submitted to a one-factor repeated-measures ANOVA, with Stimulus (Normal, Bigrams, and Random) as the sole factor. The effect of Stimulus was signficant, F(2, 74) = 230.58, MSE = 2510.98, p < 0.001.
+> For each subject we computed mean reactions for correct keystrokes in each condition of the Stimulus factor. These means were submitted to a one-factor repeated-measures ANOVA, with Stimulus (Normal, Bigrams, and Random) as the sole factor. The effect of Stimulus was (significant/non-significant), F(2, 74) = ??, MSE = ??, p < ??
 
-Note, the p-value shows up as a zero, that's because it is so small that R doesn't want to print the actual number 0.000000000000000...1.
 
-What does this tell us? 
-
-1. The $F$ value we obtained (230.58) almost never occurs by chance. More specifically, the sampling distribution of F from the distribution of no differences virtually never produces a huge F like 230.58
-
-2. It is super-duper unlikely that chance (sampling error) could have produced the difference we observed.
-
-3. We reject the idea that chance caused the differences, and are very confident that the manipulation (changing the kinds of letters that people have to type), has a causal influence on reaction time in typing.
 
 #### Report the means too
 
@@ -1671,7 +1649,7 @@ knitr::kable(plot_means)
 ```
 Now, our full write-up of the results would look like this.
 
-> For each subject we computed mean reactions for correct keystrokes in each condition of the Stimulus factor. These means were submitted to a one-factor repeated-measures ANOVA, with Stimulus (Normal, Bigrams, and Random) as the sole factor. The effect of Stimulus was signficant, F(2, 74) = 230.58, MSE = 2510.98, p < 0.001. The mean reaction time was fastest in the Normal condition (M = 833 ms, SE = 24 ms), followed by the Bigram condition, (M = 924 ms, SE = 27 ms) and slowest in the Random Condition (M = 1078 ms, SE = 32 ms).
+> For each subject we computed mean reactions for correct keystrokes in each condition of the Stimulus factor. These means were submitted to a one-factor repeated-measures ANOVA, with Stimulus (Normal, Bigrams, and Random) as the sole factor. The effect of Stimulus was (significant/non-significant), F(2, 74) = ??, MSE = ??, p < ??. The mean reaction time was fastest in the Normal condition (M = 833 ms, SE = 24 ms), followed by the Bigram condition, (M = 924 ms, SE = 27 ms) and slowest in the Random Condition (M = 1078 ms, SE = 32 ms).
 
 ### Follow-up comparisons
 
@@ -1681,33 +1659,15 @@ Because this is a repeated-measures design, we can use the paired-samples t-test
 
 #### Normal vs Bigrams
 
-We use the `subject_means` data frame. But, we want to rid of all the rows containing the means from the Random condition. We use filter to do that, then we conduct the paired-samples t-test.
+We use the `subject_means` data frame. But, we want to rid of all the rows containing the means from the Random condition. 
 
-```{r}
-comparison_df <- subject_means %>%
-                  filter(Stimulus != "Random")
+__Question__ Filter out the "Random" Stimuli, then conduct the paired-samples t-test.
 
-t.test(mean_rt~Stimulus, 
-       paired=TRUE, 
-       var.equal=TRUE, 
-       data = comparison_df)
-
-```
 
 ####  Bigrams vs Random
 
-We use the `subject_means` data frame. But, we want to rid of all the rows containing the means from the Normal condition. We use filter to do that, then we conduct the paired-samples t-test.
+We use the `subject_means` data frame. But, we want to rid of all the rows containing the means from the Normal condition. Use `filter` to do that, then and conduct the paired-samples t-test.
 
-```{r}
-comparison_df <- subject_means %>%
-                  filter(Stimulus != "Normal")
-
-t.test(mean_rt~Stimulus, 
-       paired=TRUE, 
-       var.equal=TRUE, 
-       data = comparison_df)
-
-```
 
 ### Reporting everything
 

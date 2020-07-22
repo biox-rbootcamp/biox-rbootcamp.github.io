@@ -1,0 +1,41 @@
+---
+title: 'Multiple Testing: In-class Exercise'
+author: "bioX R-Summer bootcamp"
+date: "7/30/2020"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Objective
+
+The purpose of this exercise is to make you apply what you learned on hypothesis testing.
+This is inspired from a real case study that was presented in the Statistics consulting workshop (STATS 398) over the last few months. The data was confidential, thus the data that we present here is simulated to simulate the real one.
+
+
+## Setting
+
+Suppose that you are enrolled as a statistics consultant. You get a request for help one afternoon from a doctor in the medical school. The doctor has a dataset of ICU admissions, and wants to  validate his hypothesis: there has been a drop in ICU admissions since the beginning if the shelter-in-place.
+
+His dataset consists of the weekly ICU admissions per disease category. 
+
+
+__Question 1__ Load the data, and start plotting the admission number for a few diseases. Is there any evidence to support his theory?
+
+
+__Question__
+
+
+
+
+
+
+
+
+
+
