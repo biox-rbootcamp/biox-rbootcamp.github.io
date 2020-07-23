@@ -495,13 +495,15 @@ In our experience the estimation of $\pi_0$ can be unstable and adds a step of u
 
 Suppose you want to test different group means. Each group has 50 subjects. 
 
-1. Generate 100  simulated datasets of 50 p-values:
-   - for each simulation, the first 40 differences are sampled from the null: the observations from group A and B should be sampled from a normal variable with mean 2 and variance 1.
-    - for each simulation, the last 10 differences are sampled from the alternate hypothesis: the observations from group A should be sampled from a normal variable with mean 2 and variance 1, and the ones from group B have mean 2.5 and variance 1.
-   
+1. Generate 100  simulated datasets of 150 p-values (let's say these are genes):
+   - for each simulation, the first 140 genes expressions for all the subjects are sampled from the null: the observations from group A and B should be sampled from a normal variable with mean 2 and variance 1.
+    - for each simulation, the last 10 gee expressions are sampled from the alternate hypothesis: the observations from group A should be sampled from a normal variable with mean 2 and variance 1, and the ones from group B have mean 2.5 and variance 1.
+  
 2. For each simulated dataset, compute the t-test associated to the means for group 1 and 2.
 
 3. Apply the Bonferroni correction (you can use the `p.adjust` function in R). Which p-values are significant?
+
+
 
 4. Apply a BH-q correction (you can still use the `p.adjust` function in R, change the method argument). Which p-values are significant?
 

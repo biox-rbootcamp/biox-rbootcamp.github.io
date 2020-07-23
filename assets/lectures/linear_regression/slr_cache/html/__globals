@@ -86,3 +86,5 @@ unnamed-chunk-83	~	$	abline	c	cars	data.frame	lines	max	mean	min	plot	points	pre
 unnamed-chunk-84	stop_dist_model	summary
 unnamed-chunk-85	anova	stop_dist_model
 unnamed-chunk-86	~	anova	cars	lm
+unnamed-chunk-87	read.csv
+unnamed-chunk-88	$	mlb	plot_ss	source

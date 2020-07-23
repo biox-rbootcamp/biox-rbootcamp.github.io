@@ -278,7 +278,7 @@ div.tocify {
 <p>Let's try to build up a little bit of intution. Suppose you're testing the effect of 10,000 diets on mice. Suppose that you are omniscient, and you know that none of these diets produce a change. But suppose you still want to try out to compute the diets' corresponding p-values.</p>
 <p>A property to keep in mind is that, under the null (whatever it might be), the pvalues are sampled from a uniform distribution. Sample 10,000 null-pvalues. How many are below the 0.05 significance threshold?</p>
 <pre class="r"><code>sum(runif(10000)&lt;0.05)</code></pre>
-<pre><code>## [1] 498</code></pre>
+<pre><code>## [1] 520</code></pre>
 <p>Thus, by random chance alone, when testing simulataneously multiple hypotheses, we might select hypotheses that appear to be below significant threshold but are in fact not valid (they are referred to as &quot;false positives&quot;). Thus, p-values are no longer a useful quantity to interpret when dealing with high-dimensional data --- the analysis of their raw value is not enough. This is because we are testing many <em>features</em> at the same time. We refer to this as the <em>multiple comparison</em> or <em>multiple testing</em> or <em>multiplicity</em> problem. The definition of a p-value does not provide a useful quantification here. Again, because when we test many hypotheses simultaneously, a list based simply on a small p-value cut-off of, say 0.01, can result in many false positives with high probability. Here we define terms that are more appropriate in the context of high-throughput data.</p>
 <p>The most widely used approach to the multiplicity problem is to define a <em>procedure</em> and then estimate or <em>control</em> an informative <em>error rate</em> for this procedure. What we mean by <em>control</em> here is that we adapt the procedure to guarantee an <em>error rate</em> below a predefined value. The procedures are typically flexible through parameters or cutoffs that let us control specificity and sensitivity. An example of a procedure is:</p>
 <ul>
@@ -662,8 +662,9 @@ p-value histogram with pi0 estimate.
 <pre><code>## Installing package(s) 'qvalue'</code></pre>
 <pre><code>## 
 ## The downloaded binary packages are in
-##  /var/folders/1p/bx0tk_055p38d75b4ykdy0gw0000gn/T//RtmpZOiWwW/downloaded_packages</code></pre>
-<pre><code>## Old packages: 'bit64', 'fda', 'loo', 'vctrs'</code></pre>
+##  /var/folders/1p/bx0tk_055p38d75b4ykdy0gw0000gn/T//Rtmp0me7ar/downloaded_packages</code></pre>
+<pre><code>## Old packages: 'bit64', 'devtools', 'fda', 'httr', 'loo', 'RcppArmadillo',
+##   'remotes', 'rstanarm', 'vctrs'</code></pre>
 <pre class="r"><code>library(qvalue)
 res &lt;- qvalue(pvals)
 qvals &lt;- res$qvalues
@@ -687,12 +688,12 @@ q-values versus p-values.
 <h2>Hands-On Exercises</h2>
 <p>Suppose you want to test different group means. Each group has 50 subjects.</p>
 <ol style="list-style-type: decimal">
-<li>Generate 100 simulated datasets of 50 p-values:</li>
+<li>Generate 100 simulated datasets of 150 p-values (let's say these are genes):</li>
 </ol>
 <ul>
-<li>for each simulation, the first 40 differences are sampled from the null: the observations from group A and B should be sampled from a normal variable with mean 2 and variance 1.
+<li>for each simulation, the first 140 genes expressions for all the subjects are sampled from the null: the observations from group A and B should be sampled from a normal variable with mean 2 and variance 1.
 <ul>
-<li>for each simulation, the last 10 differences are sampled from the alternate hypothesis: the observations from group A should be sampled from a normal variable with mean 2 and variance 1, and the ones from group B have mean 2.5 and variance 1.</li>
+<li>for each simulation, the last 10 gee expressions are sampled from the alternate hypothesis: the observations from group A should be sampled from a normal variable with mean 2 and variance 1, and the ones from group B have mean 2.5 and variance 1.</li>
 </ul></li>
 </ul>
 <ol start="2" style="list-style-type: decimal">

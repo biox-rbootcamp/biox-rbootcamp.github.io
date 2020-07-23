@@ -20,7 +20,7 @@ knitr::opts_chunk$set(cache = TRUE, autodep = TRUE, fig.align = "center")
 >
 > --- **George E. P. Box**
 
-After reading this chapter you will be able to:
+__Objectives__ After reading this chapter you will be able to:
 
 - Understand the concept of a model.
 - Describe two ways in which regression coefficients are derived.
@@ -1043,32 +1043,26 @@ and years of education. *The data is not real and was actually simulated*.
 
 a. Read the data into R and generate a ggplot with a fitted line.
 
-b. Split the data into train and test set. Note that here we do not form
-a validation set as we have very few observations and will only consider
-a single model.
-
-c. Fit a linear model with education (years of education) as input variable 
+b. Fit a linear model with education (years of education) as input variable 
 and income as response variable. What are the model coefficients obtained and 
 how can you extract them? Inspect the model fit using `summary()`
 
-d. Compute the fitted values of income for the observations
-included in the train set.
+c. Compute the fitted values of income for the observations.
 
-e. Predict the income for new observations, for people with 
-16.00, 12.52, 15.55, 21.09, and 18.36 years of education. Then,
-make predictions also for the test set and evaluate the root mean squared 
-error on the test set.
+d. Predict the income for new observations, for people with 
+16.00, 12.52, 15.55, 21.09, and 18.36 years of education. 
+
+e. Comment on the fit of your model.
 
 
 ### Part 2
 
 a. Now download data from "http://www-bcf.usc.edu/~gareth/ISL/Income2.csv"
 which include the same observations but also records data on "senority".
-Again, split the data into train and test.
 
 b. Fit a new model including a new variable and print the model summary.
 
-c. Predicted values of income for the observations in the train set.
+c. Compute the predicted values of income and assess the goodness of fit.
 
 d. Predict the income levels for new observations with years of education
 equal to 16.00, 12.52, 15.55, 21.09, 18.36 and seniority to
@@ -1265,8 +1259,6 @@ Or more succinctly,
 \]
 
 At this point we have neglected to prove a number of these results. Instead of working through the tedious derivations of these sampling distributions, we will instead justify these results to ourselves using simulation.
-
-A note to current readers: These derivations and proofs may be added to an appendix at a later time. You can also find these results in nearly any standard linear regression textbook. At UIUC, these results will likely be presented in both STAT 424 and STAT 425. However, since you will not be asked to perform derivations of this type in this course, they are for now omitted.
 
 ### Simulating Sampling Distributions
 
@@ -1952,7 +1944,7 @@ To develop the $F$ test, we will arrange this information in an **ANOVA** table,
 | Error      | $\sum_{i=1}^{n}(y_i - \hat{y}_i)^2$     | $n - 2$ | $\text{SSE} / (n - 2)$ |             |
 | Total      | $\sum_{i=1}^{n}(y_i - \bar{y})^2$       | $n - 1$ |                 |             |
 
-ANOVA, or Analysis of Variance will be a concept we return to often in this course. For now, we will focus on the results of the table, which is the $F$ statistic,
+ANOVA, or Analysis of Variance which we have seen last week. 
 
 \[
 F = \frac{\sum_{i=1}^{n}(\hat{y}_i - \bar{y})^2 / 1}{\sum_{i=1}^{n}(y_i - \hat{y}_i)^2 / (n - 2)} \sim F_{1, n - 2}
@@ -2008,7 +2000,124 @@ We can then think of this usage of `anova()` as directly comparing the two model
 
 
 
+# In class (time allowing)
+
+The movie Moneyball focuses on the “quest for the secret of success in baseball”. It
+follows a low-budget team, the Oakland Athletics, in the early 2000’s, who believed that
+underused statistics, such as a player’s ability to get on base, actually better predicts the
+ability to score runs than typical statistics like homeruns, RBIs (runs batted in), and
+batting average. In fact, obtaining players who excelled in these underused statistics
+turned out to be much more affordable for the team.
+In this lab we’ll be looking at data from all 30 Major League Baseball teams and examining the linear relationship between runs scored in a season and a number of other
+player statistics. Our aim will be to summarize these relationships both graphically and
+numerically in order to find which variable, if any, best helps us predict a team’s runs
+scored in a season.
+
+### The Data
+Let’s load up the batting data for the 2009 season.
+
+```{r}
+mlb = read.csv("http://stat.duke.edu/courses/Spring12/sta101.1/labs/mlb09.csv")
+```
+In addition to runs scored, there are seven traditionally-used variables in the data set:
+at-bats, hits, homeruns, batting average, strikeouts, walks and stolen bases.1 The last
+three variables in the data set are newer: on-base percentage, slugging percentage, and
+on base plus slugging.
+
+__Exercise 1.__ Plot runs as the response variable and at bats as the explanatory variable. Does
+the relationship look linear? If you knew a team’s at-bats, would you feel confident
+in your ability to make a good prediction of their runs?
+
+
+### Sum of squared residuals
+Besides correlation, another way to summarize the relationship between these two variables is finding the line that best follows their association. Use the following interactive
+function to select the line that you think does the best job of going through the cloud
+of points.
+
+```{r}
+source("http://stat.duke.edu/courses/Fall11/sta101.02/labs/plot_ss.R")
+plot_ss(x = mlb$at_bats, y = mlb$runs)
+```
+__Question 2.__ Using plot ss(), choose a line that does the best job of minimizing the sum of
+squares. Run the function several times to get the lowest possible value. What is
+that value? How does it compare to your neighbors?
+
+### The linear model
+It is rather cumbersome to try to get the correct least squares line, i.e. the line that
+minimizes the sum of squared residuals, through trial and error. Instead we can use one
+of the built in functions in R, lm() (stands for “linear model”) to fit the regression line.
+`m1 <- lm(runs ~ at_bats, data = mlb)`.
+The first argument in the function lm() takes the form `y ~ x`, or `response by explanatory`.
+We want to make a linear model of runs as a function of at bats. The second argument
+specifies that R should look in the mlb09 dataset to find these variables.
+The output of `lm()` is an object that contains all of the information we need about the
+linear model that was just fit. We can pull up the basic information with 
+`summary(m1)`.
+At the top of the output is the formula that you specified, runs as a function of at-bats.
+Below that is a table that contains summary statistics on the residuals and below that is
+the regression output. The coefficient estimate of the intercept is shown in the first row,
+next to `(Intercept)`, and the estimate of the slope is shown in the second line, next to
+at bats. How do these compare to your model from Exercise Exercise 2.? Standard
+errors, t-statistics, and p-values testing whether each coefficient is significantly different
+from 0 are also given.
+
+__Question 3.__ Using the estimates from the R output write the equation of the regression line
+for predicting runs from at-bats. Interpret the slope coefficient. Is the slope
+significantly different from 0?
+
+
+### Prediction
+
+
+
+__Question 4__ Overlay the regression line on the scatterplot of runs vs. at-bats. Using the estimates from the R output write the equation of the regression line
+for predicting runs from at-bat. If a team manager saw the least squares regression line and not the actual data how many runs would he or she predict for a team that had 5,578 at-bats? The
+Phillies had 5,578 at-bats... is the prediction based on the model an overestimate
+or an underestimate, and by how much?
+
+
+We can easily get all the predicted values using the predict() function in R:
+yhat = predict(m1)
+
+
+__Question 5.__ Plot the actual values against the predicted values. Informally, does the model
+appear to be doing a good job?
+To get interval estimates instead of just point estimates, we include the interval=
+argument. You can generate confidence intervals and prediction intervals for all the
+data points with
+`predict(m1, interval="confidence")`
+`predict(m1, interval="prediction")`
+
+The output of the predict function with the interval= argument includes the first column, fit, which gives the predicted (or “fitted” values), and then the next two columns
+give the lower and upper bounds of the interval estimate (confidence or prediction, depending on which you specify). The default level of confidence is 95%.
+We can also make predictions for new data. To generate a prediction interval for a team
+that has 5550 at-bats, we first need to create “new data” for a team with 5550 at-bats,
+then input this newdata into the predict function with the model:
+`newdata = as.data.frame(cbind(at_bats = 5550))`
+
+`predict(m1, newdata, interval="prediction")`
+__Question 6.__ Create a confidence and prediction interval for the number of runs for a team with 5000 at-bats, and interpret both intervals.
+
+### Model diagnostics
+
+In order to check if the conditions for a linear regression are met we should check for
+(1) linearity, (2) constant variability, and (3) nearly normal residuals. You can get the
+residuals with `m1$residuals.`
+__Question 7.__  Do the three conditions appear to be met?
+
+### Exploring Other Variables
+
+__Question 8.__  Now that you can summarize the linear relationship between two variables, investigate the relationships between runs and all other traditional variables, one at a
+time (no need to show each investigation, only the best one). Which variable best
+predicts runs?
+
+__Question 9.__  Now examine the three newer variables. These are the statistics used in Moneyball to predict a team’s success. In general, are they more or less effective at predicting
+runs than the old variables? Explain using appropriate graphical and numerical
+evidence. Of all ten variables we’ve analyzed, which seems to be the best predictor
+of runs? Using the limited (or not so limited) information you know about these
+baseball statistics, does your result make sense? 
+
 
 __Acknowledgements__
 
-This lab is based on the material from David Dalpiaz's [Applied Stats course](https://github.com/daviddalpiaz/appliedstats).
+This lab is based on the material from David Dalpiaz's [Applied Stats course](https://github.com/daviddalpiaz/appliedstats), and the practical from [Duke's Stats 101 course](https://www2.stat.duke.edu/courses/Spring14/sta101.001/lab10.pdf).
