@@ -14,21 +14,47 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Objective
 
-The purpose of this exercise is to make you apply what you learned on hypothesis testing.
+The purpose of this exercise is to make you apply what you learned so far -- both from the hypothesis testing perspective and in terms of linear modeling.
 This is inspired from a real case study that was presented in the Statistics consulting workshop (STATS 398) over the last few months. The data was confidential, thus the data that we present here is simulated to simulate the real one.
 
 
 ## Setting
 
-Suppose that you are enrolled as a statistics consultant. You get a request for help one afternoon from a doctor in the medical school. The doctor has a dataset of ICU admissions, and wants to  validate his hypothesis: there has been a drop in ICU admissions since the beginning if the shelter-in-place.
+Suppose that you are enrolled as a statistics consultant. You get a request for help one afternoon from a doctor in the medical school. The doctor has a dataset of ICU admissions, and wants to investigate whether or not there has been a significant drop in ICU admissions since the beginning of the shelter-in-place in Santa Clara .
 
-His dataset consists of the weekly ICU admissions per disease category. 
+His dataset consists of the weekly ICU admissions per disease category since 2019, up to end of April this year:
+- We have different diseases, and the admission counts per week.
+- the column "week" indicates which week of the year it is (1-52)
 
+
+```{r}
+data <- read.csv("data/mock_poisson_data.csv", sep=";")
+```
+
+
+## Aggregate Analysis
 
 __Question 1__ Load the data, and start plotting the admission number for a few diseases. Is there any evidence to support his theory?
 
+__Question 2__ Aggregate the data to consider the total number of admissions per week. Does there seem to be evidence (from the graph) to support this claim?
 
-__Question__
+__Question 3__ One of the issues with hospital data is that it could inherently vary due to different factors. Can you think of any factors that might affect the number of admissions? Test if these factors are significant in your current model.
+
+__Question 4__ Having accounted (or not) on these potential confounding factors, let's try to formulate his hypothesis from a mathematical perspective and test if the total number of admissions per week has decreased.
+    (a) How would you model the data? What distribution would you use?
+    (b) Write down the null hypothesis.
+    (c) Devise a hypothesis test to test the null.
+    (d) Test the null.
+    
+What are your findings?
+
+
+## Granular Analysis
+
+Try to do the analysis for each ``disease''. This might be a little tricky, because there are a lot of them...
+
+__Question 5__ How would you test  the different diseases?
+    
 
 
 
