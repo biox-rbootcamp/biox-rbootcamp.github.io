@@ -1,12 +1,19 @@
 ---
 title: "Generalized Linear Models (GLMs): A Unifying Theory"
 author: "bioX R-Summer bootcamp"
-date: "7/30/2020"
+date: "8/3/2020"
 output: 
   html_document:
     toc: true
     toc_float: true
 ---
+
+# Goals
+
+We are going to spend this discussion on Generalized Linear Models, the unifying framework behind linear regression and Poisson regression that we have seen last week, and end with another extremely useful model: logistic regression.
+
+Watch the follwoing introductory video on [Generalized linear models]((https://www.youtube.com/watch?v=hc06BXFYd_w).
+Go through the following lab.
 
 # Generalized Linear Models (GLMs): A Unifying Theory 
 
@@ -25,7 +32,7 @@ if(knitr::is_html_output()){options(knitr.table.format = "html")} else {options(
 
 ## One parameter exponential families
 
-Thus far, we have expanded our repertoire of models from OLS to include Poisson regression. But in the early 1970s @Nelder1972 identified a broader class of models that generalizes the  multiple linear regression we considered in the introductory chapter and are referred to as __generalized linear models (GLMs)__. All GLMs have similar forms for their likelihoods, MLEs, and variances. This makes it easier to find model estimates and their corresponding uncertainty. To determine whether a model is a GLM, we consider the following properties.
+Thus far, we have expanded our repertoire of models from OLS to include Poisson regression. But in the early 1970s Nelder (1972) identified a broader class of models that generalizes the  multiple linear regression we considered in the introductory chapter and are referred to as __generalized linear models (GLMs)__. All GLMs have similar forms for their likelihoods, MLEs, and variances. This makes it easier to find model estimates and their corresponding uncertainty. To determine whether a model is a GLM, we consider the following properties.
 When a probability formula can be written in the form below
 \begin{equation}
 f(y;\theta)=e^{[a(y)b(\theta)+c(\theta)+d(y)]}
@@ -182,1295 +189,1025 @@ j) Pareto (for fixed $k$):
 2. Complete Table \@ref(tab:table1chp5) containing your results of the preceding exercises.
 
 
-# Poisson Regression {#ch-poissonreg}
+# Logistic Regression {#ch-logreg}
 
-## Learning Objectives
-
-After finishing this chapter, you should be able to:  
-
-- Describe why  simple linear regression is not ideal for Poisson data.
-- Write out a Poisson regression model and identify the assumptions for inference.
-- Write out the likelihood for a Poisson regression and describe how it could be used to estimate coefficients for a model.
-- Interpret estimated coefficients from a Poisson regression and construct confidence intervals for them.
-- Use deviances for Poisson regression models to compare and assess models.
-- Use an offset to account for varying effort in data collection.
-- Fit and use a zero-inflated Poisson (ZIP) model.
-
-## Introduction to Poisson Regression
-
-Consider the following questions:
-
-1. Are the number of motorcycle deaths in a given year related to a state's helmet laws?
-2. Does the number of employers conducting on-campus interviews during a year differ for public and private colleges? 
-3. Does the daily number of asthma-related visits to an Emergency Room differ depending on air pollution indices?
-4. Has the number of deformed fish in randomly selected Minnesota lakes been affected by changes in trace minerals in the water over the last decade? 
-
-Each example involves predicting a response using one or more explanatory variables, although these examples have response variables that are counts per some unit of time or space.  A Poisson random variable is often used to model counts; see Chapter \@ref(ch-distthry) for properties of the Poisson distribution.  Since a Poisson random variable is a count, its minimum value is zero and, in theory, the maximum is unbounded. We'd like to model our main parameter $\lambda$, the average number of occurrences per unit of time or space, as a function of one or more covariates.  For example, in the first question above, $\lambda_i$ represents the average number of motorcycle deaths in a year for state $i$, and we hope to show that state-to-state variability in $\lambda_i$ can be explained by state helmet laws.  
-
-For an OLS linear regression model, the parameter of interest is the average response, $\mu_i$, for subject $i$, and $\mu_i$ is modeled as a line in the case of one explanatory variable. By analogy, it might seem reasonable to try to model the Poisson parameter $\lambda_i$ as a linear function of an explanatory variable but there are some problems with this approach.  In fact, a model like $\lambda_i=\beta_0+\beta_1x_i$ doesn't work well for Poisson data.  A line is certain to yield negative values for certain $x_i$, but $\lambda_i$ can only take on values from 0 to $\infty$. In addition, the equal variance assumption in linear regression inference is violated because as the mean rate for a Poisson variable increases the variance also increases (recall from Chapter \@ref(ch-distthry) that, if $Y$ is the observed count, then $E(Y)=Var(Y)=\lambda$).  
-
-One way to avoid these problems is to model log($\lambda_i$) instead of $\lambda_i$ as a function of the covariates. The log($\lambda_i$) takes on values from $-\infty$ to $\infty$. We can also take into account the increase in the variance with an increasing mean using this approach. (Note that throughout *Broadening Your Statistical Horizons* we use log to represent the natural logarithm.)  Thus, we will consider the **Poisson regression** model:
-
-\begin{equation}
-log(\lambda_i)=\beta_0+\beta_1 x_i
-(\#eq:poisReg)
-\end{equation}
-where the observed values $Y_i \sim$ Poisson with $\lambda=\lambda_i$ for a given $x_i$. For example, each state $i$ can potentially have a different $\lambda$ depending on its value of $x_i$, where $x_i$ could represent presence or absence of a particular helmet law.  Note that the Poisson regression model contains no separate error term like the $\epsilon$ we see in linear regression, because $\lambda$ determines both the mean and the variance of a Poisson random variable.
-
-### Poisson Regression Assumptions
-
-Much like OLS, using Poisson regression to make inferences requires model assumptions.
-
-1. __Poisson Response__ The response variable is a count per unit of time or space, described by a Poisson distribution.
-2. __Independence__ The observations must be independent of one another.
-3. __Mean=Variance__ By definition, the mean of a Poisson random variable must be equal to its variance.
-4. __Linearity__ The log of the mean rate, log($\lambda$), must be a linear function of x.
-
-### A Graphical Look at Poisson Regression
-```{r load_packageschp4, include=FALSE}
-library(dplyr)
-library(ggplot2)    # enable ggplot 
-library(gridExtra)  # enable multiple plotting
-library(knitr)      #for kable
-library(mosaic)
-library(xtable)
-library(pscl)       # needed for the zero inflation model
-library(multcomp)
-library(pander)
-library(MASS)
-library(readr)
-library(forcats)
-
+```{r,include=F}
 if(knitr::is_html_output()){options(knitr.table.format = "html")} else {options(knitr.table.format = "latex")}
 ```
 
-```{r, OLSpois, fig.align="center",out.width="60%", fig.cap='Regession Models: Linear Regression (left) and Poisson Regression (right)',echo=FALSE, warning=FALSE, message=FALSE}
-## Sample data for graph of OLS normality assumption
-##   Code from https://stackoverflow.com/questions/31794876/ggplot2-how-to-curve-small-gaussian-densities-on-a-regression-line?rq=1
+`r if (knitr:::is_html_output()) {"\\newcommand{\\lik}{\\mathrm{Lik}} \\newcommand{\\Lik}{\\mathrm{Lik}}"}`
 
-set.seed(0)
-dat <- data.frame(x=(x=runif(10000, 0, 50)),
-                  y=rnorm(10000, 10*x, 100))
+## Learning Objectives
 
-## breaks: where you want to compute densities
-breaks <- seq(0, max(dat$x), len=5)
-dat$section <- cut(dat$x, breaks)
+- Identify a binomial random variable and assess the validity of the binomial assumptions.
+- Write a generalized linear model for binomial responses in two forms, one as a function of the logit and one as a function of $p$.
+- Explain how fitting a logistic regression differs from fitting an ordinary least squares (OLS) regression model.
+- Interpret estimated coefficients in logistic regression.
+- Differentiate between logistic regression models with binary and binomial responses.
+- Use the residual deviance to compare models, to test for lack-of-fit when appropriate, and to check for unusual observations or needed transformations.
 
-## Get the residuals
-dat$res <- residuals(lm(y ~ x, data=dat))
+## Introduction to Logistic Regression
 
-## Compute densities for each section, flip the axes, add means of sections
-## Note: densities need to be scaled in relation to section size (2000 here)
-dens <- do.call(rbind, lapply(split(dat, dat$section), function(x) {
-  d <- density(x$res, n=5000)
-  res <- data.frame(x=max(x$x)- d$y*1000, y=d$x+mean(x$y))
-  res <- res[order(res$y), ]
-  ## Get some data for normal lines as well
-  xs <- seq(min(x$res), max(x$res), len=5000)
-  res <- rbind(res, data.frame(y=xs + mean(x$y),
-                               x=max(x$x) - 1000*dnorm(xs, 0, sd(x$res))))
-  res$type <- rep(c("empirical", "normal"), each=5000)
-  res
-}))
-dens$section <- rep(levels(dat$section), each=10000)
+Logistic regression is characterized by research questions with binary (yes/no or success/failure) or binomial (number of yesses or successes in $n$ trials) responses: 
 
-ols_assume <- ggplot(dat, aes(x, y)) +
-  geom_point(size = 0.1) +
-  geom_smooth(method="lm", fill=NA, lwd=2) +
-  geom_path(data=dens[dens$type=="normal",], aes(x, y, group=section), 
-            color="salmon", lwd=1.1) +
-  theme_bw() +
-  geom_vline(xintercept=breaks, lty=2)
+- a. Are students with poor grades more likely to binge drink?
+- b. Is exposure to a particular chemical associated with a cancer diagnosis?
+- c. Are the number of votes for a congressional candidate associated with the amount of campaign contributions?
+ 
+**Binary Responses:** Recall from Section \@ref(sec-binary) that binary responses take on only two values: success (Y=1) or failure (Y=0), Yes (Y=1) or No (Y=0), etc. Binary responses are ubiquitous; they are one of the most common types of data that statisticians encounter.  We are often interested in modeling the probability of success $p$ based on a set of covariates, although sometimes we wish to use those covariates to classify a future observation as a success or a failure.
 
-# Now make Poisson regression picture
-set.seed(0)
-dat <- data.frame(x=(x=runif(1000, 0, 20)),
-                  y=rpois(1000, exp(.1*x)))
+Examples (a) and (b) above would be considered to have binary responses (Does a student binge drink?  Was a patient diagnosed with cancer?), assuming that we have a unique set of covariates for each individual student or patient.
 
-## breaks: where you want to compute densities
-breaks <- seq(2, max(dat$x), len=5)
-dat$section <- cut(dat$x, breaks)
+**Binomial Responses:** Also recall from Section \@ref(sec-binomial) that binomial responses are number of successes in $n$ identical, independent trials with constant probability $p$ of success. A sequence of independent trials like this with the same probability of success is called a **Bernoulli process**.  As with binary responses, our objective in modeling binomial responses is to quantify how the probability of success, $p$, is associated with relevant covariates. 
 
-## Get the residuals
-dat$res <- dat$y - .1*dat$x
+Example (c) above would be considered to have a binonial response, assuming we have vote totals at the congressional district level rather than information on individual voters.
 
-## Compute densities for each section, flip the axes, add means of sections
-## Note: densities need to be scaled in relation to section size
-dens <- do.call(rbind, lapply(split(dat, dat$section), function(x) {
-  d <- density(x$res, n=500)
-  res <- data.frame(x=max(x$x)- d$y*10, y=d$x+mean(x$y))
-  res <- res[order(res$y), ]
-  ## Get some data for poisson lines as well
-  xs <- seq(min(x$y), max(x$y), len=500)
-  res <- rbind(res, data.frame(y=xs,
-                x=max(x$x) - 10*dpois(round(xs), exp(.1*max(x$x)))))
-  res$type <- rep(c("empirical", "poisson"), each=500)
-  res
-}))
-dens$section <- rep(levels(dat$section), each=1000)
-
-pois_assume <- ggplot(dat, aes(x, y)) +
-  geom_point(size = 0.1) +
-  geom_smooth(method="loess", fill=NA, lwd=2) +
-  geom_path(data=dens[dens$type=="poisson",], aes(x, y, group=section), 
-            color="salmon", lwd=1.1) +
-  theme_bw() +
-  geom_vline(xintercept=breaks, lty=2)
-
-grid.arrange(ols_assume, pois_assume, ncol = 2)
-```
-
-Figure \@ref(fig:OLSpois) illustrates a comparison of the OLS model for inference to Poisson regression using a log function of $\lambda$.
-
-1. The graphic displaying the ordinary least squares (OLS) inferential model appears in the left panel of Figure \@ref(fig:OLSpois). It shows that for each level of X, the responses appear to be approximately normal.  The panel on the right side of Figure \@ref(fig:OLSpois) depicts what a Poisson regression model looks like. For each level of X, the responses follow a Poisson distribution (Assumption 1). For Poisson regression, small values of $\lambda$ are associated with a distribution that is noticeably skewed with lots of small values and only a few larger ones. As $\lambda$ increases the distribution of the responses begins to look more and more like a normal distribution.
-2. In the OLS regression model, the variation in $Y$ at each level of X, $\sigma^2$, is the same. For Poisson regression the responses at each level of X become more variable with increasing means, where variance=mean (Assumption 3). 
-3. In the case of OLS, the mean responses for each level of X, $\mu_{Y|X}$, fall on a line. In the case of the Poisson model, the mean values of $Y$ at each level of $X$, $\lambda_{Y|X}$, fall on a curve, not a line, although the logs of the means should follow a line (Assumption 4).
-
-
-## Case Studies Overview
-
-We take a look at the Poisson regression model in the context of three case studies. Each case study is based on real data and real questions. Modeling household size in the Philippines introduces the idea of regression with a Poisson response along with its assumptions. A quadratic term is added to a model to determine an optimal size per household, and methods of model comparison are introduced. The campus crime case study introduces two big ideas in Poisson regression modeling: offsets, to account for sampling effort, and overdispersion, when actual variability exceeds what is expected by the model.  Finally, the weekend drinking example uses a modification of a Poisson model to account for more zeros than would be expected for a Poisson random variable. These three case studies also provide context for some of the familiar concepts related to modeling such as exploratory data analysis, estimation, and residual plots.
-
-## Case Study: Household Size in the Philippines
-
-How many other people live with you in your home? The number of people sharing a house differs from country to country and often from region to region. International agencies use household size when determining needs of populations, and the household sizes determine the magnitude of the household needs.
-
-The Philippine Statistics Authority (PSA) spearheads the Family Income and Expenditure Survey (FIES) nationwide. The survey, which is undertaken every three years, is aimed at providing data on family income and expenditure, including levels of consumption by item of expenditure. Our [data](https://www.kaggle.com/issatingzon/exploratory-data-analysis/data), from the 2015 FIES, is a subset of 1500 of the 40,000 observations [@PSA].  Our dataset focuses on five regions: Central Luzon, Metro Manila, Ilocos, Davao, and Visayas (see Figure \@ref(fig:philippinesmap)). 
-
-```{r, philippinesmap, out.width='50%', fig.show='hold', fig.cap="Regions of the Philippines", echo=FALSE}
-knitr::include_graphics("data/map_of_philippines.jpg")
-```
-
-At what age are heads of households in the Philippines most likely to find the largest number of people in their household? Is this association similar for poorer households (measured by the presence of a roof made from predominantly light/salvaged materials)? We begin by explicitly defining our response, $Y=$ number of people other than the head of the household. We then define the explanatory variables: age of the head of the household, type of roof (predominantly light/salvaged material or predominantly strong material), and location (Central Luzon, Davao Region, Ilocos Region, Metro Manila, or Visayas). Note that predominantly light/salvaged materials are a combination of light material, mixed but predominantly light material, and mixed but predominantly salvaged material, and salvaged matrial.  Our response is a count, so we consider a Poisson regression where the parameter of interest is $\lambda$, the average number of people, other than the head, per household. We will primarily examine the relationship between household size and age of the head of household, controlling for location and income.
-
-```{r, include=FALSE}
-fHH1 <- read_csv("data/fHH1.csv")
-```
-
-### Data Organization {#organizedata1}
-The first five rows from our data set `fHH1.csv` are illustrated in Table \@ref(tab:fHH1table1). Each line of the data file refers to a household at the time of the survey:
-
-- `age` = the age of the head of household
-- `numLT5` = the number in the household under 5 years of age 
-- `total` = the number of people in the household other than the head
-- `roof` = the type of roof in the household (either Predominantly Light/Salvaged Material, or Predominantly Strong Material, where stronger material can sometimes be used as a proxy for greater wealth)
-- `location` = where the house is located (Central Luzon, Davao Region, Ilocos Region, Metro Manila, or Visayas)
-
-```{r, fHH1table1, echo=FALSE, comment=NA}
-library(kableExtra)
-library(knitr)
-
-headfHH1 <- fHH1 %>%
-  filter(row_number() < 6)
-kable(headfHH1, booktabs=T,caption="The first five observations from the Philippines Household case study.")
-```
-
-
-### Exploratory Data Analyses {#explore}
-
-```{r, include=FALSE}
-
-mean(fHH1$total)
-var(fHH1$total)
-#sd(fHH1$total)
-
-prop.table(table(fHH1$roof))
-
-fHH1  %>% group_by(roof)  %>% 
-  summarise(mean=mean(total), sd=sd(total), var=var(total), n=n())
-
-fHH1  %>% group_by(location)  %>% 
-  summarise(mean=mean(total), sd=sd(total), var=var(total), n=n())
-```
-
-For the rest of this case study, we will refer to the number of people in a household as the total number of people in that specific household __besides__ the head of household. The average number of people in a household is 3.68 (Var = 5.53), and there are anywhere from 0 to 16 people in the house. Over 11.1\% of these households are made from predominantly light and salvaged material. The mean number of people in a house for houses with a roof made from predominantly strong material is is 3.69 (Var=5.55), whereas houses with a roof made from predominantly light/salvaged material average 3.64 people (Var=5.41). Of the various locations, Visayas has the largest household size, on average, with a mean of 3.90 in the household, and the Davao Region has the smallest with a mean of 3.39.  
-
-```{r, nhouse, fig.align="center",out.width="60%", fig.cap='Philippines: Distribution of household size',echo=FALSE, warning=FALSE, message=FALSE}
-ggplot(fHH1, aes(total)) + geom_histogram(binwidth = .25) + 
-  xlab("Number in the house excluding head of household") +
-  ylab("Count of households")
-```
-
-Figure \@ref(fig:nhouse) reveals a fair amount of variability in the number in each house; responses range from 0 to 16 with many of the respondents reporting between 1 and 5 people in the house. Like many Poisson distributions, this graph is right skewed. It clearly does not suggest that the number of people in a household is a normally distributed response.
-
-```{r, totalPoisByAge, fig.align="center", out.width="60%", fig.cap= 'Distribution of household sizes by age group of the household head.', echo=FALSE, warning = FALSE}
+```{r load_packages, include=FALSE}
+library(dplyr)
+library(ggplot2)    # enable ggplot 
+library(gridExtra)  # enable multiple plotting
+library(mnormt) # contour plot?
+library(lme4) #for models
 library(knitr) #for kable
-cuts = cut(fHH1$age,breaks=c(15,20,25,30,35,40,45,50,55,60,65,70))
-ageGrps <- data.frame(cuts,fHH1)
+library(pander)
+library(readr) # for read_csv
+#library(foreign)
+```
+   
+### Logistic Regression Assumptions
 
-ggplot(data = ageGrps, aes(x = total)) +
-  geom_histogram(binwidth = .25) +
-  facet_wrap(cuts) +
-  xlab("Household size")
+Much like OLS, using logistic regression to make inferences requires model assumptions.
+
+1. __Binary Response__ The response variable is dichotomous (two possible responses) or the sum of dichotomous responses.
+2. __Independence__ The observations must be independent of one another.
+3. __Variance Structure__ By definition, the variance of a binomial random variable is $np(1-p)$, so that variability is highest when $p=.5$.
+4. __Linearity__ The log of the odds ratio, log($\frac{p}{1-p}$), must be a linear function of x.  This will be explained further in the context of the first case study.
+
+### A Graphical Look at Logistic Regression
+```{r, OLSlogistic, fig.align="center", out.width="60%", fig.cap='Linear vs. Logistic regression models for binary response data.', echo=FALSE, warning=FALSE, message=FALSE}
+
+set.seed(0)
+dat <- tibble(x=runif(200, -5, 10),
+                  p=exp(-2+1*x)/(1+exp(-2+1*x)),
+                  y=rbinom(200, 1, p),
+                  logit=log(p/(1-p)))
+
+ggplot(dat, aes(x = x)) +
+  geom_point(aes(y = y)) +
+  geom_smooth(aes(y = y, color = "blue"), method = "lm", se=FALSE) +
+  geom_line(aes(y = p, color = "red")) +
+  scale_colour_manual(name = 'Regression model', 
+         values = c('blue', 'red'), 
+         labels = c('linear', 'logistic'), guide = 'legend')
 ```
 
-Figure \@ref(fig:totalPoisByAge) further shows that responses can be reasonably modeled with a Poisson distribution when grouped by a key explanatory variable: Age of the household head.  These last two plots together suggest that Assumption 1 (Poisson Response) is satisfactory in this case study.
+Figure \@ref(fig:OLSlogistic) illustrates a data set with a binary (0 or 1) response (Y) and a single continuous predictor (X).  The blue line is a linear regression fit with OLS to model the probability of a success (Y=1) for a given value of X.  With a binary response, the line doesn't fit the data well, and it produces predicted probabilities below 0 and above 1.  On the other hand, the logistic regression fit (red curve) with its typical "S" shape follows the data closely and always produces predicted probabilities between 0 and 1.  For these and several other reasons detailed in this chapter, we will focus on the following model for logistic regression with binary or binomial responses:
 
-For Poisson random variables, the variance of $Y$ (i.e., the square of the standard deviation of $Y$), is equal to its mean, where $Y$ represents the size of an individual household. As the mean increases, the variance increases. So, if the response is a count and the mean and variance are approximately equal for each group of $X$, a Poisson regression model may be a good choice. In Table \@ref(tab:table1chp4) we display age groups by 5-year increments, to check to see if the empirical means and variances of the number in the house are approximately equal for each age group. This provides us one way in which to check the Poisson assumption.
+\begin{equation}
+log(\frac{p_i}{1-p_i})=\beta_0+\beta_1 x_i
+(\#eq:logisticReg)
+\end{equation}
+where the observed values $Y_i \sim$ binomial with $p=p_i$ for a given $x_i$ and $n=1$ for binary responses.
 
-```{r, table1chp4, echo=FALSE}
-# Mean = Variance
-table1chp4<- ageGrps  %>% group_by(cuts)  %>% 
-  summarise(mnNum= mean(total),varNum=var(total),n=n())
-kable(table1chp4, booktabs=T, 
-      caption="Compare mean and variance of household size within each age group",
-      col.names = c("Age Groups", "Mean", "Variance", "n"))
+   
+## Case Studies Overview
+We consider three case studies in this chapter.  The first two involve binomial responses (Soccer Goalkeepers and Reconstructing Alabama), while the last case uses a binary response (Trying to Lose Weight).  Even though binary responses are much more common, their models have a very similar form to binomial responses, so the first two case studies will illustrate important principles that also apply to the binary case.  Here are the statistical concepts you will encounter for each Case Study.
+ 
+The soccer goalkeeper data can be written in the form of a 2 $\times$ 2 table. This example is used to describe some of the underlying theory for logistic regression. We demonstrate how binomial probability mass functions (pmfs) can be written in one parameter exponential family form, from which we can identify the canonical link  as in Chapter \@ref(ch-glms). Using the canonical link, we write a Generalized Linear Model for binomial counts and determine corresponding MLEs for model coefficients. Interpretation of the estimated parameters involves a fundamental concept, the odds ratio.
+ 
+The Reconstructing Alabama case study is another binomial example which introduces the notion of deviances, which are used to  compare and assess models. We will check the assumptions of logistic regression using empirical logit plots and deviance residuals.
+ 
+The last case study addresses why teens try to lose weight. Here the response is a binary variable which allows us to analyze individual level data. The analysis builds on concepts from the previous sections in the context of a random sample from CDC's Youth Risk Behavior Survey (YRBS).
+ 
+## Case Study: Soccer Goalkeepers
+Does the probability of a save in a soccer match depend upon whether the goalkeeper's team is behind or not?  @Roskes2011 looked at penalty kicks in the men's World Cup soccer championships from 1982 - 2010, and they assembled data on 204 penalty kicks during shootouts. The data for this study is summarized in Table \@ref(tab:table1chp6).
+
+```{r,include=FALSE}
+State <- c("Behind","Not Behind","Total")
+Saves <- c(2,39,41)
+Scores <- c(22,141,163)
+Tot <- c(24,180,204)
 ```
 
-If there is a problem with this assumption most often we see variances much larger than means.  Here, as expected, we see more variability as age increases.  However, it appears that the variance is smaller than the mean for lower ages, while the variance is greater than the mean for higher ages.  Thus, there is some evidence of a violation of the mean=variance assumption (Assumption 3), although any violations are modest.  
-
-The Poisson regression model also implies that log($\lambda_i$), not the mean household size $\lambda_i$, is a linear function of age; i.e., $log(\lambda_i)=\beta_0+\beta_1\textrm{age}_i$. Therefore, to check the linearity assumption (Assumption 4) for Poisson regression we would like to plot log($\lambda_i$) by age.  Unfortunately, $\lambda_i$ is unknown. Our best guess of $\lambda_i$ is the observed mean number in the household for each age (level of $X$). Because these means are computed for observed data, they are referred to as **empirical** means. Taking the logs of the empirical means and plotting by age provides a way to assess the linearity assumption. The smoothed curve added to Figure \@ref(fig:ageXnhouse) suggests that there is a curvilinear relationship between age and the log of the mean household size, implying that adding a quadratic term should be considered. This finding is consistent with the researchers' hypothesis that there is an age at which a maximum household size occurs. It is worth noting that we are not modeling the log of the empirical means, rather it is the log of the *true* rate that is modeled. Looking at empirical means, however, does provide an idea of the form of the relationship between log($\lambda)$ and $x_i$.
-
-```{r, ageXnhouse,fig.align="center",out.width="60%",fig.cap= 'The log of the mean household sizes, besides the head of household, by age of the head of household, with loess smoother.', echo=FALSE, warning = FALSE}
-## Checking linearity assumption: Empirical log of the means plot
-sumStats <- fHH1 %>% group_by(age) %>% 
-  summarise(mntotal = mean(total),logmntotal = log(mntotal),n=n())
-
-ggplot(sumStats, aes(x=age, y=logmntotal)) +
-  geom_point()+
-  geom_smooth(method = "loess", size = 1.5)+
-  xlab("Age of head of the household") +
-  ylab("Log of the empirical mean number in the house") 
+```{r, table1chp6, echo=FALSE}
+#tab:soccerdata
+table1chp6 <- data.frame(State,Saves,Scores,Tot)
+colnames(table1chp6) <- c(" ","Saves","Scores","Total")
+kable(table1chp6, booktabs=T,caption="Soccer goalkeepers' saves when their team is and is not behind.  Source: Roskes et al. 2011 Psychological Science")
 ```
 
-We can extend Figure \@ref(fig:ageXnhouse) by fitting separate curves for each region (see Figure \@ref(fig:byregion)).  This allows us to see if the relationship between mean household size and age is consistent across region.  In this case, the relationships are pretty similar; if they weren't we could consider adding an age-by-region interaction to our eventual Poisson regression model.
+### Modeling Odds
+Odds are one way to quantify a goalkeeper's performance. Here the odds that a goalkeeper makes a save when his team is behind is 2 to 22 or 0.09 to 1. Or equivalently, the odds that a goal is scored on a penalty kick is 22 to 2 or 11 to 1. An odds of 11 to 1 tells you that a shooter whose team is ahead will score 11 times for every 1 shot that the goalkeeper saves.  When the goalkeeper's team is not behind the odds a goal is scored is 141 to 39 or 3.61 to 1. We see that the odds of a goal scored on a penalty kick are better when the goalkeeper's team is behind than when it is not behind (i.e., better odds of scoring for the shooter when the shooter's team is ahead). We can compare these odds by calculating the __odds ratio__ \index{odds ratio} (OR), 11/3.61 or 3.05, which tells us that the *odds* of a successful penalty kick are 3.05 times higher when the shooter's team is leading.
 
-```{r, byregion, fig.align="center", out.width="60%", fig.cap= 'Empirical log of the mean household sizes vs. age of the head of household, with loess smoother by region.', echo=FALSE, warning = FALSE}
-sumStats2 <- fHH1 %>% group_by(age, location) %>% 
-  summarise(mntotal = mean(total),logmntotal = log(mntotal), n=n())
+In our example, it is also possible to estimate the probability of a goal, $p$, for either circumstance. When the goalkeeper's team is behind, the probability of a successful penalty kick is $p$ = 22/24 or 0.833. We can see that the ratio of the probability of a goal scored divided by the probability of no goal is $(22/24)/(2/24)=22/2$ or 11, the odds we had calculated above. The same calculation can be made when the goalkeeper's team is not behind. In general, we now have several ways of finding the odds of success under certain circumstances: 
+\[\textrm{Odds} = \frac{\# \textrm{successes}}{\# \textrm{failures}}=
+\frac{\# \textrm{successes}/n}{\# \textrm{failures}/n}=
+\frac{p}{1-p}.\] 
 
-ggplot(sumStats2, aes(x=age, y=logmntotal, color=location)) +
-  geom_point()+
-  geom_smooth(method = "loess", se=FALSE)+
-  xlab("Age of head of the household") +
-  ylab("Log empirical mean household size") 
-```
+### Logistic Regression Models for Binomial Responses
 
-Finally, the independence assumption (Assumption 2) can be assessed using knowledge of the study design and the data collection process.  In this case, we do not have enough information to assess the independence assumption with the information we are given. If each household was not selected individually in a random manner, but rather groups of households were selected from different regions with differing customs about living arrangements, the independence assumption would be violated. If this were the case, we could use a multilevel model like those discussed in later chapters with a village term.
+We would like to model the odds of success, however odds are strictly positive. Therefore, similar to modeling log($\lambda$) in Poisson regression, which allowed the response to take on values from $-\infty$ to $\infty$, we will model the log(odds), the __logit__\index{logit}, in logistic regression. Logits will be suitable for modeling with a linear function of the predictors:  
+\begin{equation}
+\log\left(\frac{p}{1 - p}\right)=\beta_0+\beta_1X 
+(\#eq:binreg)
+ \end{equation}
+Models of this form are referred to as __binomial regression models__,\index{binomial regression models} or more generally as __logistic regression models__. \index{logistic regression models}  Here we provide intuition for using and interpreting logistic regression models, and then in the short optional section that follows, we present rationale for these models using GLM theory.
 
+In our example we could define $X=0$ for not behind and $X=1$ for behind and fit the model:
+\begin{equation}
+\log\left(\frac{p_X}{1-p_X}\right)=\beta_0 +\beta_1X
+(\#eq:logitXform)
+\end{equation}
+where $p_X$ is the probability of a successful penalty kick given $X$.  
 
-### Estimation and Inference {#sec-PoisInference}
-
-We first consider a model for which log($\lambda$) is linear in age. We then will determine whether a model with a quadratic term in age provides a significant improvement based on trends we observed in the exploratory data analysis.
-
-R reports an estimated regression equation for the linear Poisson model as:
+So, based on this model, the log odds of a successful penalty kick when the goalkeeper's team is not behind is:
 \[
-\widehat{log(\lambda)} = 1.55 - 0.0047 (age)
+\log\left(\frac{p_0}{1-p_0}\right) =\beta_0 \nonumber,
+\]
+and the log odds when the team is behind is:
+\[
+\log\left(\frac{p_1}{1-p_1}\right)=\beta_0+\beta_1. \nonumber
 \]
 
-```{r, 4verb2, echo=FALSE, comment=NA}
-# Modeling
-modela = glm(total~age,family=poisson,data=fHH1)
-tmp <- capture.output(summary(modela))
-cat(tmp[c(3:4, 9:13, 16:20)], sep='\n')
-#exp(modela$coefficients)
+We can see that $\beta_1$ is the difference between the log odds of a successful penalty kick between games when the goalkeeper's team is behind and games when the team is not behind.  Using rules of logs:
+\begin{equation}
+\beta_1 = (\beta_0 + \beta_1) - \beta_0 = 
+\log\left(\frac{p_1}{1-p_1}\right) - \log\left(\frac{p_0}{1-p_0}\right) =
+\log\left(\frac{p_1/(1-p_1)}{p_0/{(1-p_0)}}\right).
+(\#eq:ORform)
+\end{equation}
+Thus $e^{\beta_1}$ is the ratio of the odds of scoring when the goalkeeper's team is not behind compared to scoring when the team is behind. In general, __exponentiated coefficients in logistic regression are odds ratios (OR)__. A general interpretation of an OR is the odds of success for group A compared to the odds of success for group B---how many times greater the odds of success are in group A compared to group B.
+
+The logit model (Equation \@ref(eq:logitXform)) can also be re-written in a __probability form__:
+\begin{equation} 
+p_X=\frac{e^{\beta_0+\beta_1X}}{1+e^{\beta_0+\beta_1X}}
+(\#eq:pXform)
+\end{equation}
+which can be re-written for games when the goalkeeper's team is behind as:
+\begin{equation} 
+p_1=\frac{e^{\beta_0+\beta_1}}{1+e^{\beta_0+\beta_1}}  
+(\#eq:pBehindform)
+\end{equation}
+and for games when the goalkeeper's team is not behind as:
+\begin{equation} 
+p_0=\frac{e^{\beta_0}}{1+e^{\beta_0}}
+(\#eq:pNotBehindform)
+\end{equation}
+
+We use likelihood methods to estimate $\beta_0$ and $\beta_1$. As we had done in Chapter \@ref(ch-beyondmost), we can write the likelihood for this example in the following form:
+\[\Lik(p_1, p_0) = {28 \choose 22}p_1^{22}(1-p_1)^{2}
+{180 \choose 141}p_0^{141}(1-p_0)^{39}\]
+
+Our interest centers on estimating $\hat{\beta_0}$ and $\hat{\beta_1}$, not $p_1$ or $p_0$. So we replace $p_1$ in the likelihood with an expression for $p_1$ in terms of $\beta_0$ and $\beta_1$  as in Equation \@ref(eq:pBehindform). Similarly, $p_0$ in Equation \@ref(eq:pNotBehindform) involves only $\beta_0$. After removing constants, the new likelihood looks like:
+ 
+\begin{equation}
+    \Lik(\beta_0,\beta_1) \propto \left( \frac{e^{\beta_0+\beta_1}}{1+e^{\beta_0+\beta_1}}\right)^{22}\left(1- \frac{e^{\beta_0+\beta_1}}{1+e^{\beta_0+\beta_1}}\right)^{2}
+    \left(\frac{e^{\beta_0}}{1+e^{\beta_0}}\right)^{141}\left(1-\frac{e^{\beta_0}}{1+e^{\beta_0}}\right)^{39}
+(\#eq:newlik)
+\end{equation}
+      
+Now what? Fitting the model means finding estimates of $\beta_0$ and $\beta_1$, but familiar methods from calculus for maximizing the likelihood don't work here.  Instead, we consider all possible combinations of $\beta_0$ and $\beta_1$.  That is, we will pick that pair of values for $\beta_0$ and $\beta_1$ that yield the largest likelihood for our data. Trial and error to find the best pair is tedious at best, but more efficient numerical methods are available. The MLEs for the coefficients in the soccer goalkeeper study are $\hat{\beta_0}= 1.2852$ and $\hat{\beta_1}=1.1127$.  
+```{r, echo=FALSE, comment=NA, include=FALSE}
+soccer <- tribble(
+  ~behind, ~scores, ~shots,
+  #--|--|----
+  "Yes",  22,  24,
+  "No",  141, 180
+)
+soccer <- soccer %>%
+  mutate(prop1 = scores / shots)
+soccer
+
+breg1 <- glm(prop1 ~ behind, weights = shots,
+  family = binomial(link="logit"), data = soccer )
+tmp <- capture.output(summary(breg1))
+cat(tmp[c(3:5, 9:12)], sep='\n')
 ```
 
-How can the coefficient estimates be interpreted in terms of this example? As done when interpreting slopes in the OLS models, we consider how the estimated mean number in the house, $\lambda$, changes as the age of the household head increases by an additional year. But in place of looking at change in the mean number in the house, with a Poisson regression we consider the log of the mean number in the house and then convert back to original units. For example, consider a comparison of two models---one for a given age ($x$) and one after increasing age by 1 ($x+1$)
+Exponentiating $\hat{\beta_1}$ provides an estimate of the odds ratio (the odds of scoring when the goalkeeper's team is behind compared to the odds of scoring when the team is not behind) of 3.04, which is consistent with our calculations using the 2 $\times$ 2 table. We estimate that the odds of scoring when the goalkeeper's team is behind is over 3 times that of when the team is not behind or, in other words, the odds a shooter is successful in a penalty kick shootout are 3.04 times higher when his team is leading.
+
+**Time out for study discussion (Optional).**  
+
+- Discuss the following quote from the study abstract: "Because penalty takers shot at the two sides of the goal equally often, the goalkeepers' right-oriented bias was dysfunctional, allowing more goals to be scored."
+
+- Construct an argument for why the greater success observed when the goalkeeper's team was behind might be better explained from the shooter's perspective.
+
+Before we go on, you may be curious as to why there is *no error term* in our model statements for logistic or Poisson regression. One way to look at it is to consider that all models describe how observed values are generated. With the logistic model we assume that the observations are generated as a binomial random variables. Each observation or realization of $Y$ = number of successes in $n$ independent and identical trials with a probability of success on any one trial of $p$ is produced by $Y \sim \textrm{Binomial}(n,p)$. So the randomness in this model is not introduced by an added error term but rather by appealing to a Binomial probability distribution, where variability depends only on $n$ and $p$ through $\textrm{Var}(Y)=np(1-p)$, and where $n$ is usually considered fixed and $p$ the parameter of interest.
+
+### Theoretical rationale for logistic regression models (Optional)
+
+Recall from Chapter \@ref(ch-glms) that generalized linear models (GLMs) are a way in which to model a variety of different types of responses. In this chapter, we apply the general results of GLMs to the specific application of binomial responses. Let $Y$ = the number scored out of $n$ penalty kicks. The parameter, $p$, is the probability of a score on a single penalty kick.  Recall that the theory of GLM is based on the unifying notion of the one-parameter exponential family form:
+\begin{equation}
+f(y;\theta)=e^{[a(y)b(\theta)+c(\theta)+d(y)]}
+(\#eq:1expform)
+\end{equation}
+To see that we can apply the general approach of GLMs to binomial responses, we first write an expression for the probability of a binomial response and then use a little algebra to rewrite it until we can demonstrate that it, too, can be written in one-parameter exponential family form with $\theta = p$. This will provide a way in which to specify the canonical link and the form for the model. Additional theory allows us to deduce the mean, standard deviation, and more from this form.
+
+If $Y$ follows a binomial distribution with $n$ trials and probability of success $p$, we can write:
 \begin{align}
-log(\lambda_X) &= \beta_0 + \beta_1X \\
-log(\lambda_{X+1}) &= \beta_0 + \beta_1(X+1) \\
-log(\lambda_{X+1})-log(\lambda_X) &=  \beta_1 \\
-log \left(\frac{\lambda_{X+1}}{\lambda_X}\right)   &= \beta_1\\
-\frac{\lambda_{X+1}}{\lambda_X} &= e^{\beta_1}
-(\#eq:rateRatio)
+P(Y=y)&= \binom{n}{y}p^y(1-p)^{(n-y)} \\
+      &=e^{y\log(p) + (n-y)\log(1-p) + \log\binom{n}{y}}
+(\#eq:canlink)
 \end{align}
+However, this probability mass function is not quite in one parameter exponential family form.  Note that there are two terms in the exponent which consist of a product of functions of $y$ and $p$. So more simplification is in order:
+\begin{equation}
+P(Y=y) = e^{y\log\left(\frac{p}{1-p}\right) + n\log(1-p)+ \log\binom{n}{y}}
+(\#eq:opeff)
+\end{equation}
+Don't forget to consider the support; we must make sure that the set of possible values for this response is not dependent upon $p$.  For fixed $n$ and any value of $p$, $0<p<1$, all integer values from $0$ to $n$ are possible, so the support is indeed independent of $p$.
 
-These results suggest that by exponentiating the coefficient on age we obtain the multiplicative factor by which the mean count changes. In this case, the mean number in the house changes by a factor of $e^{-0.0047}=0.995$ or decreases by 0.5\% with each additional year older the household head is; or, we predict a 0.47\% increase in mean household size for a 1 year decrease in age of the household head ($1/.995=1.0047$). The quantity on the left hand side of Equation \@ref(eq:rateRatio) is referred to as a __rate ratio__  or __relative risk__, and it represents a percent change in the response for a unit change in X.  In fact, for regression models in general, whenever a variable (response or explanatory) is logged, we make interpretations about multiplicative effects on that variable, while with unlogged variables we can reach our usual interpretations about additive effects.  
+The one parameter exponential family form for binomial responses shows that the  canonical link is $\log\left(\frac{p}{1-p}\right)$. Thus, GLM theory suggests that constructing a model using the logit, the log odds of a score, as a linear function of covariates is a reasonable approach.   
 
-```{r, 4verb2a, message=FALSE, include=FALSE}
-# Wald type CI by hand
-beta1hat <- summary(modela)$coefficients[2,1]
-beta1se <- summary(modela)$coefficients[2,2]
-beta1hat - 1.96*beta1se   # lower bound 
-beta1hat + 1.96*beta1se   # upper bound 
 
-exp(beta1hat - 1.96*beta1se)
-exp(beta1hat + 1.96*beta1se)
+## Case Study: Reconstructing Alabama
+This case study demonstrates how wide ranging applications of statistics can be. Many would not associate statistics with historical research, but this case study shows that it can be done. US Census data from 1870 helped historian Michael Fitzgerald of St. Olaf College gain insight into important questions about how railroads were supported during the Reconstruction Era.
+
+In a paper entitled "Reconstructing Alabama: Reconstruction Era Demographic and Statistical Research," Ben Bayer performs an analysis of data from 1870 to explain influences on voting on referendums related to railroad subsidies [@Bayer2011]. Positive votes are hypothesized to be inversely proportional to the distance a voter is from the proposed railroad, but the racial composition of a community (as measured by the percentage of blacks) is hypothesized to be associated with voting behavior as well. Separate analyses of three counties in Alabama---Hale, Clarke, and Dallas---were performed; we discuss Hale County here. This example differs from the soccer example in that it includes continuous covariates. Was voting on railroad referenda related to distance from the proposed railroad line and the racial composition of a community?
+
+
+### Data Organization
+The unit of observation for this data is a community in Hale County. We will focus on the following variables from `RR_Data_Hale.csv` collected for each community:
+
+- `YesVotes` = the number of "Yes" votes in favor of the proposed railroad line (our primary response variable)
+
+- `NumVotes` = total number of votes cast in the election
+
+- `pctBlack` = the percentage of blacks in the community
+
+- `distance` = the distance, in miles, the proposed railroad is from the community
+
+```{r, include=FALSE, comment=NA}
+community <- c("Carthage","Cederville","Greensboro","Havana")
+pctBlack <- c("58.4","92.4","59.4","58.4")
+distance <- c(17,7,0,12)
+YesVotes <- c(61,0,1790,16)
+NumVotes <- c(110,15,1804,68)
 ```
 
-Typically the standard errors for the estimated coefficients are included in Poisson regression output. Here the standard error for the estimated coefficient for age is 0.00094. We can use the standard error to construct a confidence interval for $\beta_1$. A 95\% CI provides a range of plausible values for the `age` coefficient and can be constructed:
-\[\hat\beta_1-Z^*\cdot SE(\hat\beta_1), \hat\beta_1+Z^*\cdot SE(\hat\beta_1)\]
-\[-0.0047-1.96*0.00094, -0.0047+1.96*0.00094\]
-\[ (-0.0065, -0.0029).
- \]
-Exponentiating the endpoints yields a confidence interval for the relative risk; i.e., the percent change in household size for each additional year older.  Thus $(e^{-0.0065},e^{-0.0029})=(0.993,0.997)$ suggests that we are 95\% confident that the mean number in the house decreases between 0.7\% and 0.3\% for each additional year older the head of household is. It is best to construct a confidence interval for the coefficient and then exponentiate the endpoints because the estimated coefficients more closely follow a normal distribution than the exponentiated coefficients. There are other approaches to constructing intervals in these circumstances, including profile likelihood, the delta method, and bootstrapping, and we will discuss some of those approaches later.  In this case, for instance, the profile likelihood interval is nearly identical to the Wald-type (normal theory) confidence interval above.
-
-```{r, message=FALSE}
-# CI for betas using profile likelihood
-confint(modela)
-exp(confint(modela))
-```
-
-If there is no association between age and household size, there is no change in household size for each additional year, so $\lambda_X$ is equal to $\lambda_{X+1}$ and the ratio $\lambda_{X+1}/\lambda_X$ is 1.  In other words, if there is no association between age and household size, then $\beta_1=0$ and $e^{\beta_1}=1$.  Note that our interval for $e^{\beta_1}$, (0.993,0.997), does not include 1, so the model with age is preferred to a model without age; i.e., age is significantly associated with household size.  Note that we could have similarly confirmed that our interval for $\beta_1$ does not include 0 to show the significance of age as a predictor of household size.  
-
-Another way to test the significance of the age term is to calculate a __Wald-type statistic__. A Wald-type test statistic is the estimated coefficient divided by its standard error. When the true coefficient is 0, this test statistic follows a standard normal distribution for sufficiently large $n$. The estimated coefficient associated with the linear term in age is ${\hat{\beta}_1}=-0.0047$ with standard error $SE(\hat{\beta}_1)=0.00094$.  The value for the Wald test statistic is then $Z=\hat{\beta}_1/SE(\hat{\beta}_1)=-5.026$, where $Z$ follows a standard normal distribution if $\beta_1=0$.  In this case, the two-sided p-value based on the standard normal distribution for testing $H_0:\beta_1=0$ is almost 0 ($p=0.000000501$).  In conclusion, we have statistically significant evidence (Z = -5.026, p < .001) that average household size decreases as age of the head of household increases.  
-
-### Using Deviances to Compare Models {#sec-Devtocompare}
-
-There is another way in which to assess how useful age is in the model. A __deviance__ is a way in which to measure how the observed data deviates from the model predictions; it will be defined more precisely in Section \@ref(sec-PoisResid), but it is similar to sum of squared errors (unexplained variability in the response) in OLS regression.  Because we want models that minimize deviance, we calculate the __drop-in-deviance__ when adding age to the model with no covariates (the **null model**). The deviances for the null model and the model with age can be found in the model output. A residual deviance for the model with age is reported as 2337.1 with 1498 df. The output also includes the deviance and degrees of freedom for the null model (2362.5 with 1499 df). The drop-in-deviance is 25.4 (2362.5 - 2337.1) with a difference of only 1 df, so that the addition of one extra term (age) reduced unexplained variability by 25.4.  If the null model were true, we would expect the drop-in-deviance to follow a $\chi^2$ distribution with 1 df. Therefore the p-value for comparing the null model to the model with age is found by determining the probability that the value for a $\chi^2$ random variable with one degree of freedom exceeds 25.4, which is essentially 0. Once again, we can conclude that we have statistically significant evidence ($\chi^2_{\text{df} =1}=25.4$, $p < .001$) that average household size decreases as age of the head of household increases.  
-
-```{r}
-# p-value for test comparing the null and first order models
-# drop.in.dev <- modela$null.deviance - modela$deviance; drop.in.dev
-# diff.in.df <- modela$df.null - modela$df.residual; diff.in.df
-# 1-pchisq(drop.in.dev, diff.in.df)
-model0 = glm(total~1,family=poisson,data=fHH1)
-anova(model0, modela, test = "Chisq")
-```
-
-More formally, we are testing:
-
-$$Null \ (reduced) \ Model: \log(\lambda) = \beta_0 \ or \ \beta_1=0$$
-$$Larger \ (full) \ Model: \log(\lambda) = \beta_0 + \beta_1(\textrm{age}) \ or \ \beta_1 \neq 0 $$
-
-In order to use the drop-in-deviance test, the models being compared must be **nested**; i.e., all the terms in the smaller model must appear in the larger model. Here the smaller model is the null model with the single term $\beta_0$ and the larger model has $\beta_0$ and $\beta_1$, so the two models are indeed nested. For nested models, we can compare the models' residual deviances to determine whether the larger model provides a significant improvement.  
-
-Here, then, is a summary of these two approaches to hypothesis testing about terms in Poisson regression models:
-
-<p align="center"> __Drop-in-deviance test to compare models__ </p>
-- Compute the deviance for each model, then calculate: drop-in-deviance = residual deviance for reduced model - residual deviance for the larger model.
-- When the reduced model is true, the drop-in-deviance $\sim \chi^2_d$
-where d= the difference in the degrees of freedom associated with the two models (that is, the difference in the number of terms / coefficients).
-- A large drop-in-deviance favors the larger model.
-
-<p align="center"> __Wald test for a single coefficient__ </p>
-- Wald-type statistic = estimated coefficient / standard error
-- When the true coefficient is 0, for sufficiently large $n$, the test statistic $\sim$ N(0,1).
-- If the magnitude of the test statistic is large, there is evidence that the true coefficient is not 0.
-
-The drop-in-deviance and the Wald-type tests usually provide consistent results; however, if there is a discrepancy the drop-in-deviance is preferred.  Not only does the drop-in-deviance test perform better in more cases, but it's also more flexible.  If two models differ by one term, then the drop-in-deviance test essentially tests if a single coefficient is 0 like the Wald test does, while if two models differ by more than one term, the Wald test is no longer appropriate.  
-
-### Using Likelihoods to fit Poisson Regression Models (Optional) {#likelihood.sec}
-
-Before continuing with model building, we take a short detour to see how coefficient estimates are determined in a Poisson regression model. The least squares approach requires a linear relationship between the parameter, $\lambda_i$ (the expected or mean response for observation $i$), and $x_i$ (the age for observation $i$). However, it is log$(\lambda_i)$, not $\lambda_i$, that is linearly related to X with the Poisson model. The assumptions of equal variance and normality also do not hold for Poisson regression.  Thus, the method of least squares will not be helpful for inference in Poisson Regression. Instead of OLS, we employ the likelihood principle to find estimates of our model coefficients. We look for those coefficient estimates for which the likelihood of our data is maximized; these are the __maximum likelihood estimates__.
-
-The likelihood for n *independent* observations is the product of the probabilities. For example, if we observe five households with household sizes of 4, 2, 8, 6, and 1 person beyond the head, the likelihood is:
-\[ Likelihood = P(Y_1=4)*P(Y_2=2)*P(Y_3=8)*P(Y_4=6)*P(Y_5=1)\]
-Recall that the probability of a Poisson response can be written
-\[P(Y=y)=\frac{e^{-\lambda}\lambda^y}{y!}\] for $y = 0, 1, 2, ...$
-So the likelihood can be written as
-\begin{align*}
- Likelihood&= \frac{ e^{-\lambda_1}\lambda_1^4 }{ 4! }*
- \frac{ e^{-\lambda_2}\lambda_2^2 }{ 2! } *\frac{e^{-\lambda_3}\lambda_3^8}{8!}*
- \frac{e^{-\lambda_4}\lambda_4^6}{6!}*\frac{e^{-\lambda_5}\lambda_5^1}{1!}\\
- \end{align*}
-where each $\lambda_i$ can differ for each household depending on a particular $x_i$.  As in chapter \@ref(ch-beyondmost), it will be easier to find a maximum if we take the log of the likelihood and ignore the constant term resulting from the sum of the factorials:
-
-\begin{align}
- -logL& \propto \lambda_{1}-4log(\lambda_{1})+\lambda_{2}-2log(\lambda_{2}) \nonumber \\
- & +\lambda_{3}-8log(\lambda_{3})+\lambda_{4}-6log(\lambda_{4}) \nonumber \\
- & +\lambda_{5}-log(\lambda_{5})
- (\#eq:poisLoglik)
-\end{align}
-
-Now if we had the age of the head of the household for each house (X), we consider the Poisson regression model:
-\[
-log(\lambda_i)=\beta_0+\beta_1x_i
- \]
-This implies that $\lambda$ differs for each age and can be determined using
- \[\lambda_i=e^{\beta_0+\beta_1x_i.}\]
-
- If the ages are $X=c(32,21,55,44,28)$ years, our loglikelihood can be written:
-
-\begin{align}
- logL & \propto [-e^{\beta_0+\beta_132}+4({\beta_0+\beta_132})]+
-[-e^{\beta_0+\beta_121}+2({\beta_0+\beta_121})]+ \nonumber \\ 
-&  [-e^{\beta_0+\beta_155}+8({\beta_0+\beta_155})]+
-[-e^{\beta_0+\beta_144}+6({\beta_0+\beta_144})]+ \nonumber \\
-  &  [-e^{\beta_0+\beta_128}+({\beta_0+\beta_128})]
-(\#eq:poisLoglik2)
-\end{align}
-
-To see this, match the terms in Equation \@ref(eq:poisLoglik) with those in Equation \@ref(eq:poisLoglik2) noting that $\lambda_i$ has been replaced with $e^{\beta_0+\beta_1x_i}$. It is Equation \@ref(eq:poisLoglik2) that will be used to estimate the coefficients $\beta_0$ and $\beta_1$. Although this looks a little more complicated than the loglikelihoods we saw in Chapter \@ref(ch-beyondmost), the fundamental ideas are the same. In theory, we try out different possible values of $\beta_0$ and $\beta_1$ until we find the two for which the loglikelihood is largest.  Most statistical software packages have automated search algorithms to find those values for $\beta_0$ and $\beta_1$ that maximize the loglikelihood.
-
-
-### Second Order Model
-
-In Section \@ref(sec-Devtocompare), the Wald-type test and drop-in-deviance test both suggest that a linear term in age is useful.  But our exploratory data analysis in Section \@ref(explore) suggests that a quadratic model might be more appropriate.  A quadratic model would allow us to see if there exists an age where the number in the house is, on average, a maximum. The output for a quadratic model appears below.
-
-```{r, 4verb3, echo=FALSE, comment=NA}
-# Quadratic Model
-fHH1 = fHH1 %>% mutate(age2 = age*age)
-modela2 = glm(total~age+age2,family=poisson,data=fHH1)
-tmp <- capture.output(summary(modela2))
-cat(tmp[c(3:4, 9:14, 17:21)], sep='\n')
-```
-
-We can assess the importance of the quadratic term in two ways. First, the p-value for the Wald-type statistic for age$^2$ is statistically significant (Z = -11.058, p < 0.001). Another approach is to perform a drop-in-deviance test.
-
-
-```{r, 4verb3a}
-# p-value for test comparing the null and first order models
-# drop.in.dev <- modela$deviance - modela2$deviance; drop.in.dev
-# diff.in.df <- modela$df.residual - modela2$df.residual; diff.in.df
-# 1-pchisq(104.78, 1)
-anova(modela, modela2, test = "Chisq")
-```
-
-
-$H_0$: log($\lambda$)=$\beta_0+\beta_1age$ (reduced model)
-
-$H_A:$ log($\lambda$)=$\beta_0+\beta_1age + \beta_2age^2$ (larger model)
-
-The first order model has a residual deviance of 2337.1 with 1498 df and the second order model, the quadratic model, has a residual deviance of 2200.9 with 1497 df. The drop-in-deviance by adding the quadratic term to the linear model is 2337.1 - 2200.9 = 136.2 which can be compared to a $\chi^2$ distribution with one degree of freedom. The p-value is esentially 0, so the observed drop of 136.2 again provides significant support for including the quadratic term.  
-
-We now have an equation in age which yields the estimated log(mean number in the house).  
-\[
-\textrm{log(mean numHouse)} =  -0.333 + 0.071(\textrm{age}) - 0.00071 (\textrm{age}^2)
-\]
-
-```{r, include=FALSE}
-# Finding the age where the number in the house is a maximum
-coefa2 = modela2$coefficients[3]
-coefa = modela2$coefficients[2]
-coefi = modela2$coefficients[2]
-estLogNumHouse.f <- function(age){
-  return(coefa2*(age)^2 + coefa*(age) + coefi)
-}
-optimize(estLogNumHouse.f, interval=c(20,70), maximum=TRUE)
-
-```
-
-As shown in the following, with calculus we can determine that the maximum estimated additional number in the house is $e^{1.608} = 4.996$ when the head of the household is 50.328 years old.
-
-\begin{align}
-\textrm{log(total)} & = -0.333 + 0.071(\textrm{age}) - 0.00071 (\textrm{age}^2) \\
-\frac{d}{d\textrm{age}}\textrm{log(total)} & = 0 + 0.071 - 0.0014 (\textrm{age}) = 0 \\
-(\textrm{age}) & = 50.04 \\
-\textrm{max[log(total)]} & = -0.333 + 0.071 \times 50.04 - 0.00071 \times (50.04)^2 = 1.608
-\end{align}
-
-
-### Adding a covariate
-
-We should consider other covariates that may be related to household size. By controlling for important covariates, we can obtain more precise estimates of the relationship between age and household size. In addition, we may discover that the relationship between age and household size may differ by levels of a covariate. One important covariate to consider is location. As described earlier in the case study, there are 5 different regions that are associated with the `Location` variable: Central Luzon, Metro Manila, Visayas, Davao Region, and Ilocos Region. Assessing the utility of including the covariate `Location` is, in essence, comparing two nested models; here the quadratic model is compared to the quadratic model plus terms for *Location*. Results from the fitted model appears below; note that the Central Luzon is the reference region that all other regions are compared to.
-
-```{r, 4verb5, comment=NA, echo=FALSE}
-modela2L = glm(total~age+age2+location,family=poisson,data=fHH1)
-tmp <- capture.output(summary(modela2L))
-cat(tmp[c(3:5, 10:19, 22:26)], sep='\n')
+```{r, table2chp6, echo=FALSE, comment=NA}
+#tab:sampleRows
+table2chp6 <- data.frame(community, pctBlack, distance, YesVotes, NumVotes)
+colnames(table2chp6) <- c("community","pctBlack", "distance","YesVotes","NumVotes")
+kable(table2chp6, booktabs=T, caption="Sample of the data for the Hale County, Alabama, railroad subsidy vote.")
 ```
 
 ```{r, include=FALSE}
-exp(modela2L$coefficients)
+rrHale.df = read.csv("data/RR_Data_Hale.csv")
+rrHale.df <- rrHale.df %>%
+  dplyr::select(community = County, pctBlack = X..Pop..Black, 
+                distance = Distance.from.RR, YesVotes = Yes.1st.Vote, 
+                NumVotes = Num.Voting.1st) %>%
+  filter(!is.na(pctBlack)) %>%
+  mutate(propYes = YesVotes / NumVotes, InFavor = (propYes > .50)) 
+rrHale.df
+
+# checking correlation betwe predictors
+with(rrHale.df,cor(pctBlack,distance))
+
+# overall proportion Yes
+sum(rrHale.df$YesVotes) / sum(rrHale.df$NumVotes)
+# overall proportion Yes without Grennsboro
+sum(rrHale.df$YesVotes[rrHale.df$community!="Greensboro"]) / 
+  sum(rrHale.df$NumVotes[rrHale.df$community!="Greensboro"])
 ```
 
-```{r, 4verb5a, include = FALSE}
-# p-value for test comparing the null and first order models
-drop.in.dev <- modela2$deviance - modela2L$deviance; drop.in.dev
-diff.in.df <- modela2$df.residual - modela2L$df.residual; diff.in.df
-1-pchisq(drop.in.dev, diff.in.df)
+### Exploratory Analyses
+
+We first look at a coded scatterplot to see our data. Figure \@ref(fig:coded) portrays the relationship between `distance` and `pctBlack` coded by the `InFavor` status (whether a community supported the referendum with over 50\% Yes votes). From this scatterplot, we can see that all of the communities in favor of the railroad referendum are over 55\% black, and all of those opposed are 7 miles or farther from the proposed line. The overall percentage of voters in Hale County in favor of the railroad is 87.9\%.
+
+```{r, coded, fig.align="center",out.width="60%", fig.cap=' Scatterplot of distance from a proposed rail line and percent black in the community coded by whether the community was in favor of the referendum or not.',echo=FALSE, warning=FALSE}
+#Coded Scatterplot
+ggplot(rrHale.df, aes(x=distance, y=pctBlack, color=InFavor)) + 
+  geom_point(size = 2.5) +
+  #scale_shape_manual(values=c(1,2)) + # Use a slightly darker palette than normal
+  ylab("Percent black in the community") +
+  xlab("Distance to the proposed railroad")
 ```
 
-Our Poisson regression model now looks like:
+Recall that a model with two covariates has the form:
+ \[\log(\textrm{odds}) = \log\left(\frac{p}{1-p}\right) = \beta_0+\beta_1X_1+\beta_2X_2.\]
+where $p$ is the proportion of Yes votes in a community.  In logistic regression, we expect the logits to be a linear function of $X$, the predictors. To assess the linearity assumption, we construct **empirical logit plots**, where "empirical" means "based on sample data." Empirical logits are computed for each community by taking $\log\left(\frac{\textrm{number of successes}}{\textrm{number of failures}}\right)$.  In Figure \@ref(fig:emplogits), we see that the plot of empirical logits versus distance produces a plot that looks linear, as needed for the logistic regression assumption. In contrast, the empirical logits by percent black reveal that Greensboro deviates quite a bit from the otherwise linear pattern; this suggests that Greensboro is an outlier and possibly an influential point. Greensboro has 99.2\% voting yes with only 59.4\% black. 
+```{r,emplogits, fig.align="center",out.width="60%", fig.cap='Empirical logit plots for the Railroad Referendum data.',echo=FALSE, warning=FALSE}
+#elogitXdist and elogitXperBlk
+# To check the linearity assumption
+# Look for outliers
+
+## Empirical logit Plots
+# Compute the empirical logits (added 0.5 to avoid log(0))
+phat <- with(rrHale.df, (YesVotes+.5)/(NumVotes+1))
+rrHale.df$elogit <- log(phat/(1-phat))
+rrHale.df$Greensboro <- ifelse(rrHale.df$community=="Greensboro", "Greensboro", NA)
+## Plots
+logdis <- ggplot(rrHale.df, aes(x=distance, y=elogit))+
+    geom_point(shape=1) +    # Use hollow circles
+    geom_smooth(method=lm,   # Add linear regression line
+                se=FALSE) + # Don't add shaded confidence region
+  xlab("distance") + ylab("empirical logits") + labs(title="Hale Empirical logits by distance")
+logblack <- ggplot(rrHale.df, aes(x=pctBlack, y=elogit))+
+    geom_point(shape=1) +    # Use hollow circles
+    geom_smooth(method=lm,   # Add linear regression line
+                se=FALSE) +   # Don't add shaded confidence region
+  xlab("percent black") + ylab("empirical logits") + 
+  labs(title="Hale Empirical logits by percent black") +
+  geom_text(aes(label=Greensboro), nudge_x = 7.5, nudge_y = -.5)
+grid.arrange(logdis, logblack ,ncol=1)
+```
+
+In addition to examining how the response correlates with the predictors, it is a good idea to determine whether the predictors correlate with one another. Here the correlation between distance and percent black is negative and moderately strong with $r = -0.49$. We'll watch to see if the correlation affects the stability of our odds ratio estimates.
+ 
+
+### Initial Models
+The first model includes only one covariate, distance.
+ 
+```{r, 6verb1, echo=FALSE, comment=NA}
+# Model with just distance
+model.HaleD <- glm(cbind(YesVotes, NumVotes - YesVotes) ~ distance,
+                   family = binomial, data = rrHale.df)
+model.HaleD.alt <- glm(YesVotes / NumVotes ~ distance, weights = NumVotes,
+                   family = binomial, data = rrHale.df)  # alternative expression
+tmp <- capture.output(summary(model.HaleD))
+cat(tmp[c(3:5, 10:14, 19:21)], sep='\n')
+# exp(coef(model.HaleD))
+```
+
+Our estimated binomial regression model is:
+\[\log\left(\frac{\hat{p}_i}{1-\hat{p}_i}\right)=3.309-0.288 (\textrm{distance}_i)\]
+where $\hat{p}_i$ is the estimated proportion of Yes votes in community $i$.  The estimated odds ratio for distance, that is the exponentiated coefficient for distance, in this model is $e^{-0.288}=0.750$. It can be interpreted as follows: for each additional mile from the proposed railroad, the support (odds of a Yes vote) declines by 25.0\%.
+
+The covariate `pctBlack` is then added to the first model. 
+
+```{r, 6verb2, echo=FALSE, comment=NA}
+# model with distance and pctBlack
+model.HaleBD <- glm(cbind(YesVotes, NumVotes - YesVotes) ~ distance + pctBlack,
+                   family = binomial, data = rrHale.df)
+tmp <- capture.output(summary(model.HaleBD))
+cat(tmp[c(3:5, 10:15, 20:22)], sep='\n')
+
+
+```
+
+```{r, include=FALSE}
+exp(coef(model.HaleBD))
+```
+
+Despite the somewhat strong negative correlation between percent black and distance, the estimated odds ratio for distance remains approximately the same in this new model (OR $= e^{-0.29} = 0.747$); controlling for percent black does little to change our estimate of the effect of distance. For each additional mile from the proposed railroad, odds of a Yes vote declines by 25.3\% after adjusting for the racial composition of a community.  We also see that, for a fixed distance from the proposed railroad, the odds of a Yes vote declines by 1.3\% (OR $= e^{-.0132} = .987$) for each additional percent black in the community.
+
+
+### Tests for significance of model coefficients {#sec-logisticInf}
+
+Do we have statistically significant evidence that support for the railroad referendum decreases with higher proportions of black residents in a community, after accounting for the distance a community is from the railroad line?  As discussed in Section \@ref(sec-PoisInference) with Poisson regression, there are two primary approaches to testing signficance of model coefficients: __Drop-in-deviance test to compare models__ and __Wald test for a single coefficient__.
+
+With our larger model given by $\log\left(\frac{p_i}{1-p_i}\right) = \beta_0+\beta_1(\textrm{distance}_i)+\beta_2(\textrm{pctBlack}_i)$, the Wald test produces a highly significant p-value ($Z=\frac{-0.0132}{0.0039}= -3.394$, $p=.00069$) indicating significant evidience that support for the railroad referendum decreases with higher proportions of black residents in a community, after adjusting for the distance a community is from the railroad line.
+
+The drop in deviance test would compare the larger model above to the reduced model $\log\left(\frac{p_i}{1-p_i}\right) = \beta_0+\beta_1(\textrm{distance}_i)$ by comparing residual deviances from the two models.  
+```{r, comment=NA, message=FALSE}
+anova(model.HaleD, model.HaleBD, test = "Chisq")
+```
+The drop-in-deviance test statistic is $318.44 - 307.22 = 11.22$ on $9 - 8 = 1$ df, producing a p-value of .00081, in close agreement with the Wald test.  
+
+A third approach to determining significance of $\beta_2$ would be to generate a 95\% confidence interval and then checking if 0 falls within the interval or, equivalently, if 1 falls within a 95\% confidence interval for $e^{\beta_2}.$ The next section describes two approaches to producing a confidence interval for coefficients in logistic regression models.
+
+### Confidence intervals for model coefficients
+
+Since the Wald statistic follows a normal distribution with $n$ large, we could generate a Wald-type (normal-based) confidence interval for $\beta_2$ using:
+\[\hat\beta_2 \pm 1.96\cdot\textrm{SE}(\hat\beta_2)\]
+and then exponentiating endpoints if we prefer a confidence interval for the odds ratio $e^{\beta_2}$.  In this case,
 \begin{align}
-\textrm{log(total)} & = -0.384 + 0.070 \cdot \textrm{age} - 0.00070 \cdot \textrm{age}^2 +0.061 \cdot \textrm{IlocosRegion} + \\ 
- & 0.054 \cdot\textrm{MetroManila}  +0.112 \cdot\textrm{Visayas} - 0.019 \cdot \textrm{DavaoRegion}
+95\% \textrm{ CI for } \beta_2 &= \hat{\beta}_2 \pm 1.96 \cdot \textrm{SE}(\hat{\beta}_2) \\
+                               &= -0.0132 \pm 1.96 \cdot 0.0039 \\
+                               &= -0.0132 \pm 0.00764 \\
+                               &= (-0.0208, -0.0056) \\
+95\% \textrm{ CI for } e^{\beta_2} &= (e^{-0.0208}, e^{-0.0056}) \\
+                                   &= (.979, .994) \\
+95\% \textrm{ CI for } e^{10\beta_2} &= (e^{-0.208}, e^{-0.056}) \\
+                                      &= (.812, .946)
 \end{align}
-Notice that because there are 5 different locations, we must represent the effects of different locations through 4 indicator variables.  For example, $\hat{\beta}_6=-0.0194$ indicates that, after controlling for the age of the head of household, the log mean household size is 0.0194 lower for households in the Davao Region than for households in the reference location of Central Luzon. In more interpretable terms, mean household size is $e^{-0.0194}=0.98$ times "higher" (i.e., 2\% lower) in the Davao Region than in Central Luzon, when holding age constant.  
+Thus, we can be 95\% confident that a 10\% increase in the proportion of black residents is associated with a 5.4\% to 18.8\% decrease in the odds of a Yes vote for the railroad referendum.  This same relationship could be expressed as between a 0.6\% and a 2.1\% decrease in odds for each 1\% increase in the black population, or between a 5.7\% ($1/e^{-.056}$) and a 23.1\% ($1/e^{-.208}$) increase in odds for each 10\% decrease in the black population, after adjusting for distance.  Of course, with $n=11$, we should be cautious about relying on a Wald-type interval in this example.
 
-```{r}
-anova(modela2,modela2L, test="Chisq")
+Another approach available in R is the **profile likelihood method**, similar to Chapter \@ref(ch-poissonreg).
+
+```{r, comment=NA, message=FALSE}
+exp(confint(model.HaleBD))
 ```
 
-To test if the mean household size significantly differs by location, we must use a drop-in-deviance test, rather than a Wald-type test, because four terms (instead of just one) are added when including the `location` variable. From the Analysis of Deviance table above, adding the four terms corresponding to location to the quadratic model with age produces a statistically significant improvement $(\chi^2=13.144, df = 4, p=0.0106)$, so there is significant evidence that mean household size differs by location, after controlling for age of the head of household.  Further modeling (not shown) shows that after controlling for location and age of the head of household, mean household size did not differ between the two types of roofing material.
+In the model with `distance` and `pctBlack`, the profile likelihood 95\% confidence interval for $e^{\beta_2}$ is (.979, .994), which is approximately equal to the Wald-based interval despite the small sample size.  We can also confirm the statistically significant association between percent black and odds of voting Yes (after controlling for distance), because 1 is not a plausible value of $e^{\beta_2}$ (where an odds ratio of 1 would imply that the odds of voting Yes do not change with percent black).
+  
+### Testing for goodness of fit
 
-```{r, 4morephil, comment=NA, echo=FALSE, include = FALSE}
-modela4 = glm(total ~ age + age2 + location + roof, 
-              family = poisson, data = fHH1)
-summary(modela4)
+As in Section \@ref(sec-PoisGOF), we can evaluate the goodness of fit for our model by comparing the residual deviance (307.22) to a $\chi^2$ distribution with $n-p$ (8) degrees of freedom. 
+```{r, gof2, comment=NA}
+1-pchisq(307.2173, 8)
 ```
 
-### Residuals for Poisson Models (Optional) {#sec-PoisResid}
+The model with `pctBlack` and `distance` has statistically significant evidence of lack of fit ($p<.001$).  
 
-Residual plots may provide some insight into Poisson regression models, especially linearity and outliers, although the plots are not quite as useful here as they are for OLS. There are a few options for computing residuals and predicted values. Residuals may have the form of residuals for OLS models or the form of deviance residuals which, when squared, sum to the total deviance for the model. Predicted values can be estimates of the counts, $e^{\beta_0+\beta_1X}$, or log counts, $\beta_0+\beta_1X$. We will typically use the deviance residuals and predicted counts. 
+Similar to the Poisson regression models, this lack of fit could result from (a) missing covariates, (b) outliers, or (c) overdispersion.  We will first attempt to address (a) by fitting a model with an interaction between distance and percent black, to determine whether the effect of racial composition differs based on how far a community is from the proposed railroad. 
+```{r, 6verb3, echo=FALSE, comment=NA}
+# model with distance and pctBlack and their interaction
+model.HaleBxD <- glm(cbind(YesVotes, NumVotes - YesVotes) ~ distance + pctBlack + 
+  distance:pctBlack, family = binomial, data = rrHale.df)
+tmp <- capture.output(summary(model.HaleBxD))
+cat(tmp[c(3:5, 10:16, 21:23)], sep='\n')
+anova(model.HaleBD, model.HaleBxD, test = "Chisq")
 
-The residuals for OLS in simple linear regression have the form:
- \begin{align}
- OLS\hspace{2mm}residual_i  &= obs_i - fit_i \nonumber \\
-&={Y_i-\hat{\mu}_i} \nonumber \\
- &= Y_i-(\hat{\beta}_0 +\hat{\beta}_1 X_i)
-(\#eq:OLSresid)
- \end{align}
-Residual sum of squares (RSS) are formed by squaring and adding these residuals, and we generally seek to minimize RSS in model building. We have several options for creating residuals for Poisson regression models. One is to create residuals in much the same way as we do in OLS. For Poisson residuals, the predicted values are denoted by $\hat{\lambda}_i$ (in place of $\hat{\mu}_i$ in Equation \@ref(eq:OLSresid)); they are then standardized by dividing by the standard error, $\sqrt{\hat{\lambda}_i}$.  These kinds of residuals are referred to as __Pearson residuals__. 
+```
+
+We have statistically significant evidence (Wald test: $Z = 5.974, p<.001$; Drop in deviance test: $\chi^2=32.984, p<.001$) that the effect of the proportion of the community that is black on the odds of voting Yes depends on the distance of the community from the proposed railroad.  
+
+
+To interpret the interaction coefficient in context, we will compare two cases: one where a community is right on the proposed railroad (`distance` = 0), and the other where the community is 15 miles away (`distance` = 15). The significant interaction implies that the effect of `pctBlack` should differ in these two cases.  In the first case, the coefficient for `pctBlack` is -0.0647, while in the second case, the relevant coefficient is $-0.0647+15(.00537) = 0.0158$.  Thus, for a community right on the proposed railroad, a 1\% increase in percent black is associated with a 6.3\% ($e^{-.0647}=.937$) decrease in the odds of voting Yes, while for a community 15 miles away, a 1\% increase in percent black is associated with a ($e^{.0158}=1.016$) 1.6\% *increase* in the odds of voting Yes.  A significant interaction term doesn't always imply a change in the direction of the association, but it does here. 
+  
+Because our interaction model still exhibits lack of fit (residual deviance of 274.23 on just 7 df), and because we have used the covariates at our disposal, we will assess this model for potential outliers and overdispersion by examining the model's residuals.
+
+### Residuals for Binomial Regression
+With OLS, residuals were used to assess model assumptions and identify outliers. For binomial regression, two different types of residuals are typically used. One residual, the **Pearson residual**, has a form similar to that used with OLS. Specifically, the Pearson residual is calculated using:
 \begin{equation}
-\textrm{Pearson residual}_i = \frac{Y_i-\hat{\lambda}_i}{\sqrt{\hat{\lambda}_i}}
-(\#eq:pearson)
+\textrm{Pearson residual}_i = \frac{\textrm{actual count}-\textrm{predicted count}}{\textrm{SD of count}} =
+\frac{Y_i-m_i\hat{p_i}}{\sqrt{m_i\hat{p_i}(1-\hat{p_i})}}
+(\#eq:pearsonBinom)
+\end{equation}
+where $m_i$ is the number of trials for the $i^{th}$ observation and $\hat{p}_i$ is the estimated probability of success for that same observation.
+
+A __deviance residual__ is an alternative residual for binomial regression based on the discrepancy between the observed values and those estimated using the likelihood.
+A deviance residual can be calculated for each observation using:
+\begin{equation}
+\textrm{d}_i = 
+\textrm{sign}(Y_i-m_i\hat{p_i})\sqrt{2[Y_i \log\left(\frac{Y_i}{m_i \hat{p_i}}\right)+
+(m_i - Y_i) \log\left(\frac{m_i - Y_i}{m_i - m_i \hat{p_i}}\right)]}
+(\#eq:devianceBinom)
 \end{equation}
 
-Pearson residuals have the advantage that you are probably familiar with their meaning and the kinds of values you would expect. For example, after standardizing we expect most Pearson residuals to fall between -2 and 2.  However, __deviance residuals__ have some useful properties that make them a better choice for Poisson regression.  
+When the number of trials is large for all of the observations and the models are appropriate, both sets of residuals should follow a standard normal distribution.
 
-First, we define a __deviance residual__ for an observation from a Poisson regression,
-\begin{equation}
-\textrm{deviance residual}_i = \textrm{sign}(Y_i-\hat{\lambda}_i)
-\sqrt{
-2 \left[Y_i log\left(\frac{Y_i}{\hat{\lambda}_i}\right)
--(Y_i - \hat{\lambda}_i) \right]}
-(\#eq:deviance)
-\end{equation}
-Where $\textrm{sign}(x)$ is defined such that:
-\[ \textrm{sign}(x) = \begin{cases} 1  & \textrm{if }\ x > 0 \\
-                                    -1 & \textrm{if }\ x < 0  \\
-                                    0  & \textrm{if }\ x = 0\end{cases}\]
+The sum of the individual deviance residuals is referred to as the **deviance** or **residual deviance**. The deviance is used to assess the model. As the name suggests, a model with a small deviance is preferred. In the case of binomial regression, when the denominators, $m_i$,  are large and a model fits, the residual deviance follows a $\chi^2$ distribution with $n-p$ degrees of freedom (the residual degrees of freedom). Thus for a good fitting model the residual deviance should be approximately equal to its corresponding degrees of freedom. When binomial data meets these conditions, the deviance can be used for a goodness-of-fit test. The p-value for lack-of-fit is the proportion of values from a $\chi_{n-p}^2$ that are greater than the observed residual deviance.
 
-As its name implies, a deviance residual describes how the observed data deviates from the fitted model. Squaring and summing the deviances for all observations produces the __residual deviance__ $=\sum (\textrm{deviance residual})^2_i$. Relatively speaking, observations for good fitting models will have small deviances; that is, the predicted values will deviate little from the observed. However, you can see that the deviance for an observation does not easily translate to a difference in observed and predicted responses as is the case with OLS models.
+We begin a residual analysis of our interaction model by plotting the residuals against the fitted values in Figure \@ref(fig:resid). This kind of plot for binomial regression would produce two linear trends with similar negative slopes if there were equal sample sizes $m_i$ for each observation. 
 
-A careful inspection of the deviance formula reveals several places where the deviance compares $Y$ to $\hat{\lambda}$: the sign of the deviance is based on the difference between $Y$ and $\hat{\lambda}$, and under the radical sign we see the ratio $Y/\hat{\lambda}$ and the difference $Y -\hat{\lambda}$.  When $Y = \hat{\lambda}$, that is, when the model fits perfectly, the difference will be 0 and the ratio will be 1 (so that its log will be 0). So like the residuals in OLS, an observation that fits perfectly will not contribute to the sum of the squared deviances. This definition of a deviance depends on the likelihood for Poisson models. Other models will have different forms for the deviance depending on their likelihood.
-
-```{r, resid1, fig.align="center",out.width="60%",fig.cap= 'Residual plot for the Poisson model of household size by age of the household head', echo=FALSE}
-# Residual plot for the first order model
-## Log scale
-lfitteda = predict(modela) # log scale
-lresida = resid(modela)  # linear model
-lresid.df = data.frame(lfitteda,lresida)
-
-ggplot(lresid.df,aes(x=lfitteda, y=lresida)) +
-  geom_point()+
-  geom_smooth(method = "loess", size = 1.5)+
-  geom_line(y=0, size=1.5, col="red")+
-  xlab("Fitted values") +
-  ylab("Deviance Residuals") 
+```{r, resid,fig.align="center",out.width="60%", fig.cap='Fitted values by residuals for the interaction model for the Railroad Referendum data.',echo=FALSE, warning=FALSE, comment=NA}
+rrHale.df <- rrHale.df %>%
+  mutate(resid.BxD = residuals(model.HaleBxD), 
+         fit.BxD = fitted.values(model.HaleBxD))
+ggplot(rrHale.df, aes(x = fit.BxD, y = resid.BxD)) +
+  geom_point() +
+  geom_text(aes(label=Greensboro), nudge_x = -.075) +
+  xlab("Fitted values from interaction model") +
+  ylab("Deviance residuals from interaction model")
 ```
 
-A plot (Figure \@ref(fig:resid1)) of the deviance residuals versus predicted responses for the first order model exhibits curvature, supporting the idea that the model may improved by adding a quadratic term. Other details related to residual plots can be found in a variety of sources including @McCullagh1989.
+From this residual plot, Greensboro does not stand out as an outlier.  If it did, we could remove Greensboro and refit our interaction model, checking to see if model coefficients changed in a noticeable way.  Instead, we will continue to include Greensboro in our modeling efforts. Because the large residual deviance cannot be explained by outliers, and given we have included all of the covariates at hand as well as an interaction term, the observed binomial counts are likely overdispersed. This means that they exhibit more variation than the model would suggest, and we must consider ways to handle this overdispersion. 
+ 
+### Overdispersion {#sec-logOverdispersion}
+Similarly to Poisson regression we can adjust for overdispersion in binomial regression. With overdispersion there is __extra-binomial variation__, so the actual variance will be greater than the variance of a binomial variable, $np(1-p)$. One way to adjust for overdispersion is to estimate a multiplier (dispersion parameter), $\hat{\phi}$, for the variance that will inflate it and reflect the reduction in the amount of information we would otherwise have with independent observations. We used a similar approach to adjust for overdispersion in a Poisson regression model in Section \@ref(sec-overdispPois), and we will use the same estimate here: $\hat\phi=\frac{\sum(\textrm{Pearson residuals})^2}{n-p}$.
 
-### Goodness-of-fit {#sec-PoisGOF}
+When overdispersion is adjusted for in this way, we can no longer use maximum likelihood to fit our regression model; instead we use a quasi-likelihood approach. Quasi-likelihood is similar to likelihood-based inference, but because the model uses the dispersion parameter, it is not a binomial model with a true likelihood. R offers quasi-likelihood as an option when model fitting. The quasi-likelihood approach will yield the same coefficient point estimates as maximum likelihood; however, the variances will be larger in the presence of overdispersion (assuming $\phi>1$). We will see other ways in which to deal with overdispersion and clusters in the remaining chapters in the book, but the following describes how overdispersion is accounted for using $\hat{\phi}$:
 
-The model residual deviance can be used to assess the degree to which the predicted values differ from the observed. When a model is true, we can expect the residual deviance to be distributed as a $\chi^2$ random variable with degrees of freedom equal to the model's residual degrees of freedom. Our model thus far, the quadratic terms for age plus the indicators for location, has a residual deviance of 2187.8 with 1493 df. The probability of observing a deviance this large if the model fits is esentially 0, saying that there is significant evidence of lack-of-fit. 
+<p align="center"> __Summary: Accounting for Overdispersion__ </p>
 
-```{r, gof1, comment=NA}
-1-pchisq(modela2$deviance, modela2$df.residual)  # GOF test
+- Use the dispersion parameter $\hat\phi=\frac{\sum(\textrm{Pearson residuals})^2}{n-p}$ to inflate standard errors of model coefficients
+- Wald test statistics: multiply the standard errors by $\sqrt{\hat{\phi}}$ so that $\textrm{SE}_\textrm{Q}(\hat\beta)=\sqrt{\hat\phi}\cdot\textrm{SE}(\hat\beta)$ and conduct tests using the $t$-distribution
+- CIs use the adjusted standard errors and multiplier based on $t$, so they are thereby wider: $\hat\beta \pm t_{n-p} \cdot \textrm{SE}_\textrm{Q}(\hat\beta)$
+- Drop-in-deviance test statistic comparing Model 1 (larger model with $p$ parameters) to Model 2 (smaller model with $q<p$ parameters) =
+ \begin{equation}
+ F = \frac{1}{\hat\phi} \cdot \frac{D_2 - D_1}{p-q}
+ (\#eq:drop12)
+ \end{equation}
+ where $D_1$ and $D_2$ are the residual deviances for models 1 and 2 respectively and $p-q$ is the difference in the number of parameters for the two models. Note that both $D_2-D_1$ and $p-q$ are positive. This test statistic is compared to an F-distribution with $p-q$ and $n-p$ degrees of freedom.
+
+Output for a model which adjusts our interaction model for overdispersion appears below, where $\hat{\phi}=51.6$ is used to adjust the standard errors for the coefficients and the drop-in-deviance tests during model building. Standard errors will be inflated by a factor of $\sqrt{51.6}=7.2$.  As a results, there are no significant terms in the adjusted interaction model below.
+
+```{r, 6verb4, echo=FALSE, comment=NA}
+# quasibinomial model with distance and pctBlack and their interaction
+model.HaleBxDq <- glm(cbind(YesVotes, NumVotes - YesVotes) ~ distance + pctBlack + 
+  distance:pctBlack, family = quasibinomial, data = rrHale.df)
+tmp <- capture.output(summary(model.HaleBxDq))
+cat(tmp[c(3:5, 10:20)], sep='\n')
 ```
 
-There are several reasons why lack-of-fit may be observed. We may be missing important covariates or interactions; a more comprehensive data set may be needed. There may be extreme observations that may cause the deviance to be larger than expected; however, our residual plots did not reveal any unusual points. Lastly, there may be a problem with the Poisson model.  In particular, the Poisson model has only a single parameter, $\lambda$, for each combination of the levels of the predictors which must describe both the mean and the variance.  This limitation can become manifest when the variance appears to be larger than the corresponding means.  In that case, the response is more variable than the Poisson model would imply, and the response is considered to be overdispered. 
+We therefore remove the interaction term and refit the model, adjusting for the extra-binomial variation that still exists.
+
+```{r, 6verb5, echo=FALSE, comment=NA}
+# quasibinomial model with distance and pctBlack
+model.HaleBDq <- glm(cbind(YesVotes, NumVotes - YesVotes) ~ distance + pctBlack,
+                     family = quasibinomial, data = rrHale.df)
+tmp <- capture.output(summary(model.HaleBDq))
+cat(tmp[c(3:5, 10:15, 18:21)], sep='\n')
+```
+
+By removing the interaction term and using the overdispersion parameter, we see that distance is significantly associated with support, but percent black is no longer significant after adjusting for distance.  
+
+```{r, include=FALSE}
+exp(coef(model.HaleBDq))
+```
+
+Because quasi-likelihood methods do not change estimated coefficients, we still estimate a 25\% decline $(1-e^{-0.292})$ in support for each additional mile from the proposed railroad (odds ratio of .75).
+
+```{r, comment=NA, message=FALSE}
+exp(confint(model.HaleBDq))
+```
+While we previously found a 95\% confidence interval for the odds ratio of (.728, .766), our confidence interval is now much wider: (.609, .871).  Appropriately accounting for overdispersion has changed both the significance of certain terms and the precision of our coefficient estimates.
+
+### Summary
+We began by fitting a logistic regression model with `distance` alone. Then we added covariate `pctBlack`, and the Wald-type test and the drop-in-deviance provided strong support for the addition of `pctBlack` to the model. The model with `distance` and `pctBlack` had a large residual deviance suggesting an ill-fitted model. When we looked at the residuals, we saw that Greensboro is an extreme observation. Models without Greensboro were fitted and compared to our initial models. Seeing no appreciable improvement or differences with Greensboro removed, we left it in the model. There remained a large residual deviance so we attempted to account for it by using an estimated dispersion parameter similar to Section \@ref(sec-overdispPois) with Poisson regression. The final model included distance and percent black, although percent black was no longer significant after adjusting for overdispersion.
 
 
-## Least Squares Regression vs. Poisson Regression
+## Least Squares Regression vs. Logistic Regression
 
 \begin{gather*}
 \underline{\textrm{Response}} \\
-\mathbf{OLS:}\textrm{ Normal} \\
-\mathbf{Poisson Regression:}\textrm{ counts} \\
+\mathbf{OLS:}\textrm{ normal} \\
+\mathbf{Binomial\ Regression:}\textrm{ number of successes in n trials} \\
 \textrm{ } \\
 \underline{\textrm{Variance}} \\
-\mathbf{OLS:}\textrm{ Equal for each level of X} \\
-\mathbf{Poisson Regression:}\textrm{ Equal to the mean for each level of X} \\
+\mathbf{OLS:}\textrm{ Equal for each level of}\ X \\
+\mathbf{Binomial\ Regression:}\ np(1-p)\textrm{ for each level of}\ X \\
 \textrm{ } \\
 \underline{\textrm{Model Fitting}} \\
 \mathbf{OLS:}\ \mu=\beta_0+\beta_1x \textrm{ using Least Squares}\\
-\mathbf{Poisson Regression:}\ log(\lambda)=\beta_0+\beta_1x \textrm{ using Maximum Likelihood}\\
+\mathbf{Binomial\ Regression:}\ \log\left(\frac{p}{1-p}\right)=\beta_0+\beta_1x \textrm{ using Maximum Likelihood}\\
 \textrm{ } \\
 \underline{\textrm{EDA}} \\
-\mathbf{OLS:}\textrm{ plot X vs. Y; add line} \\
-\mathbf{Poisson Regression:}\textrm{ find }log(\bar{y})\textrm{ for several subgroups; plot vs. X} \\
+\mathbf{OLS:}\textrm{ plot $X$ vs. $Y$; add line} \\
+\mathbf{Binomial\ Regression:}\textrm{ find $\log(\textrm{odds})$ for several subgroups; plot vs. $X$} \\
 \textrm{ } \\
 \underline{\textrm{Comparing Models}} \\
 \mathbf{OLS:}\textrm{ extra sum of squares F-tests; AIC/BIC} \\
-\mathbf{Poisson Regression:}\textrm{ Drop in Deviance tests; AIC/BIC} \\
+\mathbf{Binomial\ Regression:}\textrm{ Drop in Deviance tests; AIC/BIC} \\
 \textrm{ } \\
 \underline{\textrm{Interpreting Coefficients}} \\
-\mathbf{OLS:}\ \beta_1=\textrm{ change in }\mu_y\textrm{ for unit change in X} \\
-\mathbf{Poisson Regression:}\ e^{\beta_1}=\textrm{ percent change in }\lambda\textrm{ for unit change in X} 
+\mathbf{OLS:}\ \beta_1=\textrm{ change in }\mu_y\textrm{ for unit change in $X$} \\
+\mathbf{Binomial\ Regression:}\ e^{\beta_1}=\textrm{ percent change in odds for unit change in $X$} 
 \end{gather*}
 
+## Case Study: Trying to Lose Weight
+The final case study uses individual-specific information so that our response, rather than the number of successes out of some number of trials, is simply a binary variable taking on values of 0 or 1 (for failure/success, no/yes, etc.).  This type of problem---__binary logistic regression__---is exceedingly common in practice. Here we examine characteristics of young people who are trying to lose weight. The prevalence of obesity among US youth suggests that wanting to lose weight is sensible and desirable for some young people such as those with a high body mass index (BMI). On the flip side, there are young people who do not need to lose weight but make ill-advised attempts to do so nonetheless. A multitude of studies on weight loss focus specifically on youth and propose a variety of motivations for the young wanting to lose weight; athletics and the media are two commonly cited sources of motivation for losing weight for young people.
 
-## Case Study: Campus Crime
+Sports have been implicated as a reason for young people wanting to shed pounds, but not all studies are consistent with this idea. For example, a study by @Martinsen2009 reported that, despite preconceptions to the contrary, there was a higher rate of self-reported eating disorders among controls (non-elite athletes) as opposed to elite athletes. Interestingly, the kind of sport was not found to be a factor, as participants in leanness sports (for example, distance running, swimming, gymnastics, dance, and diving) did not differ in the proportion with eating disorders when compared to those in non-leanness sports. So, in our analysis, we will not make a distinction between different sports.
 
-Students want to feel safe and secure when attending a college or university. In response to legislation, the US Department of Education seeks to provide data and reassurances to students and parents alike. All postsecondary institutions that participate in federal student aid programs are required by the Jeanne Clery Disclosure of Campus Security Policy and Campus Crime Statistics Act and the Higher Education Opportunity Act to collect and report data on crime occurring on campus to the Department of Education. In turn, this data is publicly available on the website of the Office of Postsecondary Education. We are interested in looking at whether there are regional differences in violent crime on campus controlling for differences in the type of school.
+Other studies suggest that mass media is the culprit. They argue that students' exposure to unrealistically thin celebrities may provide unhealthy motivation for some, particularly young women, to try to slim down. An examination and analysis of a large number of related studies (referred to as a __meta-analysis__) [@Grabe2008] found a strong relationship between exposure to mass media and the amount of time that adolescents spend talking about what they see in the media, deciphering what it means, and figuring out how they can be more like the celebrities.
 
-### Data Organization
+We are interested in the following questions: Are the odds that young females report trying to lose weight greater that the odds that males do? Is increasing BMI is associated with an interest in losing weight, regardless of sex? Does sports participation increase the desire to lose weight? Is media exposure is associated with more interest in losing weight?
 
-Each row of `c_data.csv` contains crime information from a post secondary institution, either a college or university. The variables include:
-
-- `type` =  college (C) or university (U)
-- `region` = region of the country (C = Central, MW = Midwest, NE = Northeast, SE = Southeast, SW = Southwest, and W = West)
-- `nv` = the number of violent crimes for that institution for the given year
-- `Enrollment` = enrollment at the school
-- `enroll1000` = enrollment at the school, in thousands
-- `nvrate` = number of violent crimes per 1000 students
-
-```{r, include=FALSE}
-#Getting started-Crime
-# Crime data for Universities and Colleges
-library(readr)
-library(forcats)
-c.data <- read_csv("data/c_data.csv")
-
-names(c.data)
-head(c.data)
-summary(c.data)
-
-with(c.data,round(prop.table(table(type)),3)) 
-#creating dataset using 30:70 C:U
-
-with(c.data,table(type,region)) 
-#creating dataset using 30:70 C:U
-
-ggplot(c.data, aes(x=nv)) + 
-  geom_histogram()  # looks Poisson
-```
-
-```{r, 4verb10, comment=NA, echo=FALSE}
-head(c.data, n=10)
-```
-
-### Exploratory Data Analysis
-```{r, nviolent, fig.align="center",out.width="60%", fig.cap='Histogram of number of violent crimes by institution',echo=FALSE, warning=FALSE, message=FALSE}
-#This needs a caption as well
-ggplot(c.data, aes(x=nv)) + 
-  geom_histogram(bins = 15) +
-  xlab("Number of violent crimes")
-```
-
-A graph of the number of violent crimes, Figure \@ref(fig:nviolent), reveals the pattern often found with distributions of counts of rare events. Many schools reported no violent crimes or very few crimes. A few schools have a large number of crimes making for a distribution that appears to be far from normal. Therefore, Poisson regression should be used to model our data; Poisson random variables are often used to represent counts (e.g., number of violent crimes) per unit of time or space (e.g., one year).
-
-Let's take a look at the covariates of interest for these schools: type of institution and region. In our data, the majority of institutions are universities (65\% of the 81 schools) and only 35\% are colleges. Interest centers on whether the different regions tend to have different crime rates. Table \@ref(tab:regions) contains the name of each region and each column represents the percentage of schools in that region which are colleges or universities.  The proportion of colleges varies from a low of 20\% in the Southwest (SW) to a high of 50\% in the West (W).
-
-```{r, regions, echo=FALSE}
-table2chp4 <- with(c.data,round(prop.table(table(type,region),2),3)) 
-kable(table2chp4, booktabs=T, caption = 'Proportion of colleges and universities within region in the campus crime data set')
-```
-
-While a Poisson regression model is a good first choice because the responses are counts per year, it is important to note that the counts are not directly comparable because they come from different size schools.  This issue sometimes is referred to as the need to account for *sampling effort*; in other words, we expect schools with more students to have more reports of violent crime since there are more students who could be affected.  We cannot compare the 30 violent crimes from the first school in the data set to no violent crimes for the second school when their enrollments are vastly different; 5,590 for school 1 versus 540 for school 2. We can take the differences in enrollments into account by including an __offset__ in our model, which we will discuss in the next section. For the remainder of the EDA, we examine the violent crime counts in terms of the rate per 1,000 enrolled $\frac{\textrm{number of violent crimes}}{\textrm{number enrolled}} \cdot 1000$.
-
-Note that there is a noticeable outlier for a Southeastern school (5.4 violent crimes per 1000 students), and there is an observed rate of 0 for the Southwestern colleges which can lead to some computational issues. We therefore combined the SW and SE to form a single category of the South, and we also removed the extreme observation from the data set. 
-
-```{r, include=FALSE}
-# Combining the southern colleges and universities
-c.data <- c.data %>%
-              mutate(region, region = fct_recode(region, "S" = "SW", "S"="SE"))
-
-```
-
-```{r, table4ch4, echo=FALSE}
-# Removing Outlier
-c.data <- c.data %>% 
-  filter(nvrate<5)
-
-# Checking mean=variance assumption 
-table4ch4 <- c.data %>%
-    group_by(region, type) %>%
-    dplyr::summarize(MeanCount = mean(nv, na.rm=TRUE),
-              VarCount = var(nv, na.rm=TRUE),
-              MeanRate = mean(nvrate, na.rm=TRUE),
-              VarRate = var(nvrate, na.rm=TRUE),
-              n = n())
-kable(table4ch4, booktabs=T, caption = 'The mean and variance of the violent crime rate by region and type of institution')
-```
-
-```{r, boxtyperegion, fig.align="center",out.width="60%", fig.cap='Boxplot of violent crime rate by region and type of institituion',echo=FALSE, warning=FALSE, message=FALSE}
-#Insert boxplot without the outlier and combining S and SE
-#This needs a caption
-ggplot(c.data, aes(x = region, y = nvrate, fill = type)) +
-  geom_boxplot() +
-  ylab("Violent crimes per 1000 students")
-```
-
-Table \@ref(tab:table4ch4) and Figure \@ref(fig:boxtyperegion) display mean violent crime rates that are generally lower at the colleges within a region (with the exception of the Northeast). In addition, the regional pattern of rates at universities appears to differ from that of the colleges.
-
-### Accounting for Enrollment
-
-Although working with the observed rates (per 1000 students) is useful during the exploratory data analysis, we do not use these rates explicitly in the model. The counts (per year) are the Poisson responses when modeling, so we must take into account the enrollment in a different way. Our approach is to include  a term on the right side of the model called an __offset__, which is the log of the enrollment, in thousands. There is an intuitive heuristic for the form of the offset. If we think of $\lambda$ as the mean number of violent crimes per year, then $\lambda/1000$ represents the number per 1000 students, so that the yearly count is adjusted to be comparable across schools of different sizes. Adjusting the yearly count by enrollment is equivalent to adding $log(\textrm{enroll1000})$ to the right hand side of the Poisson regression equation---essentially as a predictor with a fixed coefficient of 1:
-
-\begin{align} 
-log(\frac{\lambda}{\textrm{enroll1000}} )= \beta_0 + \beta_1(\textrm{type}) \nonumber \\
-log(\lambda)-log(\textrm{enroll1000}) = \beta_0 + \beta_1(\textrm{type}) \nonumber \\
-log(\lambda) = \beta_0 + \beta_1(\textrm{type}) + log(\textrm{enroll1000})
-\end{align}
-
-While this heuristic is helpful, it is important to note that it is *not* $\frac{\lambda}{ \textrm{enroll1000}}$ that we are modeling.  We are still modeling $log(\lambda)$, but we're adding an offset to adjust for differing enrollments, where the offset has the unusual feature that the coefficient is fixed at 1.0. As a result, no estimated coefficient for `enroll1000` will appear in the output. 
-
-## Modeling Assumptions
-
-In Table \@ref(tab:table4ch4), we see that the variances are greatly higher than the mean counts in almost every group.  Thus, we have reason to question the Poisson regression assumption of variability equal to the mean; we will have to return to this issue after some initial modeling.  The fact that the variance of the rate of violent crimes per 1000 students tends to be on the same scale as the mean tells us that adjusting for enrollment may provide some help, although that may not completely solve our issues with excessive variance.   
-
-As far as other model assumptions, linearity with respect to $log(\lambda)$ is difficult to discern without continuous predictors, and it is not possible to assess independence without knowing how the schools were selected.
-
-## Initial Models
-
-We are interested primarily in differences in violent crime between institutional types controlling for difference in regions, so we fit a model with both region and our offset. Note that the central region is the reference level in our model.
-
-```{r, 4verb11, comment=NA, echo=FALSE}
-## Modeling
-modeltr = glm(nv~type+region,family=poisson, offset=log(enroll1000),data=c.data)
-tmp <- capture.output(summary(modeltr))
-cat(tmp[c(3:5, 10:18, 21:25)], sep='\n')
-```
-
-From our model the Northeast and the South differ significantly from the Central region (p= 0.00000037 and p=0.0000924 respectively). The estimated coefficient of 0.778 means that the violent crime rate per 1,000 in the Northeast is nearly 2.2 ($e^{0.778}$) times that of the Central region controlling for the type of school. A wald-type confidence interval for this factor can be constructed by first calculating a CI for the coefficient (0.778 $\pm$ $1.96 \cdot 0.153$) and then exponentiating (1.61 to 2.94). 
-
-### Tukey's Honestly Significant Differences
-
-Comparisons to regions other than the Central region can be accomplished by changing the reference region.  If many comparisons are made, it would be best to adjust for multiple comparisons using a method such as **Tukey's Honestly Significant Differences**, which considers all pairwise comparisons among regions.  This method helps control the large number of false positives that we would see if we ran multiple t-tests comparing groups. The honestly significant difference compares a standardized mean difference between two groups to a critical value from a studentized range distribution.
-
-```{r, 4verb12, comment=NA, echo=FALSE}
-tmp <- capture.output(summary(glht(modeltr, mcp(region="Tukey"))))
-cat(tmp[c(4:5, 10:22, 24)], sep='\n')
-```
-
-In our case, Tukey's Honestly Significant Differences simultaneously evaluates all 10 mean differences between pairs of regions.  We find that the Northeast has significantly higher rates of violent crimes than the Central, Midwest, and Western regions, while the South has significantly higher rates of violent crimes than the Central and the Midwest, controlling for the type of institution. The University indicator is significant and, after exponentiating the coefficient, can be interpreted as an approximately ($e^{0.280}$) 32\% increase in violent crime rate over colleges after controlling for region.  
-
-These results certainly suggest significant differences in regions and type of institution. However, the EDA  findings suggest the effect of the type of institution may vary depending upon the region, so we consider a model with an interaction between region and type.
-
-```{r, 4verb13, comment=NA, echo=FALSE}
-modeli = glm(nv ~ type + region + region:type, family = poisson, 
-             offset = log(enroll1000), data = c.data)
-tmp <- capture.output(summary(modeli))
-cat(tmp[c(3:5, 10:22, 25:29)], sep='\n')
-```
-
-These results provide convincing evidence of an interaction between the effect of region and the type of institution. A drop-in-deviance test like the one we carried out in the previous case study confirms the significance of the contribution of the interaction to this model.  We have statistically significant evidence ($\chi^2=71.98, df=4, p<.001$) that the difference between colleges and universities in violent crime rate differs by region.  For example, our model estimates that violent crime rates are 13.6 ($e^{.196+2.411}$) times higher in universities in the West compared to colleges, while in the Northeast we estimate that violent crime rates are 2.4 ($\frac{1}{e^{.196-1.070}}$) times higher in colleges.  
-
-```{r, 4verb14, comment=NA, echo=FALSE}
-anova(modeltr,modeli,test="Chisq") # addition of intxn terms sign
-```
-
-The residual deviance (276.70 with 70 df) suggests significant lack of fit in the interaction model (p < .001). One possibility is that there are other important covariates that could be used to describe the differences in the violent crime rates. Without additional covariates to consider, we look for extreme observations, but we have already eliminated the most extreme of the observations. 
-
-In the absence of other covariates or extreme observations, we consider overdispersion as a possible explanation of the significant lack-of-fit. 
-
-## Overdispersion {#sec-overdispPois}
-
-### Dispersion parameter adjustment
-
-**Overdispersion** suggests that there is more variation in the response than the model implies. Under a Poisson model, we would expect the means and variances of the response to be about the same in various groups. Without adjusting for overdispersion, we use incorrect, artificially small standard errors leading to artificially small p-values for model coefficients.  We may also end up with artificially complex models.
-
-We can take overdispersion into account in several different ways. The simplest is to use an estimated dispersion factor to inflate standard errors. Another way is to use a negative-binomial regression model.  We begin with using an estimate of the dispersion parameter. 
+We have sample of 500 teens from data collected in 2009 through the U.S. Youth Risk Behavior Surveillance System (YRBSS) [@YRBS2009]. The YRBSS is an annual national school-based survey conducted by the Centers for Disease Control and Prevention (CDC) and state, territorial, and local education and health agencies and tribal governments. More information on this survey can be found [here](http://www.cdc.gov/HealthyYouth/yrbs/index.htm).
  
-We can estimate a dispersion parameter, $\phi$, by dividing the model deviance by its corresponding degrees of freedom; i.e., $\hat\phi=\frac{\sum(\textrm{Pearson residuals})^2}{n-p}$ where $p$ is the number of model parameters. It follows from what we know about the $\chi^2$ distribution that if there is no overdispersion, this estimate should be close to one. It will be larger than one in the presence of overdispersion. We inflate the standard errors by multiplying the variance by $\phi$ so that the standard errors are larger than the likelihood approach would imply; i.e., $SE_Q(\hat\beta)=\sqrt{\hat\phi}*SE(\hat\beta)$, where $Q$ stands for "quasipoisson" since multiplying variances by $\phi$ is an ad-hoc solution. Our process for model building and comparison is called **quasilikelihood**---similar to likelihood but without exact underlying distributions.  If we choose to use a dispersion parameter with our model, we refer to the approach as quasilikelihood. The following output illustrates a quasipoisson approach to the interaction model:
-
-```{r, 4verb15, comment=NA, echo=FALSE}
-# Account for overdispersion with quasipoisson model
-modeliq = glm(nv ~ type + region + region:type, family = quasipoisson, 
-              offset = log(enroll1000), data = c.data)
-tmp <- capture.output(summary(modeliq))
-cat(tmp[c(3:5, 10:22, 25:29)], sep='\n')
-```
-
-In the absence of overdispersion, we expect the dispersion parameter estimate to be 1.0. The estimated dispersion parameter here is much larger than 1.0 (4.447) indicating overdispersion (extra variance) that should be accounted for. The larger estimated standard errors in the quasipoisson model reflect the adjustment. For example, the standard error for the West region term from a likelihood based approach is 0.7906, whereas the quasilikelihood standard error is $\sqrt{4.47}*0.7906$ or 1.6671. This term is no longer significant under the quasipoisson model.  In fact, after adjusting for overdispersion (extra variation), none of the model coefficients in the quasipoisson model are significant at the .05 level!  This is because standard errors were all increased by a factor of 2.1 ($\sqrt{\hat\phi}=\sqrt{4.447}=2.1$), while estimated coefficients remain unchanged.
-
-Note that tests for individual parameters are now based on the t-distribution rather than a standard normal distribution, with test statistic $t=\frac{\hat\beta}{SE_Q(\hat\beta)}$ following an (approximate) t-distribution with $n-p$ degrees of freedom if the null hypothesis is true ($H_O:\beta=0$).  Drop-in-deviance tests can be similarly adjusted for overdispersion in the quasipoisson model.  In this case, you can divide the test statistic by the estimated dispersion parameter and compare the result to an F-distribution with the difference in the model degrees of freedom for the numerator and the degrees of freedom for the larger model in the denominator.  That is, $F=\frac{\textrm{drop in deviance}}{\hat\phi}$ follows an (approximate) F-distribution when the null hypothesis is true ($H_O$: reduced model sufficient).  The output below tests for an interaction between region and type of institution after adjusting for overdispersion (extra variance):
-
-```{r, 4verb8, comment=NA}
-phi <- sum(resid(modeli, type='pearson')^2) / modeli$df.residual
-drop.in.dev <- modeltr$deviance - modeli$deviance
-diff.in.df <- modeltr$df.residual - modeli$df.residual
-Fstat <- drop.in.dev / summary(modeliq)$dispersion
-Fstat
-1-pf(Fstat, diff.in.df, modeli$df.residual)
-```
-
-Here, even after adjusting for overdispersion, we still have statistically significant evidence ($F=16.19, p<.001$) that the difference between colleges and universities in violent crime rate differs by region.  
-
-### Negative binomial modeling
-
-Another approach to dealing with overdispersion is to model the response using a negative binomial instead of Poisson. An advantage of this approach is that it introduces another parameter in addition to $\lambda$ which gives the model more flexibility and, as opposed to the quasipoisson model, the negative binomial model assumes an explicit likelihood model. You may recall that negative binomial random variables take on nonnegative integer values which is consistent with modeling counts. This model posits selecting a $\lambda$ for each institution and then generating a count using a Poisson random variable with the selected $\lambda$. With this approach, the counts will be more dispersed than would be expected for observations based on a single Poisson variable with rate $\lambda$. (See Guided Exercises on the Gamma-Poisson mixture in Chapter \@ref(ch-distthry).)
-
-Mathematically, you can think of the negative binomial model as a Poisson model where $\lambda$ is also random, following a gamma distribution.  Specifically, if $Y|\lambda \textrm{~ Poisson}(\lambda)$ and $\lambda \textrm{~ gamma}(r,\frac{1-p}{p})$, then $Y \textrm{~ NegBinom}(r,p)$ where $E(Y)=\frac{pr}{1-p}=\mu$ and $Var(Y)=\frac{pr}{(1-p)^2}=\mu+\frac{\mu^2}{r}$.  The overdispersion in this case is given by $\frac{\mu^2}{r}$, which approaches 0 as $r$ increases (so smaller values of $r$ indicate greater overdispersion).
-
-Here is what happens if we apply a negative binomial regression model to the interaction model, which we've already established suffers from overdispersion issues under regular Poisson regression:
-
-```{r, 4verb16, comment=NA, echo=FALSE}
-# Account for overdispersion with negative binomial model
-c.data2 <- c.data %>% 
-  mutate(enroll1000 = ifelse(enroll1000 < 1, 1, enroll1000))
-
-modelinb <- glm.nb(nv ~ type + region + region:type, 
-              offset(log(enroll1000)), data = c.data2)
-tmp <- capture.output(summary(modelinb))
-cat(tmp[c(3:6, 11:23, 26:29)], sep='\n')
-```
-
-These results differ from the quasipoisson model.  Several effects are now statistically significant at the .05 level: the effect of type of institution for the Central region ($Z=2.64, p=.008$), the difference between Northeast and Central regions for colleges ($Z=2.76, p=.006$), the difference between Northeast and Central regions in type effect ($Z=-2.01, p=.044$), and the difference between West and Central regions in type effect ($Z=2.71, p=.007$).  Compared to the quasipoisson model, negative binomial coefficient estimates are generally in the same direction and similar in size, but negative binomial standard errors are somewhat smaller.
-
-In summary, we explored the possibility of differences in the violent crime rate between colleges  and universities, controlling for region. Our initial efforts seemed to suggest that there are indeed differences between colleges and universities, and the pattern of those differences depend upon the region. However, this model exhibited significant lack-of-fit which remained after the removal of an extreme observation. In the absence of additional covariates, we accounted for the lack-of-fit by using a quasilikelihood approach and a negative binomial regression, which provided slightly different conclusions.  We may want to look for additional covariates and or more data.
-
-## Case Study: Weekend drinking {#cs:drinking}
-
-Sometimes when analyzing Poisson data, you may see many more zeros in your data set than you would expect for a Poisson random variable. For example, an informal survey of students in an introductory statistics course included the question, "How many alcoholic drinks did you consume last weekend?"  This survey was conducted on a dry campus where no alcohol is officially allowed, even among students of drinking age, so we expect that some portion of the respondents never drink. The non-drinkers would thus always report zero drinks. However, there will also be students who are drinkers reporting zero drinks because they just did not happen to drink during the past weekend. Our zeros, then, are a mixture of responses from non-drinkers and drinkers who abstained. Ideally, we'd like to sort out the non-drinkers and drinkers when performing our analysis.
-
-```{r, include=FALSE}
-#Getting started-weekenddrinks
-# File: weekendDrinks
-zip.data <- read.csv("data/weekendDrinks.csv")  
-names(zip.data)
-dim(zip.data)
-
-## Observed data
-obs.table <- tally(group_by(zip.data, drinks))  %>%
-  mutate(prop=round(n/sum(n),3))
-obs.table  # 47% reported 0 drinks last weekend
-
-g.obs <- obs.table %>%
-  ggplot(aes(y=prop,x=drinks)) + 
-  geom_bar(stat="identity") +
-  labs(x= "Number of drinks", y="Proportion") +
-  ggtitle("a) Observed")+
-  coord_cartesian(ylim = c(0, .5))
-g.obs
-
-## Poisson model
-### lambda = mean number of drinks
-sum1 <- zip.data %>% 
-  summarise(lambda=mean(drinks),maxDrinks = max(drinks))
-possible.values = with(sum1,0:maxDrinks)
-model.prob <- with(sum1,dpois(possible.values,lambda))
-pois.model <- data.frame(possible.values,model.prob)
-
-g.model<-  ggplot(pois.model,
-                  aes(y=model.prob,x=possible.values)) + 
-  geom_bar(stat="identity")+
-  labs(x= "Number of drinks", y="Probability") +
-  ggtitle("b) Poisson Model")+
-  coord_cartesian(ylim = c(0, .5))
-g.model
-```
-
-### Research Question
-
-The purpose of this survey is to explore factors related to drinking behavior on a dry campus. What proportion of students on this dry campus never drink? What factors, such as off campus living and sex, are related to whether students drink? Among those who do drink, to what extent is moving off campus associated with the number of drinks in a weekend? It is commonly assumed that males' alcohol consumption is greater than females'; is this true on this campus? Answering these questions would be a simple matter if we knew who was and was not a drinker in our sample. Unfortunately, the non-drinkers did not identify themselves as such, so we will need to use the data available with a model that allows us to estimate the proportion of drinkers and non-drinkers.
-
 ### Data Organization
-Each line of `weekendDrinks.csv` contains data provided by a student in an introductory statistics course. In this analysis, the response of interest is the respondent's report of the number of alcoholic `drinks` they consumed the previous weekend, whether the student lives `off.campus`, and `sex`. We will also consider whether a student is likely a `firstYear` student based on the `dorm` he or she lives in.  Here is a sample of observations from this dataset:
+Here are the three questions from the YRBSS we use for our investigation:
 
-```{r, include=FALSE}
-# predictors: sex, dorm, off campus
-sex.table <- tally(group_by(zip.data, sex))  %>%
-  mutate(prop=round(n/sum(n),3))
-sex.table
+Q66. Which of the following are you trying to do about your weight?
 
-dorm.table <- tally(group_by(zip.data, dorm))  %>%
-  mutate(prop=round(n/sum(n),3))
-dorm.table
+- A. Lose weight
+- B. Gain weight
+- C. Stay the same weight
+- D. I am not trying to do anything about my weight
 
-zip.data <- zip.data %>% 
-  mutate(off.campus=ifelse(dorm=="off campus",1,0))
+Q81. On an average school day, how many hours do you watch TV?
 
-off.table <- tally(group_by(zip.data, off.campus))  %>%
-  mutate(prop=round(n/sum(n),3))
-off.table
+- A. I do not watch TV on an average school day
+- B. Less than 1 hour per day
+- C. 1 hour per day
+- D. 2 hours per day
+- E. 3 hours per day
+- F. 4 hours per day
+- G. 5 or more hours per day
 
-# Grand Mean Model: no predictors
-gmn.model=glm(drinks~1,family=poisson,data=zip.data)
-summary(gmn.model)
-exp(coef(gmn.model))  # same as mean number of drinks for this simple model
-```
+Q84. During the past 12 months, on how many sports teams did you play? (Include any teams run by your school or community groups.)
 
-```{r, 4verb19, comment=NA, include=FALSE}
-## Fitting a Zero Inflated Poisson (ZIP) model
-zip.data <- zip.data %>% 
-  mutate(firstYear=dorm%in%c("kildahl","mohn","kittlesby"))
-fy.table <- tally(group_by(zip.data, firstYear))  %>%
-  mutate(prop=round(n/sum(n),3))
-fy.table
-```
+- A. 0 teams
+- B. 1 team
+- C. 2 teams
+- D. 3 or more teams
+ 
+Answers to Q66 are used to define our response variable: Y = 1 corresponds to "(A) trying to lose weight", while Y = 0 corresponds to the other non-missing values. Q84 provides information on students' sports participation and is treated as numerical, 0 through 3, with 3 representing 3 or more. As a proxy for media exposure we use answers to Q81 as numerical values 0, 0.5, 1, 2, 3, 4, and 5, with 5 representing 5 or more. Media exposure and sports participation are also considered as categorical factors, that is, as variables with distinct levels which can be denoted by indicator variables as opposed to their numerical values.
+ 
+BMI is included in this study as the percentile for a given BMI for members of the same sex. This facilitates comparisons when modeling with males and females. We will use the terms *BMI* and *BMI percentile* interchangeably with the understanding that we are always referring to the percentile.
 
-```{r, 4verb17, comment=NA}
-head(zip.data[2:5])
-```
+With our sample, we use only the cases that include all of the data for these four questions. This is referred to as a __complete case analysis__. That brings our sample of 500 to 426. There are limitations of complete case analyses that we address in the Discussion.   
 
 ### Exploratory Data Analysis
-As always we take stock of the amount of data; here there are 77 observations. Large sample sizes are preferred for the type of model we will consider, and n=77 is on the small side. We proceed with that in mind. 
 
-A premise of this analysis is that we believe that those responding zero drinks are coming from a mixture of non-drinkers and drinkers who abstained the weekend of the survey.
+```{r, include=FALSE, comment=NA}
+risk2009.data = foreign::read.spss("data/yrbs09.sav", to.data.frame=TRUE)
+names(risk2009.data)
 
-- __Non-drinkers__: respondents who never drink and would always reply with zero
-- __Drinkers__: obviously this includes those responding with one or more drinks, but it also includes people who are drinkers but did not happen to imbibe the past weekend. These people reply zero but are not considered non-drinkers.
+set.seed(1313)
+risk2009.samp <- risk2009.data %>%
+  sample_n(500)
+rm(risk2009.data)
 
-```{r, obsVmodel, fig.align="center",out.width="60%", fig.cap='Observed (a) versus Modeled (b) Number of Drinks',echo=FALSE, warning=FALSE, message=FALSE}
-#obsDrinks and modelDrinks
-obsVmodel <- grid.arrange(g.obs,g.model,ncol=1)
+# Data Prep
+sex = with(risk2009.samp,Q2)
+sex=with(risk2009.samp,ifelse(sex=="Female",0,1))
+sex.l=with(risk2009.samp,factor(sex, labels = c("Female", "Male")))
+table(sex.l)
+
+lose.wt4 = with(risk2009.samp,Q66)
+table(lose.wt4)
+lose.wt2= with(risk2009.samp,ifelse(Q66=="Lose weight",1,0))
+table(lose.wt2)
+lose.wt.l=with(risk2009.samp,factor(lose.wt2, labels = c("No weight loss", "Lose weight")))
+table(lose.wt.l)
+
+sport4 = with(risk2009.samp,Q84)
+table(sport4)
+sport =  with(risk2009.samp,ifelse(Q84=="0 teams",0,1))
+sport.l=with(risk2009.samp,factor(sport, labels = c("No sports", "Sports")))
+table(sport.l)
+
+media=with(risk2009.samp,as.numeric(Q81)) # hours of TV per day
+table(media)
+media=media-2
+table(media)
+media=ifelse(media==0,0.5,media)
+media=ifelse(media==-1,0,media)
+table(media)
+
+risk2009 <- risk2009.samp %>%
+  mutate(sex = sex.l, lose.wt = lose.wt.l, sport = sport.l, media = media,
+         lose.wt.01 = lose.wt2) %>%
+  dplyr::select(lose.wt, lose.wt.01, sex, sport, media, bmipct) %>%
+  filter(complete.cases(.))
+rm(risk2009.samp)
 ```
 
-Beginning the EDA with the response, number of drinks, we find that over 46\% of the students reported no drinks during the past weekend. Figure \@ref(fig:obsVmodel)a portrays the observed number of drinks reported by the students. The mean number of drinks reported the past weekend is 2.013. Our sample consists of 74\% females and 26\% males, only 9\% of whom live off campus.
+```{r, include = FALSE}
+#primary response
+prop.table( mosaic::tally(~ lose.wt, data = risk2009) )   
 
-Because our response is a count it is natural to consider a Poisson regression model. You may recall that a Poisson distribution has only one parameter, $\lambda$, for its mean and variance. Here we will include an additional parameter, $\alpha$. We define $\alpha$ to be the true proportion of non-drinkers in the population.
+#covariates
+prop.table( mosaic::tally(~ sex, data = risk2009) )   
+prop.table( mosaic::tally(~ sport, data = risk2009) )   
+prop.table( mosaic::tally(~ media, data = risk2009) )   
 
-The next step in the EDA is especially helpful if you suspect your data contains excess zeros.  Figure \@ref(fig:obsVmodel)b is what we might expect to see under a Poisson model. Bars represent the probabilities for a Poisson distribution (using the Poisson probability formula) with $\lambda$ equal to the mean observed number of drinks, 2.013 drinks per weekend. Comparing this Poisson distribution to what we observed (Figure \@ref(fig:obsVmodel)a), it is clear that many more zeros have been reported by the students than you would expect to see if the survey observations were coming from a Poisson distribution. This doesn't surprise us because we had expected a subset of the survey respondents to be non-drinkers; i.e., they would not be included in this Poisson process. This circumstance actually arises in many Poisson regression settings. We will define $\lambda$ to be the mean number of drinks among those who drink, and $\alpha$ to be the proportion of non-drinkers ("true zeros").  Then, we will attempt to model $\lambda$ and $\alpha$ (or functions of $\lambda$ and $\alpha$) simultaneously using covariates like sex, first-year status, and off-campus residence.  This type of model is referred to as a __zero-inflated Poisson model__ or __ZIP model__.
-
-### Modeling
-We first fit a simple Poisson model with the covariates `off.campus` and `sex`.
-
-```{r, 4verb18, comment=NA, echo=FALSE}
-# Models with Predictors
-pois.m1=glm(drinks~off.campus+sex,family=poisson, data=zip.data)
-tmp <- capture.output(summary(pois.m1))
-cat(tmp[c(3:4, 9:14, 17:21)], sep='\n')
+risk2009 %>%
+  summarise(meanBMI = mean(bmipct),
+            medianBMI = median(bmipct))
 ```
 
-```{r}
-# Exponentiated coefficients
-exp(coef(pois.m1))
+Nearly half (44.5\%) of our sample of 426 youth report that they are trying to lose weight, 49.9\% percent of the sample are females, and 56.6\% play on one or more sports teams. 9.3 percent report that they do not watch any TV on school days, whereas another 9.3\% watched 5 or more hours each day.  Interestingly, the median BMI percentile for our 426 youth is 70.  The most dramatic difference in the proportions of those who are trying to lose weight is by sex; 58\% of the females want to lose weight in contrast to only 31\% of the males (see Figure \@ref(fig:mosaicsexlose)). This provides strong support for the inclusion of a sex term in every model considered.
 
-# Goodness-of-fit test
-gof.ts = pois.m1$deviance
-gof.pvalue = 1 - pchisq(gof.ts, pois.m1$df.residual)
-gof.pvalue
+```{r, mosaicsexlose, fig.align="center", out.width="60%", fig.cap='Weight loss plans vs. Sex',echo=FALSE, warning=FALSE, comment=NA}
+ytable <- mosaic::tally(~ sex + lose.wt, data = risk2009)   
+mosaicplot(ytable, color=c("blue", "light blue"), main="")
+#prop.table(ytable, 1)
+
+# Note that we use mosaic plots in this section to illustrate differences
+# in sample sizes, but geom_barplot() could also be used to produce
+# segmented bar charts.
 ```
 
-Both covariates are statistically significant, but a goodness-of-fit test reveals that there remains significant lack-of-fit (residual deviance: 230.54 with only 74 df; p<.001 based on $\chi^2$ test with 74 df). In the absence of important missing covariates or extreme observations, this lack-of-fit may be explained by the presence of a group of non-drinkers.
 
-A zero-inflated Poisson regression model to take non-drinkers into account consists of two parts:
-
-- One part  models the association, among drinkers, between number of drinks and the predictors of sex and off campus residence.
-- The other part uses a predictor for first-year status to obtain an estimate of the proportion of non-drinkers based on the reported zeros.
-
-The form for each part of the model follows. The first part looks like an ordinary Poisson regression model:
-\[
-log(\lambda)=\beta_0+\beta_1(\textrm{off.campus})+ \beta_2(\textrm{sex})
-\]
-where $\lambda$ is the mean number of drinks in a weekend *among those who drink*.
-The second part has the form
-\[
-logit(\alpha)=\beta_0+\beta_1(\textrm{firstYear})
-\]
-where $\alpha$ is the probability of being in the non-drinkers group and $logit(\alpha) = log( \alpha/(1-\alpha))$.  We'll provide more detail on the logit in the Logistic Regression chapter. There are many ways in which to structure this model; here we use different predictors in the two pieces, athough it would have been perfectly fine to use the same predictors for both pieces, or even no predictors for one of the pieces.
-
-### Fitting a ZIP Model
-
-How is it possible to fit such a model? We cannot observe whether a respondent is a drinker or not (which probably would've been good to ask). The ZIP model is a special case of a more general type of statistical model referred to as a __latent variable model__. More specifically, it is a type of a __mixture model__ where observations for one or more groups occur together and the group membership is unknown.  Zero-inflated models are a particularly common example of a mixture model, but the response does not need to follow a Poisson distribution.  Likelihood methods are at the core of this methodology, but fitting is an iterative process where it is necessary to start out with some guesses (or starting values).  In general, it is important to know that models like ZIP exist, although we'll only explore interpretations and fitting options for a single case study here.
-
-Here is the general idea of how ZIP models are fit.  Imagine that the graph of the Poisson distribution Figure \@ref(fig:obsVmodel)b is removed from the observed data distribution in Figure \@ref(fig:obsVmodel)a. Some zero responses will remain. These would correspond to non-drinkers, and the proportion of all observations these zeros constitute might make a reasonable estimate for $\alpha$, the proportion of non-drinkers. The likelihood is used and some iterating in the fitting process is involved  because the Poisson distribution in Figure \@ref(fig:obsVmodel)b is based on the mean of the observed data, which means it is the average among all students, not only among drinkers. Furthermore, the likelihood incorporates the predictors, `sex` and `off.campus`. So there is a little more to it than computing the proportion of zeros, but this heuristic should provide you a general idea of how these kinds of models are fit. The software package `R` along with the `library(pscl)` will fit a ZIP model for us using the function `zeroinfl`. 
-
-```{r, 4verb20, comment=NA, echo=FALSE}
-zip.m2 <- zeroinfl(drinks ~ off.campus + sex | firstYear, data = zip.data)
-tmp <- capture.output(summary(zip.m2))
-cat(tmp[c(3:4, 9:20)], sep='\n')
+```{r, echo=FALSE, include=FALSE, comment=NA}
+risk2009 %>%
+  group_by(sex, lose.wt) %>%
+  summarise(mean = mean(bmipct), sd = sd(bmipct), n = n())
 ```
 
-```{r}
-exp(coef(zip.m2))   # exponentiated coefficients
+```{r, table3chp6, echo=FALSE, comment=NA}
+sex <- c("Female"," ","Male"," ")
+wls <- c("No weight loss","Lose weight","No weight loss","Lose weight")
+mbmip <- c("48.2","76.3","54.9","84.4")
+sds <- c("26.2", "19.5", "28.6", "17.7")
+ncol <- c(90,124,148,67)
+#ccbmiXsex.tab
+table3chp6 <- data.frame(sex,wls,mbmip,sds,ncol)
+colnames(table3chp6) <- c("Sex","Weight loss status","mean BMI percentile","SD","n")
+kable(table3chp6, booktabs=T,caption="Mean BMI percentile by sex and desire to lose weight.")
 ```
 
-Our model uses `firstYear` to distinguish drinkers and non-drinkers ("Zero-inflation model coefficients") and `off.campus` and `sex` to help explain the differences in the number of drinks among drinkers ("Count model coefficients").  Again, we could have used the same covariates for the two pieces of a ZIP model, but neither `off.campus` or `sex` proved to be a useful predictor of drinkers vs. non-drinkers.  
+Table \@ref(tab:table3chp6) displays the mean BMI of those wanting and not wanting to lose weight for males and females. The mean BMI is greater for those trying to lose weight compared to those not trying to lose weight, regardless of sex. The size of the difference is remarkably similar for the two sexes.
 
-We'll first consider the "Count model coefficients," which provide information on how the sex and off-campus status of a student who is a drinker are related to the number of drinks reported by that student over a weekend. As we have done with previous Poisson regression models, we exponentiate each coefficient for ease of interpretation. Thus, for those who drink, the average number of drinks for males is $e^{1.0209}$ or 2.76 times the number for females (Z = 5.827, p < 0.001) given that you are comparing people who live in comparable settings, i.e., either both on or both off campus. Among drinkers, the mean number of drinks for students living off campus is $e^{0.4159}=1.52$ times that of students living on campus for those of the same sex (Z = 2.021, p = 0.0433).
-
-The "Zero-inflation model coefficients" refer to separating drinkers from non-drinkers. An important consideration in separating drinkers from non-drinkers may be whether this is their first year, where `firstYear` is a 0/1 indicator variable. 
+If we consider including a BMI term in our model(s), the logit should be linearly related to BMI. We can investigate this assumption by constructing an empirical logit plot. In order to calculate empirical logits, we first divide our data by sex. Within each sex, we generate 10 groups of equal sizes, the first holding the bottom 10\% in BMI percentile for that sex, the second holding the next lowest 10\%, etc.. Within each group, we calculate the proporton, $\hat{p}$ that reported wanting to lose weight, and then the empirical log odds, $log(\frac{\hat{p}}{1-\hat{p}})$, that a young person in that group wants to lose weight.
+```{r, logitBMIsex, fig.align="center",out.width="60%", fig.cap='Empirical logits of trying to lose weight by BMI and Sex.',echo=FALSE, warning=FALSE, comment=NA}
+risk2009 <- risk2009 %>%
+  group_by(sex) %>%
+  mutate(BMIcuts = cut_number(bmipct,10))
   
-We have
-\[ 
-log(\alpha/(1-\alpha)) =-0.6036+1.1364(\textrm{firstYear})
- \]
+emplogit1 <- risk2009 %>%
+  group_by(sex, BMIcuts) %>%
+  summarise(prop.lose = mean(lose.wt.01), 
+            n = n(),
+            midpoint = median(bmipct)) %>%
+  mutate(prop.lose = ifelse(prop.lose==0, .01, prop.lose),
+         emplogit = log(prop.lose / (1 - prop.lose)))
 
-However we are interested in $\alpha$, the proportion of non-drinkers. Exponentiating the coefficient for the first year term for this model yields 3.12. Here it is interpreted as the odds ($\frac{\alpha}{1-\alpha}$) that a first year is a non-drinker is 3.12 times the odds that an upper class student is a non-drinker. Furthermore, with a little algebra (solving the equation with $log(\alpha/(1-\alpha)$) for $\alpha$),
- we have
- \[
- \hat{\alpha} =
- \frac{exp^ {-0.6036+1.1364(\textrm{firstYear})}}
- {1+e^{
- -0.6036+1.1364(\textrm{firstYear})
- }
- }.
- \]
-The estimated chance that a first year student is a non-drinker is
-\[
-\frac{e^{0.533}}{1+e^{0.533}} = 0.630
-\]
-or 63.0\%, while for non-first years, the estimated probability of being a non-drinker in 0.354.  If you have seen logistic regression, you'll recognize that this transformation is what is used to estimate a probability. More on this in the Logistic Regression chapter.
-
-### Comparing ZIP to ordinary Poisson with Vuong Test (Optional)
-
-Moving from ordinary Poisson to zero-inflated Poisson has helped us address additional research questions: What proportion of students are non-drinkers and what factors are associated with whether or not a student is a non-drinker?  While a ZIP model seems more faithful to the nature and structure of this data, can we quantitatively show that a zero-inflated Poisson is better than an ordinary Poisson model?
-
-We cannot use the drop-in-deviance test we discussed earlier because these two models are not nested within one another. Vuong (1989) devised a test to make this comparison for the special case of comparing a zero-inflated model and ordinary regression model. Essentially, the Vuong Test is able to compare predicted probabilities of __non-nested__ models.
-
-```{r, 4verb22, comment=NA, echo=FALSE}
-vuong(pois.m1,zip.m2)
-```
-
-Here, we have structured the Vuong Test to compare Model 1: Ordinary Poisson Model to Model 2: Zero-inflation Model. If the two models do not differ, the test statistic for Vuong would be asymptotically standard Normal and the p-value would be relatively large. Here the first line of the output table indicates that the zero-inflation model is better ($Z=-2.69,p=.0036$). Note that the test depends upon sufficiently large n for the Normal approximation, so since our sample size (n=77) is somewhat small, we need to interpret this result with caution. More research is underway to address statistical issues related to these comparisons.
-
-### Residual Plot
-Fitted values ($\hat{y}$) and residuals ($y-\hat{y}$) can be computed for zero-inflation models and plotted. Figure \@ref(fig:poisRes) reveals that one observation appears to be extreme (Y=22 drinks during the past weekend). Is this a legitimate observation or was there a transcribing error? Without the original respondents we cannot settle this question. It might be worthwhile to get a sense of how influential this extreme observation is when fitting the model by removing Y=22 and refitting the model.
-
-```{r, poisRes, fig.align="center",out.width="60%", fig.cap='Residuals by fitted counts model.',echo=FALSE, warning=FALSE, message=FALSE}
-#yhatXresidZero
-res.df <- data.frame(resid = residuals(zip.m2), fit = fitted(zip.m2))
-ggplot(res.df, aes(x = fit, y = resid)) +
+ggplot(emplogit1, aes(x = midpoint, y = emplogit, color = sex)) +
   geom_point() +
-  ylab("Residuals from ZIP model") +
-  xlab("Fitted values from ZIP model") +
-  annotate("text", x=4.2, y=5.3, label= "Y=22")
+  geom_smooth(method = "lm") +
+  xlab("BMI percentile") + ylab("Empirical logits")
 ```
 
-### Limitations
+Figure \@ref(fig:logitBMIsex) presents the empirical logits for the BMI intervals by sex. Both males and females exhibit an increasing linear trend on the logit scale indicating that increasing BMI is associated a greater desire to lose weight and that modeling log odds as a linear function of BMI is reasonable. The slope for the females appears to be similar to the slope for males, so we do not need to consider an interaction term between BMI and sex in the model. 
+ 
+```{r, mosaicsexsports, fig.align="center", out.width="60%", fig.cap='Weight loss plans vs. sex and sports participation',echo=FALSE, warning=FALSE, comment=NA}
+ytable <- mosaic::tally(~ sex + sport + lose.wt, data = risk2009)   
+mosaicplot(ytable, color = T, main="")
+#prop.table(ytable, c(1,2))
+```
 
-Given that you have progressed this far in your statistical education, the weekend drinking survey question should raise some red flags. What time period constitutes the "weekend"?  Will some students be thinking of only Saturday night while others include Friday night or possibly Sunday evening? What constitutes a drink---a bottle of beer? How many drinks will a respondent report for a bottle of wine? Precise definitions would vastly improve the quality of this data.  There is also an issue related to confidentiality.  If the data is collected in class, will the teacher be able to identify the respondent? Will respondents worry that a particular response will affect their grade in the class or lead to repercussions on a dry campus?
+Out of those who play sports, 43\% want to lose weight whereas 46\% want to lose weight among those who do not play sports. Figure \@ref(fig:mosaicsexsports) compares the proportion of respondents who want to lose weight by their sex and sport participation. The data suggest that sports participation is associated with the same or even a slightly lower desire to lose weight, contrary to what had originally been hypothesized. While the overall levels of those wanting to lose weight differ considerably between the sexes, the differences between those in and out of sports within sex appear to be very small.  A term for sports participation or number of teams will be considered, but there is not compelling evidence that an interaction term will be needed.
 
-In addition to these concerns, there are a number of other limitations that should be noted. Following the concern of whether this data represents a random sample of any population (it doesn't), we also must be concerned with the size of this data set. ZIP models are not appropriate for small samples and this data set is not impressively large.
 
-At times, a mixture of zeros occurs naturally. It may not come about because of neglecting to ask a critical question on a survey, but the information about the subpopulation may simply not be ascertainable. For example, visitors from a state park were asked as they departed how many fish they caught, but those who report 0 could be either non-fishers or fishers who had bad luck. These kinds of circumstances occur often enough that ZIP models are becoming increasingly common.
+It was posited that increased exposure to media, here measured as hours of TV daily, is associated with increased desire to lose weight, particularly for females. Overall, the percentage who want to lose weight ranges from 35\% of those watching 5 hours of TV per day to 52\% among those watching 3 hours daily. There is minimal variation in the proportion wanting to lose weight with both sexes combined. However, we are more interested in differences between the sexes (see Figure \@ref(fig:mediaXsex)).  We create empirical logits using the proportion of students trying to lose weight for each level of hours spent watching daily and look at the trends in the logits separately for males and females. From Figure \@ref(fig:logitmediasex), there does not appear to be a linear relationship for males or females. 
 
-Actually there are many fewer ordinary Poisson regression applications in contrast to ZIPs and other Poisson modeling approaches such as hurdle models and quasi-Poisson applications. So it is worth taking a look at these variations of Poisson regression models. Not enough detail is presented here to deal with certain nuances of zero-inflated models, but we want you to know about models of this type. ZIP models demonstrate that modeling can be flexible and creative which we hope you see as a theme throughout this book.
+```{r,mediaXsex, fig.align="center",out.width="60%", fig.cap='Weight loss plans vs. daily hours of TV and sex.',echo=FALSE, warning=FALSE, comment=NA}
+ytable <- mosaic::tally(~ sex + media + lose.wt, data = risk2009)   
+mosaicplot(ytable, color = T, main="")
+#prop.table(ytable, c(1,2))
+```
+
+```{r, logitmediasex, fig.align="center",out.width="60%", fig.cap='Empirical logits for the odds of trying to lose weight by TV watching and sex.',echo=FALSE, warning=FALSE}
+emplogit2 <- risk2009 %>%
+  group_by(sex, media) %>%
+  summarise(prop.lose = mean(lose.wt.01), n = n()) %>%
+  mutate(prop.lose = ifelse(prop.lose==0, .01, prop.lose)) %>%
+  mutate(emplogit = log(prop.lose / (1 - prop.lose)))
+
+ggplot(emplogit2, aes(x = media, y = emplogit, color = sex)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  xlab("TV hours per day") + ylab("Empirical logits")
+```
+
+### Initial Models
+Our strategy for modeling is to use our questions of interest and what we have learned in the exploratory data analysis. For each model we interpret the coefficient of interest, look at the corresponding Wald test and, as a final step, compare the deviances for the different models we considered.
+
+We first use a model where sex is our only predictor.
+```{r, 6model1, echo=FALSE, comment=NA}
+risk2009 <- risk2009 %>%
+  mutate(female = ifelse(sex=="Female", 1, 0))
+model1 <- glm(lose.wt.01 ~ female, family = binomial, data = risk2009)
+tmp <- capture.output(summary(model1))
+cat(tmp[c(3:4, 9:13, 18:20)], sep='\n')
+#exp(confint(model1))
+```
+Our estimated binomial regression model is:
+\[\log\left(\frac{{p}}{1-{p}}\right)=-0.79+1.11 (\textrm{female})\]
+where ${p}$ is the estimated proportion of youth wanting to lose weight. We can interpret the coefficient on female by exponentiating $e^{1.1130} = 3.04$ (95% CI = $(2.05, 4.54)$) indicating that the odds of a female trying to lose weight is over three times the odds of a male trying to lose weight ($Z=5.506$, $p=3.67e-08$). We retain sex in the model and consider adding the BMI percentile:
+
+```{r, include=FALSE}
+exp(coef(model1))
+exp(confint(model1))
+```
+
+```{r, 6model2int, echo=FALSE, include=FALSE, comment=NA}
+model2int <- glm(lose.wt.01 ~ female + bmipct + female:bmipct, 
+                 family = binomial, data = risk2009)
+summary(model2int)
+```
+
+```{r, 6model2, echo=FALSE, comment=NA}
+model2 <- glm(lose.wt.01 ~ female + bmipct, family = binomial, 
+              data = risk2009)
+tmp <- capture.output(summary(model2))
+cat(tmp[c(3:5, 10:15, 20:22)], sep='\n')
+```
+
+We see that there is statistically significant evidence ($Z=9.067, p<.001$) that BMI is positively associated with the odds of trying to lose weight, after controlling for sex.  Clearly BMI percentile belongs in the model with sex.  
+
+Our estimated binomial regression model is:
+\[\log\left(\frac{{p}}{1-{p}}\right)= -4.46+1.54\textrm{female}+0.051\textrm{bmipct}\]
+
+To interpret the coefficient on `bmipct`, we will consider a 10 unit increase in `bmipct`.  Because $e^{10*0.0509}=1.664$, then there is an estimated 66.4\% increase in the odds of wanting to lose weight for each additional 10 percentile points of BMI for members of the same sex. Just as we had done in other multiple regression models we need to interpret our coefficient *given that the other variables remain constant*. An interaction term for BMI by sex was tested (not shown) and it was not significant ($Z=-0.405$, $p=0.6856$), so the effect of BMI does not differ by sex.
+
+We next add `sport` to our model. Sports participation was considered for inclusion in the model in three ways: an indicator of sports participation (0 = no teams, 1 = one or more teams), treating the number of teams (0, 1, 2, or 3) as numeric, and treating the number of teams as a factor.  The models below treat sports participation using an indicator variable, but all three models produced similar results.
+
+```{r, 6model3, echo=FALSE, comment=NA, message=FALSE}
+model3 <- glm(lose.wt.01 ~ female + bmipct + sport, 
+              family = binomial, data = risk2009)
+tmp <- capture.output(summary(model3))
+cat(tmp[c(3:5, 10:15, 20:22)], sep='\n')
+
+model3int <- glm(lose.wt.01 ~ female + bmipct + sport + female:sport + bmipct:sport, family = binomial, data = risk2009)
+
+tmp1 <- capture.output(summary(model3int))
+cat(tmp1[c(3:5, 10:17, 22:24)], sep='\n')
+```
+
+Sports teams were not significant in any of these models, nor were interaction terms (sex by sports) and (bmipct by sports). As a result, sports participation was no longer considered for inclusion in the model.
+
+We last look at adding `media` to our model.
+
+```{r, 6model4, echo=FALSE, comment=NA, message=FALSE}
+model4 <- glm(lose.wt.01 ~ bmipct + female + media, 
+              family = binomial, data = risk2009)
+tmp <- capture.output(summary(model4))
+cat(tmp[c(3:5, 10:16, 21:23)], sep='\n')
+```
+
+Media is not a statistically significant term ($p=0.456$, $Z=-0.745$). However, because our interest centers on how media may affect attempts to lose weight and how its effect might be different for females and males, we fit a model with a media term and a sex by media interaction term (not shown). Neither term was statistically significant, so we have no support in our data that media exposure as measured by hours spent watching TV is associated with the odds a teen is trying to lose weight after accounting for sex and BMI.
+
+
+### Drop-in-deviance Tests
+
+```{r, 6model1to4, echo=FALSE, comment=NA}
+anova(model1, model2, model3, model4, test="Chisq")
+AIC(model1, model2, model3, model4)
+```
+
+Comparing models using differences in deviances requires that the models be __nested__, meaning each smaller model is a simplified version of the larger model. In our case, Models 1, 2, and 4 are nested, as are Models 1, 2, and 3, but Models 3 and 4 cannot be compared using a drop-in-deviance test.
+
+There is a large drop-in-deviance adding BMI to the model with sex (Model 1 to Model 2, 123.13), which is clearly statistically significant when compared to a $\chi^2$ distribution with 1 df. The drop-in-deviance for adding an indicator variable for sports to the model with sex and BMI is only 434.88 - 434.75 = 0.13. There is a difference of a single parameter, so the drop-in-deviance would be compared to a $\chi^2$ distribution with 1 df. The resulting $p$-value is very large (.7188) suggesting that adding an indicator for sports is not helpful once we've already accounted for BMI and sex. For comparing Models 3 and 4, one approach is to look at the AIC. In this case, the AIC is (barely) smaller for the model with media, providing evidence that the latter model is slightly preferable.
+
+### Model Discussion and Summary
+We found that the odds of wanting to lose weight are considerably greater for females compared to males. In addition, respondents with greater BMI percentiles express a greater desire to lose weight for members of the same sex. Regardless of sex or BMI percentile, sports participation and TV watching are not associated with different odds for wanting to lose weight. 
+
+A limitation of this analysis is that we used complete cases in place of a method of imputing responses or modeling missingness. This reduced our sample from 500 to 429, and it may have introduced bias. For example, if respondents who watch a lot of TV were unwilling to reveal as much, and if they differed with respect to their desire to lose weight from those respondents who reported watching little TV, our inferences regarding the relationship between lots of TV and desire to lose weight may be biased.
+
+Other limitations may result from definitions. Trying to lose weight is self-reported and may not correlate with any action undertaken to do so. The number of sports teams may not accurately reflect sports related pressures to lose weight. For example, elite athletes may focus on a single sport and be subject to greater pressures whereas athletes who casually participate in three sports may not feel any pressure to lose weight. Hours spent watching TV is not likely to encompass the totality of media exposure, particularly because exposure to celebrities occurs often online.  Furthermore, this analysis does not explore in any detail maladaptions---inappropriate motivations for wanting to lose weight. For example, we did not focus our study on subsets of respondents with low BMI who are attempting to lose weight. 
+
+It would be instructive to use data science methodologies to explore the entire data set of 16,000 instead of sampling 500. However, the types of exploration and models used here could translate to the larger sample size.
+
+Finally a limitation may be introduced as a result of the acknowledged variation in the administration of the YRBSS. States and local authorities are allowed to administer the survey as they see fit, which at times results in significant variation in sample selection and response.
 
 ## Exercises
 
-### Conceptual Exercises {#exer:concept}
-
-Each example 1-4 involves predicting a __response__ using one or more __explanatory variables__, where these examples have response variables that are counts per some unit of time or space. List the response (both what is being counted and over what unit of time or space) and relevant explanatory variables.  
-
-1. Are the number of motorcycle deaths in a given year related to a state's helmet laws?
-2. Does the number of employers conducting on-campus interviews during a year differ for public and private colleges? 
-3. Does the daily number of asthma-related visits to an Emergency Room differ depending on air pollution indices?
-4. Has the number of deformed fish in randomly selected Minnesota lakes been affected by changes in trace minerals in the water over the last decade? 
-
-5. Models of the form $Y_i=\beta_0+\beta_1X_i+\epsilon_i, \epsilon_i \sim iidN(0,\sigma)$ are fit using the method of least squares. What method is used to fit Poisson regression models?
-6. What should be done before adjusting for overdispersion?
-7. Why is quasilikelihood used and how do the results compare for corresponding models using likelihoods?
-8. Why is the log of mean counts, log($\bar{Y}$), not $\bar{Y}$, plotted against X when assessing the assumptions for Poisson regression? 
-9. How can this assumption of *mean=variance* be checked for Poisson regression? What if there are not many repeated observations at each level of X?
-10. Is it possible that a predictor is significant for a model fit using a likelihood, but not for a model for the same data fit using a quasilikelihood? Explain.
-
-Complete (a)-(d) in the context of the study for Exercises 11-13. 
+### Conceptual Exercises:
+1. List the explanatory and response variable(s) for each research question. 
+  a. Are students with poor grades more likely to binge drink?
+  b. What is the chance you are accepted into medical school given your GPA and MCAT scores? 
+  c. Does a single mom have a better chance of marrying the baby's father if she has a boy?
+  d. Are students participating in sports in college more or less likely to graduate? 
+  e. Is exposure to a particular chemical associated with a cancer diagnosis?
     
-a. Define the response. 
-b. What are the possible values for the response?	
-c. What does $\lambda$ represent? 
-d. Would a zero-inflated model be considered here? If so, what would be a "true zero?"
+2. Interpret the odds ratios in the following abstract.
 
-11. __Fish (Poisson)__ A state wildlife biologist collected data from 250 park visitors as they left at the end of their stay. Each was asked to report the number of fish they caught during their one week stay. On average visitors caught 21.5 fish per week.
+*Day Care Centers and Respiratory Health* [@Nafstad1999]
 
-12. __Methadone Program Recidivism.__ Program facilitators keep track of the number of times their program's patients relapse within five years of initial treatment. Data on 100 patients yielded a mean number of 2.8 relapses per patient within the five years of initial treatment.
+>__Objective__. To estimate the effects of the type of day care on respiratory health in preschool children.
 
-13. __Clutch size.__ Thirty nests were located and the number of eggs in each nest were counted at the start of a season. Later in the season following a particularly destructive storm, the mean clutch size of the 30 nests was only 1.7 eggs per nest.
+>__Methods__. A population-based cross-sectional study of Oslo children born in 1992 was conducted at the end of 1996. A self-administered questionnaire inquired about day care arrangements, environmental conditions, and family characteristics (n = 3853; response rate, 79\%).
 
+>__Results__. In a logistic regression controlling for confounding, children in day care centers had more often nightly cough (adjusted odds ratio, 1.89; 95\% confidence interval 1.34-2.67), and blocked or runny nose without common cold (1.55; 1.07-1.61) during the past 12 months compared with children in home care... 
 
-14. __Credit card use__ A survey of 1,000 consumers asked respondents how many credit cards they use. Interest centers on the relationship between credit card use and income, in \$10,000. The estimated coefficient for income is 2.1.
+3. Construct a table and calculate the corresponding odds and odds ratios. Comment on the reported and calculated results in this *New York Times* article from @Kolata2009.
 
-    - Identify the predictor and interpret the estimated coefficient for the predictor in this context.
-    - Describe how the assumption of linearity can be assessed in this example.
-    - Suggest a way in which to assess the equal mean and variance assumption.
-    
-15. __Dating Online__ Researchers are interested in the number of dates respondents arranged online and whether the rates differ by age group. Questions which elicit responses similar to this can be found in the Pew survey concerning dating online and relationships [@Duggan2013]. Each survey respondent was asked how many dates they have arranged online in the past 3 months as well as the typical amount of time, $t$, in hours, they spend online weekly. Some rows of data appear below.
-	
-```{r, tab2chp4, echo=FALSE}
-Agecol <- c(19,29,38,55)
-TimeOn <- c(35,20,15,10)
-Numdates <- c(3,5,0,0)
-#intentional non usage of caption in attempt for this to be a table that does not get numbered?!
-tab2chp4 <- data.frame(Agecol,TimeOn,Numdates)
-colnames(tab2chp4) <- c("Age","Time online","Number of dates arranged online")
-kable(tab2chp4)
-```
+>In November, the Centers for Disease Control and Prevention published a paper reporting that babies conceived with IVF, or with a technique in which sperm are injected directly into eggs, have a slightly increased risk of several birth defects, including a hole between the two chambers of the heart, a cleft lip or palate, an improperly developed esophagus and a malformed rectum. The study involved 9,584 babies with birth defects and 4,792 babies without. Among the mothers of babies without birth defects, 1.1 percent had used IVF or related methods, compared with 2.4 percent of mothers of babies with birth defects.
 
-- Identify the response, predictor, and offset in this context.  Does using an offset make sense?
-- Write out a model for this data. As part of your model description, define the parameter, $\lambda$.
-- Consider a Zero-inflated Poisson model for this data. Describe what the `true zeros' would be in this setting.
-    
-16. __Poisson Approximation: Rare Events__ For rare diseases, the probability of a case occurring, $p$, in a very large population, $n$, is small. With a small $p$ and large $n$, the random variable $Y$= the number of cases out of $n$ people can be approximated using a Poisson random variable with $\lambda = np$. If the count of those with the disease is observed in several different populations independently of one another, the $Y_i$ represents the number of cases in the $i^{th}$ population and can be approximated using a Poisson random variable with $\lambda_i=n_ip_i$ where $p_i$ is the probability of a case for the $i^{th}$ population. Poisson regression can take into account the differences in the population sizes, $n_i$, using as an offset which is log($n_i$). The coefficient of the offset is set at one; it is not estimated like the other coefficients.  Thus the model statement has the form:
-\[
-log(\lambda_i) = \beta_0+\beta_1x_i + log(n_i)
-\]
-where $Y_i  \sim$ Poisson($\lambda_i = n_i p_i$). Note that $\lambda_i$ depends on $x_i$ which may differ for the different populations.
-
-Data from @Scotto1974 reported the number of cases of non melanoma skin cancer for women by age group in two metropolitan areas (Minneapolis-St Paul and Dallas-Ft Worth); the year is unknown. They wondered if cancer rates by age group differ by city?  The columns contain: number of cases of skin cancer, population size of the age group per city, age group, and metropolitan area (1=Minneapolis-St Paul, 2=Dallas-Ft Worth).
-
-```{r, tab3chp4, echo=FALSE}
-#skinCancer
-Numcases <- c(1,16,"...",226,65)
-Pop <- c(172675,123065,"...",29007,7538)
-Agegroup <- c("15-24","25-34","...","75-84","85+")
-City <- c(1,1,"...",2,2)
-tab3chp4 <- data.frame(Numcases,Pop,Agegroup,City)
-colnames(tab3chp4) <- c("Number of Cases","Population","Age Group","City")
-kable(tab3chp4)
-```
-
-Identify and describe the following quantities which appear in the description of the Poisson approximation for rare events:
-
-- A case,
-- The population size, $n_i$,
-- Probability, $p_i$,
-- Poisson parameter, $\lambda_i$,
-- Poisson random variables, $Y_i$, and
-- The predictors, $X_i$.
+>The findings are considered preliminary, and researchers say they believe IVF does not carry excessive risks. There is a 3 percent chance that any given baby will have a birth defect.
 
 ### Guided Exercises
-1. We wish to build a regression model to describe the number of burglaries on a college campus in a year.  Our population of interest will be U.S. liberal arts colleges.
-  a. Describe why the response variable ($Y$ = # burglaries on campus in a year) could be modeled by a Poisson distribution.
-  b. Describe explanatory variables which might explain differences in $\lambda$ = mean number of burglaries per year on a particular campus.
-  c. Consider a campus with an average of 5 burglaries per year.  Use `dpois()` to sketch a plot of the distribution of $Y$ for this campus.  Use `rpois()` to verify that both the mean and variance of $Y$ are given by $\lambda=5$.
-  d. Consider a campus with an average of 20 burglaries per year and repeat (c).
 
-2. __Elephant Mating__ How does age affect male elephant mating patterns? An article by @Poole1989 investigated whether mating success in male elephants increases with age and whether there is a peak age for mating success. To address this question, the research team followed 41 elephants for one year and recorded both their ages and their number of matings. The data is found in `elephant.csv`, and the variables are:
-    - `MATINGS` = the number of matings in a given year
-    - `AGE` = the age of the elephant in years.
-    a. Create a histogram of MATINGS. Is there preliminary evidence that number of matings could be modeled as a Poisson response? Explain.
-    b. Plot MATINGS by AGE. Add a least squares line. Is there evidence that modeling matings using a linear regression with age might not be appropriate? Explain.  (Hints: fit a smoother; check residual plots)
-    c. For each age, calculate the mean number of matings. Take the log of each mean and plot it by AGE.
-        i. What assumption can be assessed with this plot?
-        ii. Is there evidence of a quadratic trend on this plot?
-    d. Fit a Poisson regression model with a linear term for AGE. Exponentiate and then interpret the coefficient for AGE. 
-    e. Construct a 95\% confidence interval for the slope and interpret in context (you may want to exponentiate endpoints).
-    f. Are the number of matings significantly related to age? Test with
-        i. a Wald test and
-        ii. a drop in deviance test.
-    g. Add a quadratic term in AGE to determine whether there is a maximum age for the number of matings for  elephants. Is a quadratic model preferred to a linear model? To investigate this question, use
-        i. a Wald test and
-        ii. a drop in deviance test.
-    h. What can we say about the goodness of fit of the model with age as the sole predictor? Compare the residual deviance for the linear model to a $\chi^2$ distribution with the residual model degrees of freedom.
-        i. Fit the linear model using a quasilikelihood. (Why?)
-        ii. How do the estimated coefficients change?
-        iii. How do the standard errors change?
-        iv. What is the estimated dispersion parameter?
-        v. An estimated dispersion parameter greater than one suggests overdispersion. When adjusting for overdispersion, are you more or less likely to obtain a significant result when testing coefficients? Why?
+1. **Soccer goals on target.**  Data comes from an article in *Psychological Science* [@Roskes2011].  The authors report on the success rate of penalty kicks that were on-target, so that either the keeper saved the shot or the shot scored, for FIFA World Cup shootouts between 1982 and 2010.  They found that 18 out of 20 shots were scored when the goalkeeper's team was behind, 71 out of 90 shots were scored when the game was tied, and 55 out of 75 shots were scored with the goalkeeper's team ahead.  
 
-Source: [@Ramsey2002].
+ a. Calculate the odds of a successful penalty kick for games in which the goalkeeper's team was behind, tied, or ahead. Then, construct empirical odds ratios for successful penalty kicks for (a) behind versus tied, and (b) tied versus ahead.
+
+ b. Fit a model with the categorical predictor c("behind","tied","ahead") and interpret the exponentiated coefficients. How do they compare to the empirical odds ratios you calculated?
 
 
-3. __Smoking at Work and Home__ 
-An earlier study examined the effect of workplace rules in Minnesota which require smokers to smoke cigarettes outside.  The number of cigarettes smoked by smokers in a 2-hour period was recorded, along with whether the smoker was at home or at work.  A (very) small subset of the data appears below:
+2. __Medical School Admissions.__  The data for Medical School Admissions is in `MedGPA.csv`, taken from undergraduates from a small liberal arts school over several years.  We are interested in student attributes that are associated with higher acceptance rates.
 
-```{r, ex3chp4, echo=FALSE}
-Subject <- c(1,2,3,4,5,6)
-`X (0 = home, 1 = work)` <- c(0,1,1,1,0,0)
-`Y (number of cigarettes)` <- c(3,0,0,1,2,1)
-ex3chp4 <- data.frame(Subject, `X (0 = home, 1 = work)`, 
-                      `Y (number of cigarettes)`)
-kable(ex3chp4, booktabs=T, 
-      caption="A small subset of hypothetical data on Minnesota workplace rules on smoking.  X is 0 for home and 1 for work.  Y is number of cigaretttes in a 2-hour period.",
-      col.names = c("Subject", "X (location)", "Y (cigarettes)"))
+ -  `Accept` = accepted (A) into medical school or denied (D)
+ -  `Acceptance` = accepted (1) into medical school or denied (0)
+ -  `Sex` = male (M) or female (F)
+ -  `BCPM` = GPA in natural sciences and mathematics
+ -  `GPA` = overall GPA
+ -  `VR` = verbal reasoning subscale score of the MCAT
+ -  `PS` = physical sciences subscale score of the MCAT
+ -  `WS` = writing samples subscale score of the MCAT
+ -  `BS` = biological sciences subscale score of the MCAT
+ -  `MCAT` = MCAT total score
+ -  `Apps` = number of schools applied to
 
-```
+Be sure to interpret model coefficients and associated tests of significance or confidence intervals when answering the following questions:
 
-- Model 1: Assume that $Y \sim \textrm{Poisson}(\lambda)$; there is no difference between home and work. 
-- Model 2: Assume that $Y \sim \textrm{Poisson}(\lambda_W)$ when the smoker is at work, and $Y \sim \textrm{Poisson}(\lambda_H)$ when the smoker is at home. 
-- Model 3: Assume that $Y \sim \textrm{Poisson}(\lambda)$ and  $log(\lambda)=\beta_0+\beta_1X$. 
+ a. Compare the relative effects of improving your MCAT score versus improving your GPA on your odds of being accepted to medical school.  
+ b. After controlling for MCAT and GPA, is the number of applications related to odds of getting into medical school? 
+ c. Is one MCAT subscale more important than the others?
+ d. Is there any evidence that the effect of MCAT score or GPA differs for males and females?
 
-  a. Write out the likelihood $L(\lambda)$ and the log-likelihood $logL(\lambda)$ in Model 1. Use the data values above, and simplify where possible.
-  b. Intuitively, what would be a reasonable estimate for $\lambda$ based on this data?  Why?
-  c. Find the maximum likelihood estimator for $\lambda$ in Model 1 using an optimization routine in R (but not the `glm()` function).  Use R to produce a plot of the likelihood function $L(\lambda)$.
-  d. Write out the log-likelihood function $logL(\lambda_W, \lambda_H)$ in Model 2.  Use the data values above, and simplify where possible.
-  e. Intuitively, what would be reasonable estimates for $\lambda_W$ and $\lambda_H$ based on this data?  Why?
-  f. Find the maximum likelihood estimators for $\lambda_W$ and $\lambda_H$ in Model 2 using an optimization routine in R (but not the `glm()` function).
+3. __Moths.__  An article in the *Journal of Animal Ecology* by @Bishop1972 investigated whether moths provide evidence of “survival of the fittest” with their camouflage traits.  Researchers glued equal numbers of light and dark morph moths in lifelike positions on tree trunks at 7 locations from 0 to 51.2 km from Liverpool.  They then recorded the numbers of moths removed after 24 hours, presumably by predators.  The hypothesis was that, since tree trunks near Liverpool were blackened by pollution, light morph moths would be more likely to be removed near Liverpool. 
 
+Data can be found in `moth.csv` and contains the following variables:
 
-4.  __Smoking at Work and Home (continued)__ We will use the same dataset in this question as we used in question 3. 
-
-  a. Write out the log-likelihood function $logL(\beta_0, \beta_1)$ in Model 3.  Again, use the data values above, and simplify where possible.
-  b. Find the maximum likelihood estimators for $\beta_0$ and $\beta_1$ in Model 3 using an optimization routine in R (but not the `glm()` function).  Use R to produce a 3D plot of the log-likelihood function.
-  c. Confirm your estimates for Model 1 and Model 3 using `glm()`.  Then show that the MLEs for Model 3 agree with the MLEs for Model 2.
-  
-For the remaining questions, we will focus exclusively on Model 3.
-
-  d. State a (one-sided) hypothesis for $\beta_1$ in the context of the problem (i.e. explain how your hypothesis relates to smoking at home and at work).  Note: we will nevertheless use two-sided tests and intervals in the following questions.
-  e. Do we need to include an offset in our Poisson regression model?  Why or why not?
-  f. Give estimates of $\beta_0$ and $\beta_1$, and provide interpretations for both in the context of the problem. 
-  g. Provide and interpret a 95% confidence interval for $\beta_1$.
-  h. Provide two *different* significance tests for $\beta_1$, in each case providing a test statistic and a p-value and a conclusion in the context of the problem.
-  i. Provide a goodness-of-fit test for Model 3, again providing a test statistic, p-value, and conclusion in context.
-  j. Can we generalize results of this study to all Minnesota smokers?  Why or why not.
-  k. Can we claim that rules restricting smoking in the workplace have caused lower levels of smoking at work?  Explain.
-  l. Give two ways in which this study might be improved (besides simply “bigger sample size”).
-
-5. __Campus Crime__ The data set `campuscrime09.csv` contains the number of burglaries reported at a collection of 47 US public universities with over 10,000 students in the year 2009.  In addition, covariates are included which may explain differences in crime rates, including total number of students, percentage of men, average SAT and ACT test scores, and tuition.
-  a. Perform an exploratory data analysis. Support your analysis with plots and summary statistics. 
-    i. Analyze whether number of burglaries could be reasonably modeled with a Poisson distribution
-    ii. Analyze which covariates you expect to be the best predictors of burglaries.  
-  b. Consider a model with 4 predictors:  `act.comp + tuition + pct.male + total`.  Try fitting a linear regression with `burg09` as the response. Are there any concerns with this linear regression model?
-  c. Run a Poisson regression model with the 4 predictors from (b).  Interpret the coefficients for `tuition` and `pct.male`.
-  d. Replace `tuition` with tuition in thousands in your model from (c) – i.e. `tuition.thous`=`tuition`/1000.  How does your new model compare to your model in (c)?  Interpret the coefficient for `tuition.thous`.
-  e. We will consider the possibility of including the total number of students at a university as an offset.
-    i. Explain why we might consider `total` as an offset.
-    ii.	Refit your model from (d) with total (actually, log(total)) as an offset rather than as a predictor.  Does this new model appear to fit better or worse than the model from (d)?
-  	iii. Refit your model from (d) with log(total) rather than total – so log(total) is a predictor and not an offset.  If total were a good candidate for an offset, what would we expect the coefficient of log(total) to be?  Does a 95% confidence interval for that coefficient contain the value you expected?
-  f. Run the following model, then interpret the coefficients for `tuition.thous` and the interaction between `tuition.thous` and `act.comp`.
+ -  `MOPRH` = light or dark
+ -  `DISTANCE` = kilometers from Liverpool
+ -  `PLACED` = number of moths of a specific morph glued to trees at that location
+ -  `REMOVED` = number of moths of a specific morph removed after 24 hours
 
 ```{r, eval = FALSE}
-crime <- mutate(crime, total.thous = total/1000)
-fit3 <- glm(burg09 ~ act.comp + tuition.thous + total.thous +
-  act.comp:tuition.thous + act.comp:total.thous, family = poisson, data = crime)
+moth <- read_csv("data/moth.csv")
+moth <- mutate(moth, notremoved = PLACED - REMOVED, 
+               logit1 = log(REMOVED / notremoved),
+               prop1 = REMOVED / PLACED, 
+               dark = ifelse(MORPH=="dark",1,0) )
 ```
 
-
-6. __US National Medical Expenditure Survey__ The data set `NMES1988` in the `AER` package contains a sample of individuals over 65 who are covered by Medicare in order to assess the demand for health care through physician office visits, outpatient visits, ER visits, hospital stays, etc.  The data can be accessed by installing the `AER` package and then running:
-
-```{r, eval=FALSE}
-library(AER)
-data(NMES1988)
-```
-
-More background information and references about the `NMES1988` data can be found in help pages for the `AER` package.  
-
-  a. Show through graphical means that there are more respondents with 0 visits than might be expected under a Poisson model.
-  b. Fit a model for the number of physician office `visits` using `chronic`, `health`, and `insurance` as predictors for the Poisson count, and `chronic` and `insurance` as the predictors for the binary part of the model.  Then, provide interpretations in context for the following model parameters:
-
- - `chronic` in the Poisson part of the model
- - poor `health` in the Poisson part of the model
- - the Intercept in the logistic part of the model
- - `insurance` in the logistic part of the model
+ a. What are logits in this study? 
+ b. Create empirical logit plots (logits vs. distance by morph). What can we conclude from this plot?
+ c. Create a model with `DISTANCE` and `dark`. Interpret all the coefficients.
+ d. Create a model with `DISTANCE`, `dark`, and the interaction between both variables. Interpret all the coefficients. 
+ e. Interpret a drop-in-deviance test and a Wald test to test the significance of the interaction term in (d). 
+ f. Test the goodness of fit for the interaction model.  What can we conclude about this model?
+ g. Is there evidence of overdispersion in the interaction model?  What factors might lead to overdispersion in this case? Regardless of your answer, repeat (d) adjusting for overdispersion.
+ h. Compare confidence intervals that you find in (g) and in (d). 
+ i. What happens if we expand the data set to contain one row per moth (968 rows)?  Now we can run a logistic binary regression model.  How does the logistic binary regression model compare to the binomial regression model?  What are similarities and differences?  Would there be any reason to run a binomial regression rather than a logistic regression in a case like this? The following is some starter code:
  
-  c. Is there significant evidence that the ZIP model is an improvement over a simple Poisson regression model? 
+```{r, eval = FALSE}
+mtemp1 = rep(moth$dark[1],moth$REMOVED[1])
+dtemp1 = rep(moth$DISTANCE[1],moth$REMOVED[1])
+rtemp1 = rep(1,moth$REMOVED[1])
+mtemp1 = c(mtemp1,rep(moth$dark[1],moth$PLACED[1]-moth$REMOVED[1]))
+dtemp1 = c(dtemp1,rep(moth$DISTANCE[1],moth$PLACED[1]-moth$REMOVED[1]))
+rtemp1 = c(rtemp1,rep(0,moth$PLACED[1]-moth$REMOVED[1]))
+for(i in 2:14)  {
+  mtemp1 = c(mtemp1,rep(moth$dark[i],moth$REMOVED[i]))
+  dtemp1 = c(dtemp1,rep(moth$DISTANCE[i],moth$REMOVED[i]))
+  rtemp1 = c(rtemp1,rep(1,moth$REMOVED[i]))
+  mtemp1 = c(mtemp1,rep(moth$dark[i],moth$PLACED[i]-moth$REMOVED[i]))
+  dtemp1 = c(dtemp1,rep(moth$DISTANCE[i],moth$PLACED[i]-moth$REMOVED[i]))
+  rtemp1 = c(rtemp1,rep(0,moth$PLACED[i]-moth$REMOVED[i]))  }
+newdata = data.frame(removed=rtemp1,dark=mtemp1,dist=dtemp1)
+newdata[1:25,]
+cdplot(as.factor(rtemp1)~dtemp1)
+```
+ 
+4. __2016 Election.__  An [award-winning](https://www.causeweb.org/usproc/usclap/2018/spring/winners) student project [@Renier2018] examined driving forces behind Donald Trump's surprising victory in the 2016 Presidential Election, using data from nearly 40,000 voters collected as part of the 2016 Cooperative Congressional Election Survey (CCES).  The student researchers investigated two theories: (1) Trump was seen as the candidate of change for voters experiencing economic hardship, and (2) Trump exploited voter fears about immigrants and minorities.  
 
+The dataset `electiondata.csv` has individual level data on voters in the 2016 Presidential election, collected from the CCES and subsequently tidied.  We will focus on the following variables:
 
-7. __Going Vague: Ambiguity in Political Issue Statements__  In the following exercise, you will use a **hurdle model** to analyze the data. A hurdle model is similar to a zero-inflated poisson model, but instead of assuming that "zeros" are comprised of two distinct groups---those who would always be 0 and those who happen to be 0 on this occasion (e.g. non-drinkers and drinkers who had zero drinks over the weekend in Case Study \@ref(cs:drinking))---the hurdle model assumes that "zeros" are a single entity. Therefore, in a hurdle model, cases are classified as either "zeros" or "non-zeros", where "non-zeros" hurdle the 0 threshold---they must always have counts of 1 or above.  We will use the `pscl` package and the `hurdle` function in it, to analyze a hurdle model.  Note that coefficients in the "zero hurdle model" section of the output relate predictors to the log-odds of being a non-zero (i.e., having at least one issue statement).
+ - `Vote` = 1 if Trump; 0 if another candidate
+ - `zfaminc` = family income expressed as a z-score (number of standard deviations above or below the mean)
+ - `zmedinc` = state median income expressed as a z-score
+ - `EconWorse` = 1 if the voter believed the economy had gotten worse in the past 4 years; 0 otherwise
+ - `EducStatus` = 1 if the voter had at least a bachelor's degree; 0 otherwise
+ - `republican` = 1 if the voter identified as Republican; 0 otherwise
+ - `Noimmigrants` = 1 if the voter supported at least 1 of 2 anti-immigrant policy statements; 0 if neither
+ - `propforeign` = proportion foreign born in the state
+ - `evangelical` = 1 if `pew_bornagain` is 2; otherwise 0 
 
-In a 2018 study, @Chapp2018 scraped every issue statement from webpages of candidates for the US House of Representatives, counting the number of issues candidates commented on and scoring the level of ambiguity of each statement.  We will focus on the issue counts, and determining which attributes (of both the district as a whole and the candidates themselves) are associated with candidate silence (commenting on 0 issues) and a willingness to comment on a greater number of issues.  The data set `ambiguity.csv` contains the following variables:  
+The questions below address Theory 1 (Economic Model).  We want to see if there is significant evidence that voting for Trump was associated with family income level and/or with a belief that the economy became worse during the Obama Administration.  
 
-  - `name` : candidate name
-  - `distID` : unique identification number for Congressional district
-  - `ideology` : candidate left-right orientation
-  - `democrat` : 1 if Democrat, 0 if Republican
-  - `mismatch` : disagreement between candidate ideology and district voter ideology
-  - `incumbent` : 1 if incumbent, 0 if not
-  - `demHeterogeneity` : how much voters in a district differ according to race, education, occupation, etc.
-  - `attHeterogeneity` : how much voters in a district differ according to political ideology
-  - `distLean` : overall ideological lean in a district
-  - `totalIssuePages` : number of issues candidates commented on (response)
+  a. Create a plot showing the relationship between whether a voter voted for Trump and their opinion about the status of the economy. What do you find?
+  b. Repeat (a) separately for Republicans and non-Republicans.  Again describe what you find.
+  c. Create a plot with one observation per state showing the relationship between a state's median income and the log odds of a resident of that state voting for Trump.  What can you conclude from this plot?
   
-  a. Create a frequency plot of `total_issue_pages`. Why might we consider using a hurdle model compared to a poisson model? Why can’t we use a zero-inflated poisson model?
-  b. Create a plot of the empirical log odds of having at least one issue statement by ideology.  You may want to group ideology values first.  What can you conclude from this plot?
-  c. Create a scatter plot that shows the log of the mean number of issues vs ideology group by party, among candidates with at least one issue statement. What can we conclude from this plot?
-  d. Create a hurdle model with `ideology` and `democrat` as predictors in both parts. Interpret `ideology` in both parts of the model. 
-  e. Repeat (d), but include an interaction in both parts. Interpret the interaction in the zero hurdle part of the model.
-  f. Find the best model you can to determine `total_issue_pages`. Write a short paragraph discussing implications of your model.  
+Fit the following model to your data:
 
+```{r, eval = FALSE}
+model1a <- glm(Vote01 ~ zfaminc + zmedinc + EconWorse + EducStatus +
+  republican + EducStatus:republican + EconWorse:zfaminc + 
+  EconWorse:republican, family = binomial, data = electiondata)
+summary(model1a)
+```
+
+  d. Interpret the coefficient for `zmedinc` in context.
+  e. Interpret the coefficient for `republican` in context.
+  f. Interpret the coefficient for `EconWorse:republican` in context.  What does this allow us to conclude about Theory 1?
+  g. Repeat the above process for Theory 2 (Immigration Model).  That is, produce meaningful exploratory plots, fit a model to the data with special emphasis on `Noimmigrants`, interpret meaningful coefficients, and state what can be concluded about Theory 2.
+  h. Is there any concern about the independence assumption in these models?  We will return to this question in later chapters.
+  
+ 
 ### Open-ended Exercises
 
-1. __Airbnb in NYC.__ Airbnb is an online service that allows travelers to book a stay with only a few clicks at any given time. Customers are given the ability to tailor their travel experience to fit their budget and lifestyle, choosing from castles to tree houses, and finding plenty of offerings in rural towns as well as busy metropolitan areas. In a break from traditional industrial models, Airbnb promotes the growth of a "sharing economy," a way to supplement income by renting out or otherwise utilizing existing assets for individual profit. There are few barriers to entry to become a seller on the rental market for Airbnb, and its global reach provides an instantaneous way to make money for its wide user base.  
+1. __2008 Presidential Voting in Minnesota counties.__  Data in `mn08.csv` contains results from the 2008 US Presidential election by county in Minnesota, focusing on the two primary candidates (Democrat Barack Obama and Republican John McCain).  You can consider the response to be either the percent of Obama votes in a county (binomial) or whether or not Obama had more votes than McCain (binary).  Then build a model for your response using county-level predictors listed below.  Interpret the results of your model.
 
-@Awad2017 scraped 40628 Airbnb listings from New York City in March 2017 and put together the data set `NYCairbnb.csv`.  Key variables include:
+ - `County` = county name
+ - `Obama` = total votes for Obama
+ - `McCain` = total votes for McCain
+ - `pct_Obama` = percent of votes for Obama
+ - `pct_rural` = percent of county who live in a rural setting
+ - `medHHinc` = median household income
+ - `unemp_rate` = unemployment rate
+ - `pct_poverty` = percent living below the poverty line
+ - `medAge2007` = median age in 2007
+ - `medAge2000` = median age in 2000
+ - `Gini_Index` = measure of income disparity in a county
+ - `pct_native` = percent of native born residents
+ 
 
-- `id` = unique ID number for each unit
-- `last_scraped` = date when information scraped
-- `host_since` = date when host first listed the unit on Airbnb
-- `days` = `last_scraped` - `host_since` = number of days the unit has been listed
-- `room_type` = Entire home/apt, Private room, or Shared room
-- `bathrooms` = number of bathrooms
-- `bedrooms` = number of bedrooms
-- `price` = price per night (dollars)
-- `number_of_reviews` = number of reviews for the unit on Airbnb
-- `review_scores_cleanliness` = cleanliness score from reviews (1-10)
-- `review_scores_location` = location score from reviews (1-10)
-- `review_scores_value` = value score from reviews (1-10)
-- `instant_bookable` = "t" if instantly bookable, "f" if not
+2. __Crime on Campus.__  The data set `c_data2.csv` contains statistics on violent crimes and property crimes for a sample of 81 US colleges and universities.  Characterize rates of violent crimes as a proportion of total crimes reported (i.e., `num_viol` / `total_crime`) -- do they differ based on type of institution, size of institution, or region of the country? 
 
-Perform an EDA, build a model, and interpret model coefficients to describe variation in the number of reviews (a proxy for the number of rentals, which is not available) as a function of the variables provided.  Don't forget to consider an offset, if needed.
-
-
-2. __Crab Satellites__
-
-@Brockmann1996 carried out a study of nesting female horseshoe crabs. Female horseshoe crabs often have male crabs attached to a female's nest known as *satellites*. One objective of the study was to determine which characteristics of the female were associated with the number of satellites. Of particular interest is the relationship between the width of the female carapace and satellites.
-The data can be found in `crab.csv`. It includes:
-
-- `NumSat` = number of satellites
-- `Width` = carapace width (cm)
-- `Wt` = weight (kg)
-- `Sp` = spine condition (1 = both good, 2 = one worn or broken, 3 = both worn or broken)
-- `C` = color (1 = light medium, 2 = medium, 3 = dark medium, 4 = dark)
-
-Use Poisson regression to investigate the research question. Be sure you work to obtain an appropriate model before considering overdispersion.
+ - `Enrollment` = number of students enrolled
+ - `type` = university (U) or college (C)
+ - `num_viol` = number of violent crimes reported
+ - `num_prop` = number of property crimes reported
+ - `viol_rate_10000` = violent crime rate per 10000 students enrolled
+ - `prop_rate_10000` = property crime rate per 10000 students enrolled
+ - `total_crime` = total crimes reported (property and violent)
+ - `region` = region of the country
 
 
-3. __Doctor Visits__ 
+3. __NBA Data.__  Data in `NBA1718team.csv` [@rossotti] looks at factors that are associated with a team's winning percentage. After a thorough exploratory data analyses, create the best model you can to predict a team's winning percentage; be careful of collinearity between the covariates. Based on your EDA and modeling, describe the factors that seem to explain a team's success.
 
-Data was collected on doctor visits from a sample of 5,190 people in the 1977/1978 Australian Health Survey. @Cameron1986 sought to explain the variation in doctor visits using one or more explanatory variables. The data can be found in an R data set from `library(AER)` accessible with the command `data("DoctorVisits")`. Variable descriptions can be found under `help("DoctorVisits")`
+  - `win_pct` = Percentage of Wins,
+  - `FT_pct` = Average Free Throw Percentage per game,
+  - `TOV` = Average Turnovers per game, 
+  - `FGA` = Average Field Goal Attempts per game,
+  - `FG` = Average Field Goals Made per game,
+  - `attempts_3P` = Average 3 Point Attempts per game,
+  - `avg_3P_pct` = Average 3 Point Percentage per game,
+  - `PTS` = Average Points per game,
+  - `OREB` = Average Offensive Rebounds per game,
+  - `DREB` = Average Defensive per game,
+  - `REB` = Average Rebounds per game,
+  - `AST` = Average Assists per game,
+  - `STL` = Average Steals per game,
+  - `BLK` = Average Blocks per game,
+  - `PF` = Average Fouls per game,
+  - `attempts_2P` = Average 2 Point Attempts per game
 
-Explore the use of a zero-inflated model for this data. Begin with a histogram of the number of visits, some EDA, and fitting several models. Summarize your results.
 
-4. __More Fish__
+4. __Trashball.__ Great for a rainy day! A fun way to generate overdispersed binomial data. Each student crumbles an 8-1/2 by 11 inch sheet and tosses it from three prescribed distances ten times each. The response is the number of made baskets out of 10 tosses, keeping track of the distance. Create your own variables to analyze, and include them in your dataset (ex: years of basketball experience, using a tennis ball instead of a sheet of paper, height).  Some sample analysis steps:
 
-The number of fish caught (`count`), persons in the party (`persons`), the number of children in the party (`child`), whether or not they brought a camper into the park (`camper`), and the length of stay (`LOS`) were recorded for 250 camping parties. The data can be found in `fish2.csv` (source: [@idre2018]).  Create and assess a model for the number of fish caught.
-
+  a. Create scatterplots of logits vs. continuous predictors (distance, height, shot number, etc.) and boxplots of logit vs. categorical variables (sex, type of ball, etc.). Summarize important trends in one or two sentences.
+  b. Create a graph with empirical logits vs. distance plotted separately by sex. What might you conclude from this plot?
+  c. Find a binomial model using the variables that you collected. Give a brief discussion on your findings. 

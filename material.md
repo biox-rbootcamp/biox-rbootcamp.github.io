@@ -20,10 +20,10 @@ layout: cme195
 | 12 | Th |  | [Lecture: ANOVA](https://www.youtube.com/watch?v=CS_BKChyPuc)  |  [Lab 12: ANOVA](./biox-rbootcamp.github.io/assets/lectures/testing_lectures/anova_lab.html)| [Lab 12 Material Rmd](./biox-rbootcamp.github.io/assets/lectures/testing_lectures/anova_lab.Rmd)  |
 | 13 | M | Regression | [Lecture: Simple Linear Regression: slr(1)](https://www.youtube.com/watch?v=ptvHkDQYS40&feature=youtu.be)[ slr(2)](https://www.youtube.com/watch?v=PI_dNMU7fqI&feature=youtu.be)[ slr(3)](https://www.youtube.com/watch?v=YvhOvdxz1LM&feature=youtu.be) |  [Lab 13](./biox-rbootcamp.github.io/assets/lectures/linear_regression/slr.html) |  [Lab 13 [rmd]](./biox-rbootcamp.github.io/assets/lectures/linear_regression/slr.Rmd) |
 | 14 | W | | [Lecture: Multivariate Regression: mlr(1)](https://www.youtube.com/watch?v=RUgi_Uc1fx0&feature=youtu.be) [mlr(2)](https://www.youtube.com/watch?v=RUgi_Uc1fx0&feature=youtu.be)[ mlr(3)](https://www.youtube.com/watch?v=bhQ0obnUabM&feature=youtu.be) [ mlr(4)](https://www.youtube.com/watch?v=3zjMDsPhJnk&feature=youtu.be) | [Lab 14](./biox-rbootcamp.github.io/assets/lectures/linear_regression/mlr.html) |   [Lab 14 [rmd]](./biox-rbootcamp.github.io/assets/lectures/linear_regression/mlr.Rmd) |
-| 15 | Th |  | [Lecture: GLMs and Poisson regression]() |  [Lab 15](./biox-rbootcamp.github.io/assets/lectures/linear_regression/Generalized-Linear-Models.html) |  |
-| 16 | M | Mixtures and Bootstrap tests | [Lecture: Mixtures](https://drive.google.com/file/d/1aXFkzL1tWYLnAf5PKkwMGvai6NUaHrnb/view?usp=sharing)  | [Lab 16]() |  |  |
-| 17 | W |  | [Lecture: Permutation tests and the Bootstrap]()  | [Lab 17]() |  |
-| 18 | Th |  | [Lecture: Model diagnostics]()  |  [Lab 18]() |  |
+| 15 | Th |  | [Lecture: Poisson regression](https://www.youtube.com/watch?v=0XfXHYDYoBA) |  [Lab 15](./biox-rbootcamp.github.io/assets/lectures/linear_regression/Generalized-Linear-Models.html) |  |
+| 16 | M | GLMs, Mixtures and Bootstrap tests | [Lecture: Generalized Linear Models](https://www.youtube.com/watch?v=hc06BXFYd_w)| [Lab 16](./biox-rbootcamp.github.io/assets/lectures/linear_regression/Generalized-Linear-Models.html) |  |  |
+| 17 | W |  | [Lecture: Mixtures](https://drive.google.com/file/d/1aXFkzL1tWYLnAf5PKkwMGvai6NUaHrnb/view?usp=sharing)  | [Lab 17](./biox-rbootcamp.github.io/assets/lectures/Lab5b_mixtures/Lab5b_mixtures.html) |  |  |
+| 18 | Th |  | [Lecture: Permutation tests and the Bootstrap]()   |  [Lab 18]() |  |
 | 19 | M | Clustering | [Lecture: Kmeans and density based clustering](https://drive.google.com/file/d/1ekIRX3Fi_TWMnwJhTeW4RrXslfot_sVE/view?usp=sharing) | [Lab 19]() |  |  |
 | 20 | W |  | [Lecture: Hierarchical Clustering]()| [Lab 20]() |  |
 | 21 | Th |  |  [Lecture: Machine Learning]() | [Lab 21]()  |  |

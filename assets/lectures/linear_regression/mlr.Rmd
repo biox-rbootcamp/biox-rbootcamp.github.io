@@ -1106,6 +1106,9 @@ Multiple regression is a widely used statistical method with many uses, we will 
 - Controlling for confounding in situations with multiple confounding variables
 - Developing predictive models to be applied to new data
 
+Please prepare the following two exercises. 
+You'll have a little bit of time to discuss them with your fellow classmates in class, but we'll ask you to correct these exercises.
+
 ### Professor Salaries and Confounding Variables
 Let us consider [a dataset from major United States universities](https://raw.githubusercontent.com/biox-rbootcamp/biox-rbootcamp.github.io/master/assets/data/professor_salaries.csv) that was collected as part of the university’s ongoing evaluation of salary differences between its male and female faculty.
 The Professor Salary Data includes the following variables:
@@ -1117,7 +1120,7 @@ The Professor Salary Data includes the following variables:
 - Sex - Whether the professor is male or female
 - Salary - The 9 month salary of the professor (in US dollars)
 
-__Question 0__ Load and start exploring the data. 
+__Question #0__ Load and start exploring the data. 
 
 
 
@@ -1204,6 +1207,7 @@ The single subject discussed in Lab Question #14 changes the regression line’s
 
 For Question #15, create a new variable by applying a log-transformation to PR, then compare the R2 value of the simple linear regression model using the log-transformed variable with the R2 value of the simple linear regression model using the original, un-transformed variable (Hints: You might need to add a small positive value to each subject in your log-transformation formula; Also, you should be sure that subject #127 has been added back to your data for these comparisons)
 
+__Question #17__ Plot the confidence intervals associated to your regression line.
 
 
 __Question #16__
