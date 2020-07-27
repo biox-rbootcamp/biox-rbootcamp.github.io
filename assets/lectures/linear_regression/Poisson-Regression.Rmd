@@ -1117,7 +1117,7 @@ Source: [Ramsey 2002].
 
 
 
-4. __Campus Crime__ The data set [`campuscrime09.csv`](https://raw.githubusercontent.com/biox-rbootcamp/biox-rbootcamp.github.io/master/assets/lectures/linear_regression/data/campuscrime09.csv) contains the number of burglaries reported at a collection of 47 US public universities with over 10,000 students in the year 2009.  In addition, covariates are included which may explain differences in crime rates, including total number of students, percentage of men, average SAT and ACT test scores, and tuition.
+4. __Campus Crime__ The data [`campuscrime09.csv`](https://raw.githubusercontent.com/biox-rbootcamp/biox-rbootcamp.github.io/master/assets/lectures/linear_regression/data/campuscrime09.csv) contains the number of burglaries reported at a collection of 47 US public universities with over 10,000 students in the year 2009.  In addition, covariates are included which may explain differences in crime rates, including total number of students, percentage of men, average SAT and ACT test scores, and tuition.
   a. Perform an exploratory data analysis. Support your analysis with plots and summary statistics. 
     i. Analyze whether number of burglaries could be reasonably modeled with a Poisson distribution
     ii. Analyze which covariates you expect to be the best predictors of burglaries.  

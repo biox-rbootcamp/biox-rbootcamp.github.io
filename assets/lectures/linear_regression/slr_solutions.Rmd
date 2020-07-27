@@ -1,0 +1,2239 @@
+---
+title: "Simple Linear Regression"
+author: "bioX R- bootcamp"
+date: "07/27/2020"
+
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+
+# Goals
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(cache = TRUE, autodep = TRUE, fig.align = "center")
+```
+
+> "All models are wrong, but some are useful."
+>
+> --- **George E. P. Box**
+
+__Objectives__ After reading this chapter you will be able to:
+
+- Understand the concept of a model.
+- Describe two ways in which regression coefficients are derived.
+- Estimate and visualize a regression model using `R`.
+- Interpret regression coefficients and statistics in the context of real-world problems.
+- Use a regression model to make predictions.
+
+Please watch the following videos before going through the lab.
+Prepare two questions on the material covered to ask in the discussion session.
+
+- [Linear regression](https://www.youtube.com/watch?v=ptvHkDQYS40&feature=youtu.be)
+- [Linear regression (2)](https://www.youtube.com/watch?v=PI_dNMU7fqI&feature=youtu.be)
+- [Linear regression (3)](https://www.youtube.com/watch?v=YvhOvdxz1LM&feature=youtu.be)
+
+
+# Simple Linear Regression
+
+## Modeling
+
+Let's consider a simple example of how the speed of a car affects its stopping distance, that is, how far it travels before it comes to a stop. To examine this relationship, we will use the `cars` dataset which, is a default `R` dataset. Thus, we don't need to load a package first; it is immediately available.
+
+To get a first look at the data you can use the `View()` function inside RStudio.
+
+```{r, eval = FALSE}
+View(cars)
+```
+
+We could also take a look at the variable names, the dimension of the data frame, and some sample observations with `str()`.
+
+```{r}
+str(cars)
+```
+
+As we have seen before with data frames, there are a number of additional functions to access some of this information directly.
+
+```{r}
+dim(cars)
+nrow(cars)
+ncol(cars)
+```
+
+Other than the two variable names and the number of observations, this data is still just a bunch of numbers, so we should probably obtain some context.
+
+```{r, eval = FALSE}
+?cars
+```
+
+Reading the documentation we learn that this is data gathered during the 1920s about the speed of cars and the resulting distance it takes for the car to come to a stop. The interesting task here is to determine how far a car travels before stopping, when traveling at a certain speed. So, we will first plot the stopping distance against the speed.
+
+```{r}
+library(tidyverse)
+ggplot( data = cars,aes(y=dist, x= speed))+
+  geom_point(size=2, colour ="grey")+
+  xlab("Speed (in Miles Per Hour)") +
+  ylab("Stopping Distance (in Feet)")+
+  ggtitle("Stopping Distance vs Speed")+
+  theme_bw()
+
+```
+
+Let's now define some terminology. We have pairs of data, $(x_i, y_i)$, for $i = 1, 2, \ldots n$, where $n$ is the sample size of the dataset.
+
+We use $i$ as an index, simply for notation. We use $x_i$ as the **predictor** (explanatory) variable. The predictor variable is used to help *predict* or explain the **response** (target, outcome) variable, $y_i$.
+
+Other texts may use the term independent variable instead of predictor and dependent variable in place of response. However, those monikers imply mathematical characteristics that might not be true. While these other terms are not incorrect, independence is already a strictly defined concept in probability. For example, when trying to predict a person's weight given their height, would it be accurate to say that height is independent of weight? Certainly not, but that is an unintended implication of saying "independent variable." We prefer to stay away from this nomenclature.
+
+In the `cars` example, we are interested in using the predictor variable `speed` to predict and explain the response variable `dist`.
+
+Broadly speaking, we would like to model the relationship between $X$ and $Y$ using the form
+
+$$
+Y = f(X) + \epsilon.
+$$
+
+The function $f$ describes the functional relationship between the two variables, and the $\epsilon$ term is used to account for error. This indicates that if we plug in a given value of $X$ as input, our output is a value of $Y$, within a certain range of error. You could think of this a number of ways:
+
+- Response = Prediction + Error
+- Response = Signal + Noise
+- Response = Model + Unexplained
+- Response = Deterministic + Random
+- Response = Explainable + Unexplainable
+
+What sort of function should we use for $f(X)$ for the `cars` data?
+
+We could try to model the data with a horizontal line. That is, the model for $y$ does not depend on the value of $x$. (Some function $f(X) = c$.) In the plot below, we see this doesn't seem to do a very good job. Many of the data points are very far from the orange line representing $c$. This is an example of **underfitting**. The obvious fix is to make the function $f(X)$ actually depend on $x$.
+
+```{r underfit_plot, echo = FALSE}
+plot(dist ~ speed, data = cars,
+     xlab = "Speed (in Miles Per Hour)",
+     ylab = "Stopping Distance (in Feet)",
+     main = "Stopping Distance vs Speed",
+     pch  = 20,
+     cex  = 2,
+     col  = "grey")
+underfit_model = lm(dist ~ 1, data = cars)
+abline(underfit_model, lwd = 3, col = "darkorange")
+```
+
+We could also try to model the data with a very "wiggly" function that tries to go through as many of the data points as possible. This also doesn't seem to work very well. The stopping distance for a speed of 5 mph shouldn't be off the chart! (Even in 1920.) This is an example of **overfitting**. (Note that in this example no function will go through every point, since there are some $x$ values that have several possible $y$ values in the data.)
+
+```{r overfit_plot, echo = FALSE}
+overfit_model = lm(dist ~ poly(speed, 18), data = cars)
+x = seq(-10, 50, length.out = 200)
+plot(dist ~ speed, data = cars,
+     xlab = "Speed (in Miles Per Hour)",
+     ylab = "Stopping Distance (in Feet)",
+     main = "Stopping Distance vs Speed",
+     pch  = 20,
+     cex  = 2,
+     col  = "grey")
+lines(x, predict(overfit_model, data.frame(speed = x)), lwd = 2, col = "darkorange")
+```
+
+Lastly, we could try to model the data with a well chosen line rather than one of the two extremes previously attempted. The line on the plot below seems to summarize the relationship between stopping distance and speed quite well. As speed increases, the distance required to come to a stop increases. There is still some variation about this line, but it seems to capture the overall trend.
+
+```{r goodfit_plot, echo = FALSE}
+stop_dist_model = lm(dist ~ speed, data = cars)
+plot(dist ~ speed, data = cars,
+     xlab = "Speed (in Miles Per Hour)",
+     ylab = "Stopping Distance (in Feet)",
+     main = "Stopping Distance vs Speed",
+     pch  = 20,
+     cex  = 2,
+     col  = "grey")
+abline(stop_dist_model, lwd = 3, col = "darkorange")
+```
+
+With this in mind, we would like to restrict our choice of $f(X)$ to *linear* functions of $X$. We will write our model using $\beta_1$ for the slope, and $\beta_0$ for the intercept,
+
+$$
+Y = \beta_0 + \beta_1 X + \epsilon.
+$$
+
+### Simple Linear Regression Model
+
+We now define what we will call the simple linear regression model,
+
+$$
+Y_i = \beta_0 + \beta_1 x_i + \epsilon_i
+$$
+
+where
+
+$$
+\epsilon_i \sim N(0, \sigma^2).
+$$
+
+That is, the $\epsilon_i$ are *independent and identically distributed* (iid) normal random variables with mean $0$ and variance $\sigma^2$. This model has three parameters to be estimated: $\beta_0$, $\beta_1$, and $\sigma^2$, which are fixed, but unknown constants.
+
+We have slightly modified our notation here. We are now using $Y_i$ and $x_i$, since we will be fitting this model to a set of $n$ data points, for $i = 1, 2, \ldots n$.
+
+Recall that we use capital $Y$ to indicate a random variable, and lower case $y$ to denote a potential value of the random variable. Since we will have $n$ observations, we have $n$ random variables $Y_i$ and their possible values $y_i$.
+
+In the simple linear regression model, the $x_i$ are assumed to be fixed, known constants, and are thus notated with a lower case variable. The response $Y_i$ remains a random variable because of the random behavior of the error variable, $\epsilon_i$. That is, each response $Y_i$ is tied to an observable $x_i$ and a random, unobservable, $\epsilon_i$.
+
+Essentially, we could explicitly think of the $Y_i$ as having a different distribution for each $X_i$. In other words, $Y_i$ has a conditional distribution dependent on the value of $X_i$, written $x_i$. Doing so, we still make no distributional assumptions of the $X_i$, since we are only interested in the distribution of the $Y_i$ for a particular value $x_i$. 
+
+$$
+Y_i \mid X_i \sim N(\beta_0 + \beta_1 x_i, \sigma^2)
+$$
+
+The random $Y_i$ are a function of $x_i$, thus we can write its mean as a function of $x_i$,
+
+$$
+\text{E}[Y_i \mid X_i = x_i] = \beta_0 + \beta_1 x_i.
+$$
+
+However, its variance remains constant for each $x_i$,
+
+$$
+\text{Var}[Y_i \mid X_i = x_i] = \sigma^2.
+$$
+
+This is visually displayed in the image below. We see that for any value $x$, the expected value of $Y$ is $\beta_0 + \beta_1 x$. At each value of $x$, $Y$ has the same variance $\sigma^2$.
+
+![Simple Linear Regression Model [Introductory Statistics (Shafer and Zhang), UC Davis Stat Wiki](http://statwiki.ucdavis.edu/Textbook_Maps/General_Statistics/Map%3A_Introductory_Statistics_(Shafer_and_Zhang)/10%3A_Correlation_and_Regression/10.3_Modelling_Linear_Relationships_with_Randomness_Present){target="_blank"}](images/model.jpg)
+
+Often, we directly talk about the assumptions that this model makes. They can be cleverly shortened to **LINE**.  
+
+- **L**inear. The relationship between $Y$ and $x$ is linear, of the form $\beta_0 + \beta_1 x$.
+- **I**ndependent. The errors $\epsilon$ are independent.
+- **N**ormal. The errors, $\epsilon$ are normally distributed. That is the "error" around the line follows a normal distribution.
+- **E**qual Variance. At each value of $x$, the variance of $Y$ is the same, $\sigma^2$.
+
+We are also assuming that the values of $x$ are fixed, that is, not random. We do not make a distributional assumption about the predictor variable.
+
+As a side note, we will often refer to simple linear regression as **SLR**. Some explanation of the name SLR:
+
+- **Simple** refers to the fact that we are using a single predictor variable. Later we will use multiple predictor variables.
+- **Linear** tells us that our model for $Y$ is a linear combination of the predictors $X$. (In this case just the one.) Right now, this always results in a model that is a line, but later we will see how this is not always the case.
+- **Regression** simply means that we are attempting to measure the relationship between a response variable and (one or more) predictor variables. In the case of SLR, both the response and the predictor are *numeric* variables. 
+
+So SLR models $Y$ as a linear function of $X$, but how do we actually define a good line? There are an infinite number of lines we could use, so we will attempt to find one with "small errors." That is a line with as many points as close to it as possible. The questions now becomes, how do we find such a line? There are many approaches we could take.
+
+We could find the line that has the smallest maximum distance from any of the points to the line. That is,
+
+$$
+\underset{\beta_0, \beta_1}{\mathrm{argmin}} \max|y_i - (\beta_0 + \beta_1 x_i)|.
+$$
+
+We could find the line that minimizes the sum of all the distances from the points to the line. That is,
+
+$$
+\underset{\beta_0, \beta_1}{\mathrm{argmin}} \sum_{i = 1}^{n}|y_i - (\beta_0 + \beta_1 x_i)|.
+$$
+
+We could find the line that minimizes the sum of all the squared distances from the points to the line. That is,
+
+$$
+\underset{\beta_0, \beta_1}{\mathrm{argmin}} \sum_{i = 1}^{n}(y_i - (\beta_0 + \beta_1 x_i))^2.
+$$
+
+This last option is called the method of **least squares**. It is essentially the de-facto method for fitting a line to data. (You may have even seen it before in a linear algebra course.) Its popularity is largely due to the fact that it is mathematically "easy." (Which was important historically, as computers are a modern contraption.) It is also very popular because many relationships are well approximated by a linear function.
+
+
+##  Least Squares Approach
+
+Given observations $(x_i, y_i)$, for $i = 1, 2, \ldots n$, we want to find values of $\beta_0$ and $\beta_1$ which minimize
+
+$$
+f(\beta_0, \beta_1) = \sum_{i = 1}^{n}(y_i - (\beta_0 + \beta_1 x_i))^2 = \sum_{i = 1}^{n}(y_i - \beta_0 - \beta_1 x_i)^2.
+$$
+
+We will call these values $\hat{\beta}_0$ and $\hat{\beta}_1$.
+
+First, we take a partial derivative with respect to both $\beta_0$ and $\beta_1$.
+
+$$
+\begin{aligned}
+\frac{\partial f}{\partial \beta_0} &= -2 \sum_{i = 1}^{n}(y_i - \beta_0 - \beta_1 x_i) \\
+\frac{\partial f}{\partial \beta_1} &= -2 \sum_{i = 1}^{n}(x_i)(y_i - \beta_0 - \beta_1 x_i)
+\end{aligned}
+$$
+
+We then set each of the partial derivatives equal to zero and solving the resulting system of equations.
+
+$$
+\begin{aligned}
+\sum_{i = 1}^{n}(y_i - \beta_0 - \beta_1 x_i) &= 0 \\
+\sum_{i = 1}^{n}(x_i)(y_i - \beta_0 - \beta_1 x_i) &= 0 
+\end{aligned}
+$$
+
+While solving the system of equations, one common algebraic rearrangement results in the **normal equations**.
+
+$$
+\begin{aligned}
+n \beta_0 + \beta_1 \sum_{i = 1}^{n} x_i &= \sum_{i = 1}^{n} y_i\\
+\beta_0 \sum_{i = 1}^{n} x_i + \beta_1 \sum_{i = 1}^{n} x_i^2 &= \sum_{i = 1}^{n} x_i y_i  
+\end{aligned}
+$$
+
+Finally, we finish solving the system of equations.
+
+$$
+\begin{aligned}
+\hat{\beta}_1 &= \frac{\sum_{i = 1}^{n} x_i y_i - \frac{(\sum_{i = 1}^{n} x_i)(\sum_{i = 1}^{n} y_i)}{n}}{\sum_{i = 1}^{n} x_i^2 - \frac{(\sum_{i = 1}^{n} x_i)^2}{n}} = \frac{S_{xy}}{S_{xx}}\\
+\hat{\beta}_0 &= \bar{y} - \hat{\beta}_1 \bar{x}
+\end{aligned}
+$$
+
+Here, we have defined some notation for the expression we've obtained. Note that they have alternative forms which are much easier to work with. (We won't do it here, but you can try to prove the equalities below on your own, for "fun.") We use the capital letter $S$ to denote "summation" which replaces the capital letter $\Sigma$ when we calculate these values based on observed data, $(x_i ,y_i)$. The subscripts such as $xy$ denote over which variables the function $(z - \bar{z})$ is applied.
+
+$$
+\begin{aligned}
+S_{xy} &= \sum_{i = 1}^{n} x_i y_i - \frac{(\sum_{i = 1}^{n} x_i)(\sum_{i = 1}^{n} y_i)}{n}  = \sum_{i = 1}^{n}(x_i - \bar{x})(y_i - \bar{y})\\
+S_{xx} &= \sum_{i = 1}^{n} x_i^2 - \frac{(\sum_{i = 1}^{n} x_i)^2}{n}  = \sum_{i = 1}^{n}(x_i - \bar{x})^2\\
+S_{yy} &= \sum_{i = 1}^{n} y_i^2 - \frac{(\sum_{i = 1}^{n} y_i)^2}{n}  = \sum_{i = 1}^{n}(y_i - \bar{y})^2
+\end{aligned}
+$$
+
+Note that these summations $S$ are not to be confused with sample standard deviation $s$.
+
+By using the above alternative expressions for $S_{xy}$ and $S_{xx}$, we arrive at a cleaner, more useful expression for $\hat{\beta}_1$.
+
+$$
+\hat{\beta}_1 = \frac{S_{xy}}{S_{xx}} = \frac{\sum_{i = 1}^{n}(x_i - \bar{x})(y_i - \bar{y})}{\sum_{i = 1}^{n}(x_i - \bar{x})^2}
+$$
+
+Traditionally we would now calculate $\hat{\beta}_0$ and $\hat{\beta}_1$ by hand for the `cars` dataset. However because we are living in the 21st century and are intelligent (or lazy or efficient, depending on your perspective), we will utilize `R` to do the number crunching for us.
+
+To keep some notation consistent with above mathematics, we will store the response variable as `y` and the predictor variable as `x`.
+
+```{r}
+x = cars$speed
+y = cars$dist
+```
+
+We then calculate the three sums of squares defined above.
+
+```{r}
+Sxy = sum((x - mean(x)) * (y - mean(y)))
+Sxx = sum((x - mean(x)) ^ 2)
+Syy = sum((y - mean(y)) ^ 2)
+c(Sxy, Sxx, Syy)
+```
+
+Then finally calculate $\hat{\beta}_0$ and $\hat{\beta}_1$.
+
+```{r}
+beta_1_hat = Sxy / Sxx
+beta_0_hat = mean(y) - beta_1_hat * mean(x)
+c(beta_0_hat, beta_1_hat)
+```
+
+What do these values tell us about our dataset?
+
+The slope *parameter* $\beta_1$ tells us that for an increase in speed of one mile per hour, the **mean** stopping distance increases by $\beta_1$. It is important to specify that we are talking about the mean. Recall that $\beta_0 + \beta_1 x$ is the mean of $Y$, in this case stopping distance, for a particular value of $x$. (In this case speed.) So $\beta_1$ tells us how the mean of $Y$ is affected by a change in $x$.
+
+Similarly, the *estimate* $\hat{\beta}_1 = `r round(beta_1_hat, 2)`$ tells us that for an increase in speed of one mile per hour, the **estimated** *mean* stopping distance increases by $`r round(beta_1_hat, 2)`$ feet. Here we should be sure to specify we are discussing an estimated quantity. Recall that $\hat{y}$ is the estimated mean of $Y$, so $\hat{\beta}_1$ tells us how the estimated mean of $Y$ is affected by changing $x$. 
+
+The intercept *parameter* $\beta_0$ tells us the **mean** stopping distance for a car traveling zero miles per hour. (Not moving.) The *estimate* $\hat{\beta}_0 = `r round(beta_0_hat, 2)`$ tells us that the **estimated** mean stopping distance for a car traveling zero miles per hour is $`r round(beta_0_hat, 2)`$ feet. So when you apply the brakes to a car that is not moving, it moves backwards? This doesn't seem right. (Extrapolation, which we will see later, is the issue here.) 
+
+### Making Predictions
+
+We can now write the **fitted** or estimated line,
+
+$$
+\hat{y} = \hat{\beta}_0 + \hat{\beta}_1 x.
+$$
+
+In this case,
+
+$$
+\hat{y} = `r round(beta_0_hat, 2)` + `r round(beta_1_hat, 2)` x.
+$$
+
+We can now use this line to make predictions. First, let's see the possible $x$ values in the `cars` dataset. Since some $x$ values may appear more than once, we use the `unique()` to return each unique value only once.
+
+```{r}
+unique(cars$speed)
+```
+
+Let's make a prediction for the stopping distance of a car traveling at 8 miles per hour.
+
+$$
+\hat{y} = `r round(beta_0_hat, 2)` + `r round(beta_1_hat, 2)` \times 8 % = `r round(beta_0_hat + beta_1_hat * 8, 2)`
+$$
+
+```{r}
+beta_0_hat + beta_1_hat * 8
+```
+
+This tells us that the estimated mean stopping distance of a car traveling at 8 miles per hour is $`r round(beta_0_hat + beta_1_hat * 8, 2)`$.
+
+Now let's make a prediction for the stopping distance of a car traveling at 21 miles per hour. This is considered **interpolation** as 21 is not an observed value of $x$. (But is in the data range.) We can use the special `%in%` operator to quickly verify this in `R`.
+
+```{r}
+8 %in% unique(cars$speed)
+21 %in% unique(cars$speed)
+```
+
+```{r}
+min(cars$speed) < 21 & 21 < max(cars$speed)
+```
+
+$$
+\hat{y} = `r round(beta_0_hat, 2)` + `r round(beta_1_hat, 2)` \times 21 % = `r round(beta_0_hat + beta_1_hat * 21, 2)`
+$$
+
+```{r}
+beta_0_hat + beta_1_hat * 21
+```
+
+Lastly, we can make a prediction for the stopping distance of a car traveling at 50 miles per hour. This is considered [**extrapolation**](https://xkcd.com/605/){target="_blank"} as 50 is not an observed value of $x$ and is outside data range. We should be less confident in predictions of this type.
+
+```{r}
+range(cars$speed)
+range(cars$speed)[1] < 50 & 50 < range(cars$speed)[2] 
+```
+
+$$
+\hat{y} = `r round(beta_0_hat, 2)` + `r round(beta_1_hat, 2)` \times 50 % = `r round(beta_0_hat + beta_1_hat * 50, 2)`
+$$
+
+```{r}
+beta_0_hat + beta_1_hat * 50
+```
+
+Cars travel 50 miles per hour rather easily today, but not in the 1920s!
+
+This is also an issue we saw when interpreting $\hat{\beta}_0 = `r round(beta_0_hat, 2)`$, which is equivalent to making a prediction at $x = 0$. We should not be confident in the estimated linear relationship outside of the range of data we have observed.
+
+### Residuals
+
+If we think of our model as "Response = Prediction + Error," we can then write it as
+
+$$
+y = \hat{y} + e.
+$$
+
+We then define a **residual** to be the observed value minus the predicted value.
+
+$$
+e_i = y_i - \hat{y}_i
+$$
+
+Let's calculate the residual for the prediction we made for a car traveling 8 miles per hour. First, we need to obtain the observed value of $y$ for this $x$ value.
+
+```{r}
+which(cars$speed == 8)
+cars[5, ]
+cars[which(cars$speed == 8), ]
+```
+
+We can then calculate the residual.
+
+$$
+e = 16 - `r round(beta_0_hat + beta_1_hat * 8, 2)` = `r round(16 - (beta_0_hat + beta_1_hat * 8), 2)`
+$$
+
+```{r}
+16 - (beta_0_hat + beta_1_hat * 8)
+```
+
+The positive residual value indicates that the observed stopping distance is actually `r round(16 - (beta_0_hat + beta_1_hat * 8), 2)` feet more than what was predicted.
+
+### Variance Estimation
+
+We'll now use the residuals for each of the points to create an estimate for the variance, $\sigma^2$.
+
+Recall that,
+
+$$
+\text{E}[Y_i \mid X_i = x_i] = \beta_0 + \beta_1 x_i.
+$$
+
+So,
+
+$$
+\hat{y}_i = \hat{\beta}_0 + \hat{\beta}_1 x_i
+$$
+
+is a natural estimate for the mean of $Y_i$ for a given value of $x_i$.
+
+Also, recall that when we specified the model, we had three unknown parameters; $\beta_0$, $\beta_1$, and $\sigma^2$. The method of least squares gave us estimates for $\beta_0$ and $\beta_1$, however, we have yet to see an estimate for $\sigma^2$. We will now define $s_e^2$ which will be an estimate for $\sigma^2$.
+
+$$
+\begin{aligned}
+s_e^2 &= \frac{1}{n - 2} \sum_{i = 1}^{n}(y_i - (\hat{\beta}_0 + \hat{\beta}_1 x_i))^2 \\
+      &= \frac{1}{n - 2} \sum_{i = 1}^{n}(y_i - \hat{y}_i)^2 \\
+      &= \frac{1}{n - 2} \sum_{i = 1}^{n} e_i^2
+\end{aligned}
+$$
+
+This probably seems like a natural estimate, aside from the use of $n - 2$, which we will put off explaining until the next chapter. It should actually look rather similar to something we have seen before.
+
+$$
+s^2 = \frac{1}{n - 1}\sum_{i=1}^{n}(x_i - \bar{x})^2
+$$
+
+Here, $s^2$ is the estimate of $\sigma^2$ when we have a single random variable $X$. In this case $\bar{x}$ is an estimate of $\mu$ which is assumed to be the same for each $x$.
+
+Now, in the regression case, with $s_e^2$ each $y$ has a different mean because of the relationship with $x$. Thus, for each $y_i$, we use a different estimate of the mean, that is $\hat{y}_i$.
+
+```{r}
+y_hat = beta_0_hat + beta_1_hat * x
+e     = y - y_hat
+n     = length(e)
+s2_e  = sum(e^2) / (n - 2)
+s2_e
+```
+
+Just as with the univariate measure of variance, this value of `r round(s2_e, 2)` doesn't have a practical interpretation in terms of stopping distance. Taking the square root, however, computes the standard deviation of the residuals, also known as *residual standard error*.
+
+```{r}
+s_e = sqrt(s2_e)
+s_e
+```
+
+This tells us that our estimates of mean stopping distance are "typically" off by `r round(s_e, 2)` feet.
+
+
+##  Decomposition of Variation
+
+We can re-express $y_i - \bar{y}$, which measures the deviation of an observation from the sample mean, in the following way,
+
+$$
+y_i - \bar{y} = (y_i - \hat{y}_i) + (\hat{y}_i - \bar{y}).
+$$
+
+This is the common mathematical trick of "adding zero." In  this case we both added and subtracted $\hat{y}_i$.
+
+Here, $y_i - \hat{y}_i$ measures the deviation of an observation from the fitted regression line and  $\hat{y}_i - \bar{y}$ measures the deviation of the fitted regression line from the sample mean.
+
+If we square then sum both sides of the equation above, we can obtain the following,
+
+$$
+\sum_{i=1}^{n}(y_i - \bar{y})^2 = \sum_{i=1}^{n}(y_i - \hat{y}_i)^2 + \sum_{i=1}^{n}(\hat{y}_i - \bar{y})^2.
+$$
+
+This should be somewhat alarming or amazing. How is this true? For now we will leave this questions unanswered. (Think about this, and maybe try to prove it.) We will now define three of the quantities seen in this equation. 
+
+#### Sum of Squares Total {-}
+
+$$
+\text{SST} = \sum_{i=1}^{n}(y_i - \bar{y})^2
+$$
+
+The quantity "Sum of Squares Total," or $\text{SST}$, represents the **total variation** of the observed $y$ values. This should be a familiar looking expression. Note that,
+
+$$
+s ^ 2 = \frac{1}{n - 1}\sum_{i=1}^{n}(y_i - \bar{y})^2 = \frac{1}{n - 1} \text{SST}.
+$$
+
+#### Sum of Squares Regression {-}
+
+$$
+\text{SSReg} = \sum_{i=1}^{n}(\hat{y}_i - \bar{y})^2
+$$
+
+The quantity "Sum of Squares Regression," $\text{SSReg}$, represents the **explained variation** of the observed $y$ values.
+
+#### Sum of Squares Error {-}
+
+$$
+\text{SSE} = \text{RSS} = \sum_{i=1}^{n}(y_i - \hat{y}_i)^2
+$$
+
+The quantity "Sum of Squares Error," $\text{SSE}$, represents the **unexplained variation** of the observed $y$ values. You will often see $\text{SSE}$ written as $\text{RSS}$, or "Residual Sum of Squares."
+
+```{r}
+SST   = sum((y - mean(y)) ^ 2)
+SSReg = sum((y_hat - mean(y)) ^ 2)
+SSE   = sum((y - y_hat) ^ 2)
+c(SST = SST, SSReg = SSReg, SSE = SSE)
+```
+
+Note that,
+
+$$
+s_e^2 = \frac{\text{SSE}}{n - 2}.
+$$
+
+```{r}
+SSE / (n - 2)
+```
+
+We can use `R` to verify that this matches our previous calculation of $s_e^2$.
+
+```{r}
+s2_e == SSE / (n - 2)
+```
+
+These three measures also do not have an important practical interpretation individually. But together, they're about to reveal a new statistic to help measure the strength of a SLR model.
+
+###  Coefficient of Determination
+
+The **coefficient of determination**, $R^2$, is defined as
+
+$$
+\begin{aligned}
+R^2 &= \frac{\text{SSReg}}{\text{SST}} = \frac{\sum_{i=1}^{n}(\hat{y}_i - \bar{y})^2}{\sum_{i=1}^{n}(y_i - \bar{y})^2} \\[2.5ex]
+    &= \frac{\text{SST} - \text{SSE}}{\text{SST}} = 1 - \frac{\text{SSE}}{\text{SST}} \\[2.5ex]
+    &= 1 - \frac{\sum_{i=1}^{n}(y_i - \hat{y}_i)^2}{\sum_{i=1}^{n}(y_i - \bar{y})^2} = 
+1 - \frac{\sum_{i = 1}^{n}e_i^2}{\sum_{i=1}^{n}(y_i - \bar{y})^2}
+\end{aligned}
+$$
+
+The coefficient of determination is interpreted as the proportion of observed variation in $y$ that can be explained by the simple linear regression model.
+
+```{r}
+R2 = SSReg / SST
+R2
+```
+
+For the `cars` example, we calculate $R^2 = `r round(R2, 2)`$. We then say that $`r round(R2, 2) * 100`\%$ of the observed variability in stopping distance is explained by the linear relationship with speed.
+
+```{r, echo = FALSE, message = FALSE, warning = FALSE}
+generate_data = function(int = 1,
+                         slope = 2,
+                         sigma = 5,
+                         n_obs = 15,
+                         x_min = 0,
+                         x_max = 10) {
+  x = seq(x_min, x_max, length.out = n_obs)
+  y = int + slope * x + rnorm(n_obs, 0, sigma)
+  fit = lm(y ~ x)
+  y_hat = fitted(fit)
+  y_bar = rep(mean(y), n_obs)
+  data.frame(x, y, y_hat, y_bar)
+}
+
+plot_total_dev = function(reg_data) {
+  plot(reg_data$x, reg_data$y, main = "SST (Sum of Squares Total)", 
+       xlab = "x", ylab = "y", pch = 20, cex = 2, col = "grey")
+  arrows(reg_data$x, reg_data$y_bar,
+         reg_data$x, reg_data$y,
+         col = 'grey', lwd = 1, lty = 3, length = 0.2, angle = 20)
+  abline(h = mean(reg_data$y), lwd = 2,col = "grey")
+  # abline(lm(y ~ x, data = reg_data), lwd = 2, col = "grey")
+}
+
+plot_total_dev_prop = function(reg_data) {
+  plot(reg_data$x, reg_data$y, main = "SST (Sum of Squares Total)", 
+       xlab = "x", ylab = "y", pch = 20, cex = 2, col = "grey")
+  arrows(reg_data$x, reg_data$y_bar,
+         reg_data$x, reg_data$y_hat,
+         col = 'darkorange', lwd = 1, length = 0.2, angle = 20)
+  arrows(reg_data$x, reg_data$y_hat,
+         reg_data$x, reg_data$y,
+         col = 'dodgerblue', lwd = 1, lty = 2, length = 0.2, angle = 20)
+  abline(h = mean(reg_data$y), lwd = 2,col = "grey")
+  abline(lm(y ~ x, data = reg_data), lwd = 2, col = "grey")
+}
+
+plot_unexp_dev = function(reg_data) {
+  plot(reg_data$x, reg_data$y, main = "SSE (Sum of Squares Error)",
+       xlab = "x", ylab = "y", pch = 20, cex = 2, col = "grey")
+  arrows(reg_data$x, reg_data$y_hat,
+         reg_data$x, reg_data$y,
+         col = 'dodgerblue', lwd = 1, lty = 2, length = 0.2, angle = 20)
+  abline(lm(y ~ x, data = reg_data), lwd = 2, col = "grey")
+}
+
+plot_exp_dev = function(reg_data) {
+  plot(reg_data$x, reg_data$y, main = "SSReg (Sum of Squares Regression)", 
+  xlab = "x", ylab = "y", pch = 20, cex = 2, col = "grey")
+  arrows(reg_data$x, reg_data$y_bar,
+         reg_data$x, reg_data$y_hat,
+         col = 'darkorange', lwd = 1, length = 0.2, angle = 20)
+  abline(lm(y ~ x, data = reg_data), lwd = 2, col = "grey")
+  abline(h = mean(reg_data$y), col = "grey")
+}
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+set.seed(2)
+plot_data = generate_data(sigma = 2)
+```
+
+The following plots visually demonstrate the three "sums of squares" for a simulated dataset which has $R^2 = `r round(summary(lm(y ~ x, data = plot_data))$r.sq, 2)`$ which is a somewhat high value. Notice in the final plot, that the orange arrows account for a larger proportion of the total arrow.
+
+```{r, echo=FALSE, fig.height=12, fig.width=12, message=FALSE, warning=FALSE}
+par(mfrow = c(2, 2))
+plot_exp_dev(plot_data)
+plot_unexp_dev(plot_data)
+plot_total_dev(plot_data)
+plot_total_dev_prop(plot_data)
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+set.seed(1)
+plot_data = generate_data(slope = -1.5, sigma = 10)
+```
+
+The next plots again visually demonstrate the three "sums of squares," this time for a simulated dataset which has $R^2 = `r round(summary(lm(y ~ x, data = plot_data))$r.sq, 2)`$. Notice in the final plot, that now the blue arrows account for a larger proportion of the total arrow.
+
+```{r, echo=FALSE, fig.height=12, fig.width=12, message=FALSE, warning=FALSE}
+par(mfrow = c(2, 2))
+plot_exp_dev(plot_data)
+plot_unexp_dev(plot_data)
+plot_total_dev(plot_data)
+plot_total_dev_prop(plot_data)
+```
+
+
+## The `lm` Function
+
+So far we have done regression by deriving the least squares estimates, then writing simple `R` commands to perform the necessary calculations. Since this is such a common task, this is functionality that is built directly into `R` via the `lm()` command.
+
+The `lm()` command is used to fit **linear models** which actually account for a broader class of models than simple linear regression, but we will use SLR as our first demonstration of `lm()`. The `lm()` function will be one of our most commonly used tools, so you may want to take a look at the documentation by using `?lm`. You'll notice there is a lot of information there, but we will start with just the very basics. This is documentation you will want to return to often.
+
+We'll continue using the `cars` data, and essentially use the `lm()` function to check the work we had previously done.
+
+```{r}
+stop_dist_model = lm(dist ~ speed, data = cars)
+```
+
+This line of code fits our very first linear model. The syntax should look somewhat familiar. We use the `dist ~ speed` syntax to tell `R` we would like to model the response variable `dist` as a linear function of the predictor variable `speed`. In general, you should think of the syntax as `response ~ predictor`. The `data = cars` argument then tells `R` that that `dist` and `speed` variables are from the dataset `cars`. We then store this result in a variable `stop_dist_model`.
+
+The variable `stop_dist_model` now contains a wealth of information, and we will now see how to extract and use that information. The first thing we will do is simply output whatever is stored immediately in the variable `stop_dist_model`.
+
+```{r}
+stop_dist_model
+```
+
+We see that it first tells us the formula we input into `R`, that is `lm(formula = dist ~ speed, data = cars)`. We also see the coefficients of the model. We can check that these are what we had calculated previously. (Minus some rounding that `R` is doing when displaying the results. They are stored with full precision.)
+
+```{r}
+c(beta_0_hat, beta_1_hat)
+```
+
+Next, it would be nice to add the fitted line to the scatterplot. To do so we will use the `abline()` function.
+
+```{r}
+plot(dist ~ speed, data = cars,
+     xlab = "Speed (in Miles Per Hour)",
+     ylab = "Stopping Distance (in Feet)",
+     main = "Stopping Distance vs Speed",
+     pch  = 20,
+     cex  = 2,
+     col  = "grey")
+abline(stop_dist_model, lwd = 3, col = "darkorange")
+```
+
+The `abline()` function is used to add lines of the form $a + bx$ to a plot. (Hence **`ab`**`line`.) When we give it `stop_dist_model` as an argument, it automatically extracts the regression coefficient estimates ($\hat{\beta}_0$ and $\hat{\beta}_1$) and uses them as the slope and intercept of the line. Here we also use `lwd` to modify the width of the line, as well as `col` to modify the color of the line.
+
+The "thing" that is returned by the `lm()` function is actually an object of class `lm` which is a list. The exact details of this are unimportant unless you are seriously interested in the inner-workings of `R`, but know that we can determine the names of the elements of the list using the `names()` command.
+
+```{r}
+names(stop_dist_model)
+```
+
+We can then use this information to, for example, access the residuals using the `$` operator.
+
+```{r}
+stop_dist_model$residuals
+```
+
+Another way to access stored information in `stop_dist_model` are the `coef()`, `resid()`, and `fitted()` functions. These return the coefficients, residuals, and fitted values, respectively.
+
+```{r}
+coef(stop_dist_model)
+resid(stop_dist_model)
+fitted(stop_dist_model)
+```
+
+An `R` function that is useful in many situations is `summary()`. We see that when it is called on our model, it returns a good deal of information. By the end of the course, you will know what every value here is used for. For now, you should immediately notice the coefficient estimates, and you may recognize the $R^2$ value we saw earlier.
+
+```{r}
+summary(stop_dist_model)
+```
+
+The `summary()` command also returns a list, and we can again use `names()` to learn what about the elements of this list.
+
+```{r}
+names(summary(stop_dist_model))
+```
+
+So, for example, if we wanted to directly access the value of $R^2$, instead of copy and pasting it out of the printed statement from `summary()`, we could do so.
+
+```{r}
+summary(stop_dist_model)$r.squared
+```
+
+Another value we may want to access is $s_e$, which `R` calls `sigma`.
+
+```{r}
+summary(stop_dist_model)$sigma
+```
+
+Note that this is the same result seen earlier as `s_e`. You may also notice that this value was displayed above as a result of the `summary()` command, which `R` labeled the "Residual Standard Error."
+
+$$
+s_e = \text{RSE} = \sqrt{\frac{1}{n - 2}\sum_{i = 1}^n e_i^2}
+$$
+
+Often it is useful to talk about $s_e$ (or RSE) instead of $s_e^2$ because of their units. The units of $s_e$ in the `cars` example is feet, while the units of $s_e^2$ is feet-squared.
+
+Another useful function, which we will use almost as often as `lm()` is the `predict()` function.
+
+```{r}
+predict(stop_dist_model, newdata = data.frame(speed = 8))
+```
+
+The above code reads "predict the stopping distance of a car traveling 8 miles per hour using the `stop_dist_model`." Importantly, the second argument to `predict()` is a data frame that we make in place. We do this so that we can specify that `8` is a value of `speed`, so that predict knows how to use it with the model stored in `stop_dist_model`. We see that this result is what we had calculated "by hand" previously.
+
+We could also predict multiple values at once.
+
+```{r}
+predict(stop_dist_model, newdata = data.frame(speed = c(8, 21, 50)))
+```
+
+$$
+\begin{aligned}
+\hat{y} &= `r round(beta_0_hat, 2)` + `r round(beta_1_hat, 2)` \times 8 = `r round(beta_0_hat + beta_1_hat * 8, 2)` \\
+\hat{y} &= `r round(beta_0_hat, 2)` + `r round(beta_1_hat, 2)` \times 21 = `r round(beta_0_hat + beta_1_hat * 21, 2)` \\
+\hat{y} &= `r round(beta_0_hat, 2)` + `r round(beta_1_hat, 2)` \times 50 = `r round(beta_0_hat + beta_1_hat * 50, 2)`
+\end{aligned}
+$$
+
+Or we could calculate the fitted value for each of the original data points. We can simply supply the original data frame, `cars`, since it contains a variables called `speed` which has the values we would like to predict at.
+
+```{r}
+predict(stop_dist_model, newdata = cars)
+# predict(stop_dist_model, newdata = data.frame(speed = cars$speed))
+```
+
+This is actually equivalent to simply calling `predict()` on `stop_dist_model` without a second argument.
+
+```{r}
+predict(stop_dist_model)
+```
+
+Note that then in this case, this is the same as using `fitted()`.
+
+```{r}
+fitted(stop_dist_model)
+```
+
+
+## Maximum Likelihood Estimation (MLE) Approach
+
+Recall the model,
+
+$$
+Y_i = \beta_0 + \beta_1 x_i + \epsilon_i
+$$
+
+where $\epsilon_i \sim N(0, \sigma^2)$.
+
+Then we can find the mean and variance of each $Y_i$.
+
+$$
+\text{E}[Y_i \mid X_i = x_i] = \beta_0 + \beta_1 x_i
+$$
+
+and
+
+$$
+\text{Var}[Y_i \mid X_i = x_i] = \sigma^2.
+$$
+
+Additionally, the $Y_i$ follow a normal distribution conditioned on the $x_i$.
+
+$$
+Y_i \mid X_i \sim N(\beta_0 + \beta_1 x_i, \sigma^2)
+$$
+
+
+Recall that the pdf of a random variable $X \sim N(\mu, \sigma^2)$ is given by
+
+$$
+f_{X}(x; \mu, \sigma^2) = \frac{1}{\sqrt{2\pi\sigma^2}} \exp{\left[-\frac{1}{2}\left(\frac{x - \mu}{\sigma}\right)^2\right]}.
+$$
+
+Then we can write the pdf of each of the $Y_i$ as
+
+$$
+f_{Y_i}(y_i; x_i, \beta_0, \beta_1, \sigma^2) = \frac{1}{\sqrt{2\pi\sigma^2}} \exp{\left[-\frac{1}{2}\left(\frac{y_i - (\beta_0 + \beta_1 x_i)}{\sigma}\right)^2\right]}.
+$$
+
+Given $n$ data points $(x_i, y_i)$ we can write the likelihood, which is a function of the three parameters $\beta_0$, $\beta_1$, and $\sigma^2$. Since the data have been observed, we use lower case $y_i$ to denote that these values are no longer random.
+
+$$
+L(\beta_0, \beta_1, \sigma^2) = \prod_{i = 1}^{n} \frac{1}{\sqrt{2\pi\sigma^2}} \exp{\left[-\frac{1}{2}\left(\frac{y_i - \beta_0 - \beta_1 x_i}{\sigma}\right)^2\right]}
+$$
+
+Our goal is to find values of $\beta_0$, $\beta_1$, and $\sigma^2$ which maximize this function, which is a straightforward multivariate calculus problem.
+
+We'll start by doing a bit of rearranging to make our task easier.
+
+$$
+L(\beta_0, \beta_1, \sigma^2) = \left(\frac{1}{\sqrt{2 \pi \sigma^2}}\right)^n \exp{\left[-\frac{1}{2 \sigma^2} \sum_{i = 1}^{n} (y_i - \beta_0 - \beta_1 x_i)^2\right]}
+$$
+
+Then, as is often the case when finding MLEs, for mathematical convenience we will take the natural logarithm of the likelihood function since log is a monotonically increasing function. Then we will proceed to maximize the log-likelihood, and the resulting estimates will be the same as if we had not taken the log.
+
+$$
+\log L(\beta_0, \beta_1, \sigma^2) = -\frac{n}{2}\log(2 \pi) - \frac{n}{2}\log(\sigma^2) - \frac{1}{2 \sigma^2} \sum_{i = 1}^{n} (y_i - \beta_0 - \beta_1 x_i)^2
+$$
+
+Note that we use $\log$ to mean the natural logarithm. We now take a partial derivative with respect to each of the parameters.
+
+$$
+\begin{aligned}
+\frac{\partial \log L(\beta_0, \beta_1, \sigma^2)}{\partial \beta_0} &= \frac{1}{\sigma^2} \sum_{i = 1}^{n} (y_i - \beta_0 - \beta_1 x_i)\\
+\frac{\partial \log L(\beta_0, \beta_1, \sigma^2)}{\partial \beta_1} &= \frac{1}{\sigma^2} \sum_{i = 1}^{n}(x_i)(y_i - \beta_0 - \beta_1 x_i) \\
+\frac{\partial \log L(\beta_0, \beta_1, \sigma^2)}{\partial \sigma^2} &= -\frac{n}{2 \sigma^2} + \frac{1}{2(\sigma^2)^2} \sum_{i = 1}^{n} (y_i - \beta_0 - \beta_1 x_i)^2
+\end{aligned}
+$$
+
+We then set each of the partial derivatives equal to zero and solve the resulting system of equations.
+
+$$
+\begin{aligned}
+\sum_{i = 1}^{n} (y_i - \beta_0 - \beta_1 x_i) &= 0\\
+\sum_{i = 1}^{n}(x_i)(y_i - \beta_0 - \beta_1 x_i) &= 0\\
+-\frac{n}{2 \sigma^2} + \frac{1}{2(\sigma^2)^2} \sum_{i = 1}^{n} (y_i - \beta_0 - \beta_1 x_i)^2 &= 0
+\end{aligned}
+$$
+
+You may notice that the first two equations also appear in the least squares approach. Then, skipping the issue of actually checking if we have found a maximum, we then arrive at our estimates. We call these estimates the maximum likelihood estimates.
+
+$$
+\begin{aligned}
+\hat{\beta}_1 &= \frac{\sum_{i = 1}^{n} x_i y_i - \frac{(\sum_{i = 1}^{n} x_i)(\sum_{i = 1}^{n} y_i)}{n}}{\sum_{i = 1}^{n} x_i^2 - \frac{(\sum_{i = 1}^{n} x_i)^2}{n}} = \frac{S_{xy}}{S_{xx}}\\
+\hat{\beta}_0 &= \bar{y} - \hat{\beta}_1 \bar{x}\\
+\hat{\sigma}^2 &= \frac{1}{n} \sum_{i = 1}^{n}(y_i - \hat{y}_i)^2
+\end{aligned}
+$$
+
+Note that $\hat{\beta}_0$ and $\hat{\beta}_1$ are the same as the least squares estimates. However we now have a new estimate of $\sigma^2$, that is $\hat{\sigma}^2$. So we now have two different estimates of $\sigma^2$.
+
+$$
+\begin{aligned}
+s_e^2 &= \frac{1}{n - 2} \sum_{i = 1}^{n}(y_i - \hat{y}_i)^2 = \frac{1}{n - 2} \sum_{i = 1}^{n}e_i^2 & \text{Least Squares}\\
+\hat{\sigma}^2 &= \frac{1}{n} \sum_{i = 1}^{n}(y_i - \hat{y}_i)^2 = \frac{1}{n} \sum_{i = 1}^{n}e_i^2 & \text{MLE}
+\end{aligned}
+$$
+
+In the next chapter, we will discuss in detail the difference between these two estimates, which involves biasedness.
+
+
+## Simulating SLR
+
+We return again to more examples of simulation. This will be a common theme! 
+
+In practice you will almost never have a true model, and you will use data to attempt to recover information about the unknown true model. With simulation, we decide the true model and simulate data from it. Then, we apply a method to the data, in this case least squares. Now, since we know the true model, we can assess how well it did.
+
+For this example, we will simulate $n = 21$ observations from the model
+
+$$
+Y = 5 - 2 x + \epsilon.
+$$
+
+That is $\beta_0 = 5$, $\beta_1 = -2$, and let $\epsilon \sim N(\mu = 0, \sigma^2 = 9)$. Or, even more succinctly we could write
+
+$$
+Y \mid X \sim N(\mu = 5 - 2 x, \sigma^ 2 = 9).
+$$
+
+We first set the true parameters of the model to be simulated.
+
+```{r}
+num_obs = 21
+beta_0  = 5
+beta_1  = -2
+sigma   = 3
+```
+
+Next, we obtain simulated values of $\epsilon_i$ after setting a seed for reproducibility.
+
+```{r}
+set.seed(1)
+epsilon = rnorm(n = num_obs, mean = 0, sd = sigma)
+```
+
+Now, since the $x_i$ values in SLR are considered fixed and known, we simply specify `r num_obs` values. Another common practice is to generate them from a uniform distribution, and then use them for the remainder of the analysis.
+
+```{r}
+x_vals = seq(from = 0, to = 10, length.out = num_obs)
+# set.seed(1)
+# x_vals = runif(num_obs, 0, 10)
+```
+
+We then generate the $y$ values according the specified functional relationship.
+
+```{r}
+y_vals = beta_0 + beta_1 * x_vals + epsilon
+```
+
+The data, $(x_i, y_i)$, represent a possible sample from the true distribution. Now to check how well the method of least squares works, we use `lm()` to fit the model to our simulated data, then take a look at the estimated coefficients.
+
+```{r}
+sim_fit = lm(y_vals ~ x_vals)
+coef(sim_fit)
+```
+
+And look at that, they aren't too far from the true parameters we specified!
+
+```{r}
+plot(y_vals ~ x_vals)
+abline(sim_fit)
+```
+
+We should say here, that we're being sort of lazy, and not the good kinda of lazy that could be considered efficient. Any time you simulate data, you should consider doing two things: writing a function, and storing the data in a data frame.
+
+The function below, `sim_slr()`, can be used for the same task as above, but is much more flexible. Notice that we provide `x` to the function, instead of generating `x` inside the function. In the SLR model, the $x_i$ are considered known values. That is, they are not random, so we do not assume a distribution for the $x_i$. Because of this, we will repeatedly use the same `x` values across all simulations.
+
+```{r}
+sim_slr = function(x, beta_0 = 10, beta_1 = 5, sigma = 1) {
+  n = length(x)
+  epsilon = rnorm(n, mean = 0, sd = sigma)
+  y = beta_0 + beta_1 * x + epsilon
+  data.frame(predictor = x, response = y)
+}
+```
+
+Here, we use the function to repeat the analysis above.
+
+```{r}
+set.seed(1)
+sim_data = sim_slr(x = x_vals, beta_0 = 5, beta_1 = -2, sigma = 3)
+```
+
+This time, the simulated observations are stored in a data frame.
+
+```{r}
+head(sim_data)
+```
+
+Now when we fit the model with `lm()` we can use a `data` argument, a very good practice.
+
+```{r}
+sim_fit = lm(response ~ predictor, data = sim_data)
+coef(sim_fit)
+```
+
+And this time, we'll make the plot look a lot nicer.
+
+```{r}
+plot(response ~ predictor, data = sim_data,
+     xlab = "Simulated Predictor Variable",
+     ylab = "Simulated Response Variable",
+     main = "Simulated Regression Data",
+     pch  = 20,
+     cex  = 2,
+     col  = "grey")
+abline(sim_fit, lwd = 3, lty = 1, col = "darkorange")
+abline(beta_0, beta_1, lwd = 3, lty = 2, col = "dodgerblue")
+legend("topright", c("Estimate", "Truth"), lty = c(1, 2), lwd = 2,
+       col = c("darkorange", "dodgerblue"))
+```
+
+
+## History
+
+For some brief background on the history of linear regression, see ["Galton, Pearson, and the Peas: A Brief History of Linear Regression for Statistics Instructors"](http://www.amstat.org/publications/jse/v9n3/stanton.html){target="_blank"} from the [Journal of Statistics Education](http://www.amstat.org/publications/jse/){target="_blank"} as well as the [Wikipedia page on the history of regression analysis](https://en.wikipedia.org/wiki/Regression_analysis#History){target="_blank"} and lastly the article for [regression to the mean](https://en.wikipedia.org/wiki/Regression_toward_the_mean){target="_blank"} which details the origins of the term "regression."
+
+
+## Exercise: Linear Regression
+
+### Part 1
+
+The data in the following URL "http://faculty.marshall.usc.edu/gareth-james/ISL/Income1.csv"
+includes observation on income levels (in tens of thousands of dollars)
+and years of education. *The data is not real and was actually simulated*.
+
+a. Read the data into R and generate a ggplot with a fitted line.
+
+```{r}
+library(tidyverse)
+df = read.csv("http://faculty.marshall.usc.edu/gareth-james/ISL/Income1.csv",
+              row.names=1)
+names(df)
+ggplot(df,aes(x=Education, y=Income))+
+  geom_point()+
+  geom_smooth(formula= y~x, method="lm")+
+  theme_bw()
+```
+
+b. Fit a linear model with education (years of education) as input variable 
+and income as response variable. What are the model coefficients obtained and 
+how can you extract them? Inspect the model fit using `summary()`
+
+```{r}
+
+summary(reg <- lm(Income~Education, data=df))
+
+```
+
+c. Compute the fitted values of income for the observations.
+
+```{r}
+df$yhat = reg$fitted.values
+ggplot(df)+
+  geom_point(aes(x=Education, y=Income, colour = "observed"))+
+  geom_point(aes(x=Education, y=yhat, colour = "predicted"))+
+  theme_bw()
+```
+
+d. Predict the income for new observations, for people with 
+16.00, 12.52, 15.55, 21.09, and 18.36 years of education. 
+
+```{r}
+preds= predict(reg, newdata = data.frame("Education" = c(16.00, 12.52, 15.55, 21.09, 18.36)))
+```
+
+
+e. Comment on the fit of your model.
+
+```{r}
+df$residuals = reg$residuals
+ggplot(df)+
+  geom_point(aes(x=Education, y=residuals))+
+  theme_bw()
+
+p <- ggplot(df, aes(sample = residuals))
+p + stat_qq() + stat_qq_line() + theme_bw()
+```
+
+### Part 2
+
+a. Now download data from "http://faculty.marshall.usc.edu/gareth-james/ISL/Income2.csv"
+which include the same observations but also records data on "senority".
+```{r}
+library(tidyverse)
+df = read.csv("http://faculty.marshall.usc.edu/gareth-james/ISL/Income2.csv",
+              row.names=1)
+names(df)
+ggplot(df,aes(x=Seniority, y=Income))+
+  geom_point()+
+  geom_smooth(formula= y~x, method="lm")+
+  theme_bw()
+```
+
+b. Fit a new model including a new variable and print the model summary.
+
+```{r}
+
+summary(reg2 <- lm(Income ~., data=df))
+
+```
+
+c. Compute the predicted values of income and assess the goodness of fit.
+
+```{r}
+df$residuals = reg2$residuals
+ggplot(df)+
+  geom_point(aes(x=Education, y=residuals))+
+  theme_bw()
+
+p <- ggplot(df, aes(sample = residuals))
+p + stat_qq() + stat_qq_line() + theme_bw()
+```
+
+
+d. Predict the income levels for new observations with years of education
+equal to 16.00, 12.52, 15.55, 21.09, 18.36 and seniority to
+123.74, 83.63,  90.94, 178.96, 125.17.
+
+```{r}
+preds= predict(reg2, newdata = data.frame("Education" = c(16.00, 12.52, 15.55, 21.09, 18.36),
+                                         "Seniority" =c(123.74, 83.63,  90.94, 178.96, 125.17)))
+```
+
+# Inference for Simple Linear Regression
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(cache = TRUE, autodep = TRUE, fig.align = "center")
+```
+
+> "There are three types of lies: lies, damn lies, and statistics."
+>
+> --- **Benjamin Disraeli**
+
+After reading this chapter you will be able to:
+
+- Understand the distributions of regression estimates.
+- Create interval estimates for regression parameters, mean response, and predictions.
+- Test for significance of regression.
+
+Last chapter we defined the simple linear regression model,
+
+\[
+Y_i = \beta_0 + \beta_1 x_i + \epsilon_i
+\]
+
+where $\epsilon_i \sim N(0, \sigma^2)$. We then used observations $(x_i, y_i)$, for $i = 1, 2, \ldots n$, to find values of $\beta_0$ and $\beta_1$ which minimized
+
+\[
+f(\beta_0, \beta_1) = \sum_{i = 1}^{n}(y_i - (\beta_0 + \beta_1 x_i))^2.
+\]
+
+We called these values $\hat{\beta}_0$ and $\hat{\beta}_1$, which we found to be
+
+\[
+\begin{aligned}
+\hat{\beta}_1 &= \frac{S_{xy}}{S_{xx}} = \frac{\sum_{i = 1}^{n}(x_i - \bar{x})(y_i - \bar{y})}{\sum_{i = 1}^{n}(x_i - \bar{x})^2}\\
+\hat{\beta}_0 &= \bar{y} - \hat{\beta}_1 \bar{x}.
+\end{aligned}
+\]
+
+We also estimated $\sigma ^2$ using $s_e^2$. In other words, we found that $s_e$ is an estimate of $\sigma$, where;
+
+\[
+s_e = \text{RSE} = \sqrt{\frac{1}{n - 2}\sum_{i = 1}^n e_i^2}
+\]
+
+which we also called $\text{RSE}$, for "Residual Standard Error."
+
+When applied to the `cars` data, we obtained the following results:
+
+```{r}
+stop_dist_model = lm(dist ~ speed, data = cars)
+summary(stop_dist_model)
+```
+
+Last chapter, we only discussed the `Estimate`, `Residual standard error`, and `Multiple R-squared` values. In this chapter, we will discuss all of the information under `Coefficients` as well as `F-statistic`.
+
+```{r}
+plot(dist ~ speed, data = cars,
+     xlab = "Speed (in Miles Per Hour)",
+     ylab = "Stopping Distance (in Feet)",
+     main = "Stopping Distance vs Speed",
+     pch  = 20,
+     cex  = 2,
+     col  = "grey")
+abline(stop_dist_model, lwd = 5, col = "darkorange")
+```
+
+To get started, we'll note that there is another equivalent expression for $S_{xy}$ which we did not see last chapter,
+
+\[
+S_{xy}= \sum_{i = 1}^{n}(x_i - \bar{x})(y_i - \bar{y}) = \sum_{i = 1}^{n}(x_i - \bar{x}) y_i.
+\]
+
+This may be a surprising equivalence. (Maybe try to prove it.) However, it will be useful for illustrating concepts in this chapter.
+
+Note that, $\hat{\beta}_1$ is a **sample statistic** when calculated with observed data as written above, as is $\hat{\beta}_0$.   
+
+However, in this chapter it will often be convenient to use both $\hat{\beta}_1$ and $\hat{\beta}_0$ as **random variables**, that is, we have not yet observed the values for each $Y_i$. When this is the case, we will use a slightly different notation, substituting in capital $Y_i$ for lower case $y_i$.
+
+\[
+\begin{aligned}
+\hat{\beta}_1 &= \frac{\sum_{i = 1}^{n}(x_i - \bar{x}) Y_i}{\sum_{i = 1}^{n}(x_i - \bar{x})^2} \\
+\hat{\beta}_0 &= \bar{Y} - \hat{\beta}_1 \bar{x}
+\end{aligned}
+\]
+
+Last chapter we argued that these estimates of unknown model parameters $\beta_0$ and $\beta_1$ were good because we obtained them by minimizing errors. We will now discuss the Gauss–Markov theorem which takes this idea further, showing that these estimates are actually the "best" estimates, from a certain point of view.
+
+## Gauss–Markov Theorem
+
+The **Gauss–Markov theorem** tells us that when estimating the parameters of the simple linear regression model $\beta_0$ and $\beta_1$, the $\hat{\beta}_0$ and $\hat{\beta}_1$ which we derived are the **best linear unbiased estimates**, or *BLUE* for short. (The actual conditions for the Gauss–Markov theorem are more relaxed than the SLR model.)
+
+We will now discuss *linear*, *unbiased*, and *best* as is relates to these estimates.
+
+#### Linear {-}
+
+Recall, in the SLR setup that the $x_i$ values are considered fixed and known quantities. Then a **linear** estimate is one which can be written as a linear combination of the $Y_i$. In the case of $\hat{\beta}_1$ we see
+
+\[
+\hat{\beta}_1 = \frac{\sum_{i = 1}^{n}(x_i - \bar{x}) Y_i}{\sum_{i = 1}^{n}(x_i - \bar{x})^2} = \sum_{i = 1}^n k_i Y_i = k_1 Y_1 + k_2 Y_2 + \cdots k_n Y_n
+\]
+
+where $k_i = \displaystyle\frac{(x_i - \bar{x})}{\sum_{i = 1}^{n}(x_i - \bar{x})^2}$.
+
+In a similar fashion, we could show that $\hat{\beta}_0$ can be written as a linear combination of the $Y_i$. Thus both $\hat{\beta}_0$ and $\hat{\beta}_1$ are linear estimators.
+
+#### Unbiased {-}
+
+Now that we know our estimates are *linear*, how good are these estimates? One measure of the "goodness" of an estimate is its **bias**. Specifically, we prefer estimates that are **unbiased**, meaning their expected value is the parameter being estimated.
+
+In the case of the regression estimates, we have,
+
+\[
+\begin{aligned}
+\text{E}[\hat{\beta}_0] &= \beta_0 \\
+\text{E}[\hat{\beta}_1] &= \beta_1.
+\end{aligned}
+\]
+
+This tells us that, when the conditions of the SLR model are met, on average our estimates will be correct. However, as we saw last chapter when simulating from the SLR model, that does not mean that each individual estimate will be correct. Only that, if we repeated the process an infinite number of times, on average the estimate would be correct.
+
+#### Best {-}
+
+Now, if we restrict ourselves to both *linear* and *unbiased* estimates, how do we define the *best* estimate? The estimate with the **minimum variance**.
+
+First note that it is very easy to create an estimate for $\beta_1$ that has very low variance, but is not unbiased. For example, define:
+
+\[
+\hat{\theta}_{BAD} = 5.
+\]
+
+Then, since $\hat{\theta}_{BAD}$ is a constant value,
+
+\[
+\text{Var}[\hat{\theta}_{BAD}] = 0.
+\]
+
+However since,
+
+\[
+\text{E}[\hat{\theta}_{BAD}] = 5
+\]
+
+we say that $\hat{\theta}_{BAD}$ is a biased estimator unless $\beta_1 = 5$, which we would not know ahead of time. For this reason, it is a terrible estimate (unless by chance $\beta_1 = 5$) even though it has the smallest possible variance. This is part of the reason we restrict ourselves to *unbiased* estimates. What good is an estimate, if it estimates the wrong quantity?
+
+So now, the natural question is, what are the variances of $\hat{\beta}_0$ and $\hat{\beta}_1$? They are,
+
+\[
+\begin{aligned}
+\text{Var}[\hat{\beta}_0] &= \sigma^2 \left(\frac{1}{n} + \frac{\bar{x}^2}{S_{xx}}\right) \\
+\text{Var}[\hat{\beta}_1] &= \frac{\sigma^2}{S_{xx}}.
+\end{aligned}
+\]
+
+These quantify the variability of the estimates due to random chance during sampling. Are these "the best"? Are these variances as small as we can possibility get? You'll just have to take our word for it that they are because showing that this is true is beyond the scope of this course.
+
+## Sampling Distributions
+
+Now that we have "redefined" the estimates for $\hat{\beta}_0$ and $\hat{\beta}_1$ as random variables, we can discuss their **sampling distribution**, which is the distribution when a statistic is considered a random variable.
+
+Since both $\hat{\beta}_0$ and $\hat{\beta}_1$ are a linear combination of the $Y_i$ and each $Y_i$ is normally distributed, then both $\hat{\beta}_0$ and $\hat{\beta}_1$ also follow a normal distribution.
+
+Then, putting all of the above together, we arrive at the distributions of $\hat{\beta}_0$ and $\hat{\beta}_1$.
+
+For $\hat{\beta}_1$ we say,
+
+\[
+\hat{\beta}_1 = \frac{S_{xy}}{S_{xx}} 
+= \frac{\sum_{i = 1}^{n}(x_i - \bar{x}) Y_i}{\sum_{i = 1}^{n}(x_i - \bar{x})^2}
+\sim N\left(  \beta_1, \ \frac{\sigma^2}{\sum_{i = 1}^{n}(x_i - \bar{x})^2} \right).
+\]
+
+Or more succinctly,
+
+\[
+\hat{\beta}_1 \sim N\left(  \beta_1, \frac{\sigma^2}{S_{xx}} \right).
+\]
+
+And for $\hat{\beta}_0$,
+
+\[
+\hat{\beta}_0 = \bar{Y} - \hat{\beta}_1 \bar{x} 
+\sim N\left(  \beta_0, \ \frac{\sigma^2 \sum_{i = 1}^{n}x_i^2}{n \sum_{i = 1}^{n}(x_i - \bar{x})^2} \right).
+\]
+
+Or more succinctly,
+
+\[
+\hat{\beta}_0 \sim N\left(  \beta_0, \sigma^2 \left(\frac{1}{n} + \frac{\bar{x}^2}{S_{xx}}\right) \right)
+\]
+
+At this point we have neglected to prove a number of these results. Instead of working through the tedious derivations of these sampling distributions, we will instead justify these results to ourselves using simulation.
+
+### Simulating Sampling Distributions
+
+To verify the above results, we will simulate samples of size $n = 100$ from the model
+
+\[
+Y_i = \beta_0 + \beta_1 x_i + \epsilon_i
+\]
+
+where $\epsilon_i \sim N(0, \sigma^2).$ In this case, the parameters are known to be:
+
+- $\beta_0 = 3$
+- $\beta_1 = 6$
+- $\sigma^2 = 4$
+
+Then, based on the above, we should find that
+
+\[
+\hat{\beta}_1 \sim N\left(  \beta_1, \frac{\sigma^2}{S_{xx}} \right)
+\]
+
+and
+
+\[
+\hat{\beta}_0 \sim N\left(  \beta_0, \sigma^2 \left(\frac{1}{n} + \frac{\bar{x}^2}{S_{xx}}\right) \right).
+\]
+
+First we need to decide ahead of time what our $x$ values will be for this simulation, since the $x$ values in SLR are also considered known quantities. The choice of $x$ values is arbitrary. Here we also set a seed for randomization, and calculate $S_{xx}$ which we will need going forward.
+
+```{r}
+set.seed(42)
+sample_size = 100 # this is n
+x = seq(-1, 1, length = sample_size)
+Sxx = sum((x - mean(x)) ^ 2)
+```
+
+We also fix our parameter values.
+
+```{r}
+beta_0 = 3
+beta_1 = 6
+sigma  = 2
+```
+
+With this information, we know the sampling distributions should be:
+
+```{r}
+(var_beta_1_hat = sigma ^ 2 / Sxx)
+(var_beta_0_hat = sigma ^ 2 * (1 / sample_size + mean(x) ^ 2 / Sxx))
+```
+
+\[
+\hat{\beta}_1 \sim N(  `r beta_1`, `r var_beta_1_hat`)
+\]
+
+and
+
+\[
+\hat{\beta}_0 \sim N(  `r beta_0`, `r var_beta_0_hat`).
+\]
+
+That is,
+
+\[
+\begin{aligned}
+\text{E}[\hat{\beta}_1] &= `r beta_1` \\
+\text{Var}[\hat{\beta}_1] &= `r var_beta_1_hat`
+\end{aligned}
+\]
+
+and
+
+\[
+\begin{aligned}
+\text{E}[\hat{\beta}_0] &= `r beta_0` \\
+\text{Var}[\hat{\beta}_0] &= `r var_beta_0_hat`.
+\end{aligned}
+\]
+
+We now simulate data from this model 10,000 times. Note this may not be the most `R` way of doing the simulation. We perform the simulation in this manner in an attempt at clarity. For example, we could have used the `sim_slr()` function from the previous chapter. We also simply store variables in the global environment instead of creating a data frame for each new simulated dataset.
+
+```{r}
+num_samples = 10000
+beta_0_hats = rep(0, num_samples)
+beta_1_hats = rep(0, num_samples)
+
+for (i in 1:num_samples) {
+  eps = rnorm(sample_size, mean = 0, sd = sigma)
+  y   = beta_0 + beta_1 * x + eps
+  
+  sim_model = lm(y ~ x)
+  
+  beta_0_hats[i] = coef(sim_model)[1]
+  beta_1_hats[i] = coef(sim_model)[2]
+}
+```
+
+Each time we simulated the data, we obtained values of the estimated coefficiets. The variables `beta_0_hats` and `beta_1_hats` now store 10,000 simulated values of $\hat{\beta}_0$ and $\hat{\beta}_1$ respectively.
+
+We first verify the distribution of $\hat{\beta}_1$.
+
+```{r}
+mean(beta_1_hats) # empirical mean
+beta_1            # true mean
+var(beta_1_hats)  # empirical variance
+var_beta_1_hat    # true variance
+```
+
+We see that the empirical and true means and variances are *very* similar. We also verify that the empirical distribution is normal. To do so, we plot a histogram of the `beta_1_hats`, and add the curve for the true distribution of $\hat{\beta}_1$. We use `prob = TRUE` to put the histogram on the same scale as the normal curve.
+
+```{r}
+# note need to use prob = TRUE
+hist(beta_1_hats, prob = TRUE, breaks = 20, 
+     xlab = expression(hat(beta)[1]), main = "", border = "dodgerblue")
+curve(dnorm(x, mean = beta_1, sd = sqrt(var_beta_1_hat)), 
+      col = "darkorange", add = TRUE, lwd = 3)
+```
+
+We then repeat the process for $\hat{\beta}_0$.
+
+```{r}
+mean(beta_0_hats) # empirical mean
+beta_0            # true mean
+var(beta_0_hats)  # empirical variance
+var_beta_0_hat    # true variance
+```
+
+```{r}
+hist(beta_0_hats, prob = TRUE, breaks = 25, 
+     xlab = expression(hat(beta)[0]), main = "", border = "dodgerblue")
+curve(dnorm(x, mean = beta_0, sd = sqrt(var_beta_0_hat)),
+      col = "darkorange", add = TRUE, lwd = 3)
+```
+
+In this simulation study, we have only simulated a finite number of samples. To truly verify the distributional results, we would need to observe an infinite number of samples. However, the following plot should make it clear that if we continued simulating, the empirical results would get closer and closer to what we should expect.
+
+```{r}
+par(mar = c(5, 5, 1, 1)) # adjusted plot margins, otherwise the "hat" does not display
+plot(cumsum(beta_1_hats) / (1:length(beta_1_hats)), type = "l", ylim = c(5.95, 6.05),
+     xlab = "Number of Simulations",
+     ylab = expression("Empirical Mean of " ~ hat(beta)[1]),
+     col  = "dodgerblue")
+abline(h = 6, col = "darkorange", lwd = 2)
+
+par(mar = c(5, 5, 1, 1)) # adjusted plot margins, otherwise the "hat" does not display
+plot(cumsum(beta_0_hats) / (1:length(beta_0_hats)), type = "l", ylim = c(2.95, 3.05),
+     xlab = "Number of Simulations",
+     ylab = expression("Empirical Mean of " ~ hat(beta)[0]),
+     col  = "dodgerblue")
+abline(h = 3, col = "darkorange", lwd = 2)
+```
+
+## Standard Errors
+
+So now we believe the two distributional results,
+
+\[
+\begin{aligned}
+\hat{\beta}_0 &\sim N\left(  \beta_0, \sigma^2 \left(\frac{1}{n} + \frac{\bar{x}^2}{S_{xx}}\right) \right) \\
+\hat{\beta}_1 &\sim N\left(  \beta_1, \frac{\sigma^2}{S_{xx}} \right).
+\end{aligned}
+\]
+
+Then by standardizing these results we find that
+
+\[
+\frac{\hat{\beta}_0 - \beta_0}{\text{SD}[\hat{\beta}_0]} \sim N(0, 1)
+\]
+
+and
+
+\[
+\frac{\hat{\beta}_1 - \beta_1}{\text{SD}[\hat{\beta}_1]} \sim N(0, 1)
+\]
+
+where
+
+\[
+\text{SD}[\hat{\beta}_0] = \sigma\sqrt{\frac{1}{n} + \frac{\bar{x}^2}{S_{xx}}}
+\]
+
+and
+
+\[
+\text{SD}[\hat{\beta}_1] = \frac{\sigma}{\sqrt{S_{xx}}}.
+\]
+
+Since we don't know $\sigma$ in practice, we will have to estimate it using $s_e$, which we plug into our existing expression for the standard deviations of our estimates.
+
+These two new expressions are called **standard errors** which are the *estimated* standard deviations of the sampling distributions.
+
+\[
+\text{SE}[\hat{\beta}_0] = s_e\sqrt{\frac{1}{n} + \frac{\bar{x}^2}{S_{xx}}}
+\]
+
+\[
+\text{SE}[\hat{\beta}_1] = \frac{s_e}{\sqrt{S_{xx}}}
+\]
+
+Now if we divide by the standard error, instead of the standard deviation, we obtain the following results which will allow us to make confidence intervals and perform hypothesis testing.
+
+\[
+\frac{\hat{\beta}_0 - \beta_0}{\text{SE}[\hat{\beta}_0]} \sim t_{n-2}
+\]
+
+\[
+\frac{\hat{\beta}_1 - \beta_1}{\text{SE}[\hat{\beta}_1]} \sim t_{n-2}
+\]
+
+To see this, first note that,
+
+\[
+\frac{\text{RSS}}{\sigma^2} = \frac{(n-2)s_e^2}{\sigma^2} \sim \chi_{n-2}^2.
+\]
+
+Also recall that a random variable $T$ defined as,
+
+\[
+T = \frac{Z}{\sqrt{\frac{\chi_{d}^2}{d}}}
+\]
+
+follows a $t$ distribution with $d$ degrees of freedom, where $\chi_{d}^2$ is a $\chi^2$ random variable with $d$ degrees of freedom.
+
+We write,
+
+\[
+T \sim t_d
+\]
+
+to say that the random variable $T$ follows a $t$ distribution with $d$ degrees of freedom.
+
+Then we use the classic trick of "multiply by 1" and some rearranging to arrive at
+
+\[
+\begin{aligned}
+\frac{\hat{\beta}_1 - \beta_1}{\text{SE}[\hat{\beta}_1]} 
+&= \frac{\hat{\beta}_1 - \beta_1}{s_e / \sqrt{S_{xx}}} \\
+&= \frac{\hat{\beta}_1 - \beta_1}{s_e / \sqrt{S_{xx}}} \cdot \frac{\sigma / \sqrt{S_{xx}}}{\sigma / \sqrt{S_{xx}}} \\
+&= \frac{\hat{\beta}_1 - \beta_1}{\sigma / \sqrt{S_{xx}}} \cdot \frac{\sigma / \sqrt{S_{xx}}}{s_e / \sqrt{S_{xx}}} \\
+&= \frac{\hat{\beta}_1 - \beta_1}{\sigma / \sqrt{S_{xx}}} \bigg/ \sqrt{\frac{s_e^2}{\sigma^2}} \\
+&= \frac{\hat{\beta}_1 - \beta_1}{\text{SD}[\hat{\beta}_1]} \bigg/ \sqrt{\frac{\frac{(n - 2)s_e^2}{\sigma^2}}{n - 2}}
+\sim \frac{Z}{\sqrt{\frac{\chi_{n-2}^2}{n-2}}}
+\sim t_{n-2}
+\end{aligned}
+\]
+
+where $Z \sim N(0,1)$.
+
+Recall that a $t$ distribution is similar to a standard normal, but with heavier tails. As the degrees of freedom increases, the $t$ distribution becomes more and more like a standard normal. Below we plot a standard normal distribution as well as two examples of a $t$ distribution with different degrees of freedom. Notice how the $t$ distribution with the larger degrees of freedom is more similar to the standard normal curve.
+
+```{r}
+# define grid of x values
+x = seq(-4, 4, length = 100)
+
+# plot curve for standard normal
+plot(x, dnorm(x), type = "l", lty = 1, lwd = 2,
+     xlab = "x", ylab = "Density", main = "Normal vs t Distributions")
+# add curves for t distributions
+lines(x, dt(x, df = 1), lty = 3, lwd = 2, col = "darkorange")
+lines(x, dt(x, df = 10), lty = 2, lwd = 2, col = "dodgerblue")
+
+# add legend
+legend("topright", title = "Distributions",
+       legend = c("t, df = 1", "t, df = 10", "Standard Normal"), 
+       lwd = 2, lty = c(3, 2, 1), col = c("darkorange", "dodgerblue", "black"))
+```
+
+## Confidence Intervals for Slope and Intercept
+
+Recall that confidence intervals for means often take the form:
+
+\[
+\text{EST} \pm \text{CRIT} \cdot \text{SE}
+\]
+
+or
+
+\[
+\text{EST} \pm \text{MARGIN}
+\]
+
+where $\text{EST}$ is an estimate for the parameter of interest, $\text{SE}$ is the standard error of the estimate, and $\text{MARGIN} = \text{CRIT} \cdot \text{SE}$.
+
+Then, for $\beta_0$ and $\beta_1$ we can create confidence intervals using
+
+\[
+\hat{\beta}_0 \pm t_{\alpha/2, n - 2} \cdot \text{SE}[\hat{\beta}_0] \quad \quad \quad \hat{\beta}_0 \pm t_{\alpha/2, n - 2} \cdot s_e\sqrt{\frac{1}{n}+\frac{\bar{x}^2}{S_{xx}}}
+\]
+
+and
+
+\[
+\hat{\beta}_1 \pm t_{\alpha/2, n - 2} \cdot \text{SE}[\hat{\beta}_1]  \quad \quad \quad \hat{\beta}_1 \pm t_{\alpha/2, n - 2} \cdot \frac{s_e}{\sqrt{S_{xx}}}
+\]
+
+where $t_{\alpha/2, n - 2}$ is the critical value such that $P(t_{n-2} > t_{\alpha/2, n - 2}) = \alpha/2$.
+
+## Hypothesis Tests
+
+> "We may speak of this hypothesis as the '[null hypothesis](https://xkcd.com/892/){target="_blank"}', and it should be noted that the null hypothesis is never proved or established, but is possibly disproved, in the course of experimentation."
+>
+> --- **Ronald Aylmer Fisher**
+
+Recall that a test statistic ($\text{TS}$) for testing means often take the form:
+
+\[
+\text{TS} = \frac{\text{EST} - \text{HYP}}{\text{SE}}
+\]
+
+where $\text{EST}$ is an estimate for the parameter of interest, $\text{HYP}$ is a hypothesized value of the parameter, and $\text{SE}$ is the standard error of the estimate.
+
+So, to test
+
+\[
+H_0: \beta_0 = \beta_{00} \quad \text{vs} \quad H_1: \beta_0 \neq \beta_{00}
+\]
+
+we use the test statistic
+
+\[
+t = \frac{\hat{\beta}_0 - \beta_{00}}{\text{SE}[\hat{\beta}_0]} = \frac{\hat{\beta}_0-\beta_{00}}{s_e\sqrt{\frac{1}{n} + \frac{\bar{x}^2}{S_{xx}}}}
+\]
+
+which, under the null hypothesis, follows a $t$ distribution with $n - 2$ degrees of freedom. We use $\beta_{00}$ to denote the hypothesized value of $\beta_0$.
+
+Similarly, to test
+
+\[
+H_0: \beta_1 = \beta_{10} \quad \text{vs} \quad H_1: \beta_1 \neq \beta_{10}
+\]
+
+we use the test statistic
+
+\[
+t = \frac{\hat{\beta}_1-\beta_{10}}{\text{SE}[\hat{\beta}_1]} = \frac{\hat{\beta}_1-\beta_{10}}{s_e / \sqrt{S_{xx}}}
+\]
+
+which again, under the null hypothesis, follows a $t$ distribution with $n - 2$ degrees of freedom. We now use $\beta_{10}$ to denote the hypothesized value of $\beta_1$.
+
+## `cars` Example
+
+We now return to the `cars` example from last chapter to illustrate these concepts. We first fit the model using `lm()` then use `summary()` to view the results in greater detail.
+
+```{r}
+stop_dist_model = lm(dist ~ speed, data = cars)
+summary(stop_dist_model)
+```
+
+### Tests in `R`
+
+We will now discuss the results displayed called `Coefficients`. First recall that we can extract this information directly.
+
+```{r}
+names(summary(stop_dist_model))
+summary(stop_dist_model)$coefficients
+```
+
+The `names()` function tells us what information is available, and then we use the `$` operator and `coefficients` to extract the information we are interested in. Two values here should be immediately familiar.
+
+\[
+\hat{\beta}_0 = `r summary(stop_dist_model)$coefficients[1,1]`
+\]
+
+and
+
+\[
+\hat{\beta}_1 = `r summary(stop_dist_model)$coefficients[2,1]`
+\]
+
+which are our estimates for the model parameters $\beta_0$ and $\beta_1$.
+
+Let's now focus on the second row of output, which is relevant to $\beta_1$.
+
+```{r}
+summary(stop_dist_model)$coefficients[2,]
+```
+
+Again, the first value, `Estimate` is
+
+\[
+\hat{\beta}_1 = `r summary(stop_dist_model)$coefficients[2,1]`.
+\]
+
+The second value, `Std. Error`, is the standard error of $\hat{\beta}_1$,
+
+\[
+\text{SE}[\hat{\beta}_1] = \frac{s_e}{\sqrt{S_{xx}}} = `r summary(stop_dist_model)$coefficients[2,2]`.
+\]
+
+The third value, `t value`, is the value of the test statistic for testing $H_0: \beta_1 = 0$ vs $H_1: \beta_1 \neq 0$,
+
+\[
+t = \frac{\hat{\beta}_1-0}{\text{SE}[\hat{\beta}_1]} = \frac{\hat{\beta}_1-0}{s_e / \sqrt{S_{xx}}} = `r summary(stop_dist_model)$coefficients[2,3]`.
+\]
+
+Lastly, `Pr(>|t|)`, gives us the p-value of that test.
+
+\[
+\text{p-value} = `r summary(stop_dist_model)$coefficients[2,4]`
+\]
+
+Note here, we are specifically testing whether or not $\beta_1 = 0$. 
+
+The first row of output reports the same values, but for $\beta_0$.
+
+```{r}
+summary(stop_dist_model)$coefficients[1,]
+```
+
+In summary, the following code stores the information of `summary(stop_dist_model)$coefficients` in a new variable `stop_dist_model_test_info`, then extracts each element into a new variable which describes the information it contains.
+
+```{r}
+stop_dist_model_test_info = summary(stop_dist_model)$coefficients
+
+beta_0_hat      = stop_dist_model_test_info[1, 1] # Estimate
+beta_0_hat_se   = stop_dist_model_test_info[1, 2] # Std. Error
+beta_0_hat_t    = stop_dist_model_test_info[1, 3] # t value
+beta_0_hat_pval = stop_dist_model_test_info[1, 4] # Pr(>|t|)
+
+beta_1_hat      = stop_dist_model_test_info[2, 1] # Estimate
+beta_1_hat_se   = stop_dist_model_test_info[2, 2] # Std. Error
+beta_1_hat_t    = stop_dist_model_test_info[2, 3] # t value
+beta_1_hat_pval = stop_dist_model_test_info[2, 4] # Pr(>|t|)
+```
+
+We can then verify some equivalent expressions: the $t$ test statistic for $\hat{\beta}_1$ and the two-sided p-value associated with that test statistic.
+
+```{r}
+(beta_1_hat - 0) / beta_1_hat_se
+beta_1_hat_t
+```
+
+```{r}
+2 * pt(abs(beta_1_hat_t), df = length(resid(stop_dist_model)) - 2, lower.tail = FALSE)
+beta_1_hat_pval
+```
+
+### Significance of Regression, t-Test
+
+We pause to discuss the **significance of regression** test. First, note that based on the above distributional results, we could test $\beta_0$ and $\beta_1$ against any particular value, and perform both one and two-sided tests.
+
+However, one very specific test,
+
+\[
+H_0: \beta_1 = 0 \quad \text{vs} \quad H_1: \beta_1 \neq 0
+\]
+
+is used most often. Let's think about this test in terms of the simple linear regression model,
+
+\[
+Y_i = \beta_0 + \beta_1 x_i + \epsilon_i.
+\]
+
+If we assume the null hypothesis is true, then $\beta_1 = 0$ and we have the model,
+
+\[
+Y_i = \beta_0 + \epsilon_i.
+\]
+
+In this model, the response does **not** depend on the predictor. So then we could think of this test in the following way,
+
+- Under $H_0$ there is not a significant linear relationship between $x$ and $y$.
+- Under $H_1$ there is a significance **linear** relationship between $x$ and $y$.
+
+For the `cars` example,
+
+- Under $H_0$ there is not a significant linear relationship between speed and stopping distance.
+- Under $H_1$ there is a significant **linear** relationship between speed and stopping distance.
+
+Again, that test is seen in the output from `summary()`, 
+
+\[
+\text{p-value} = `r summary(stop_dist_model)$coefficients[2,4]`.
+\]
+
+With this extremely low p-value, we would reject the null hypothesis at any reasonable $\alpha$ level, say for example $\alpha = 0.01$. So we say there is a significant **linear** relationship between speed and stopping distance. Notice that we emphasize **linear**.
+
+```{r, echo = FALSE}
+set.seed(42)
+x = seq(-1, 1, 0.01)
+y = 5 + 4 * x ^ 2 + rnorm(length(x), 0, 0.5)
+plot(x, y, pch  = 20, cex  = 2, col  = "grey")
+abline(lm(y ~ x), lwd = 3, col = "darkorange")
+```
+
+In this plot of simulated data, we see a clear relationship between $x$ and $y$, however it is not a linear relationship. If we fit a line to this data, it is very flat. The resulting test for $H_0: \beta_1 = 0$ vs $H_1: \beta_1 \neq 0$ gives a large p-value, in this case $`r summary(lm(y ~ x))$coef[2,4]`$, so we would fail to reject and say that there is no significant linear relationship between $x$ and $y$. We will see later how to fit a curve to this data using a "linear" model, but for now, realize that testing $H_0: \beta_1 = 0$ vs $H_1: \beta_1 \neq 0$ can only detect straight line relationships.
+
+### Confidence Intervals in `R`
+
+Using `R` we can very easily obtain the confidence intervals for $\beta_0$ and $\beta_1$.
+
+```{r}
+confint(stop_dist_model, level = 0.99)
+```
+
+This automatically calculates 99% confidence intervals for both $\beta_0$ and $\beta_1$, the first row for $\beta_0$, the second row for $\beta_1$.
+
+For the `cars` example when interpreting these intervals, we say, we are 99% confident that for an increase in speed of 1 mile per hour, the average increase in stopping distance is between `r confint(stop_dist_model, level = 0.99)[2,1]` and `r confint(stop_dist_model, level = 0.99)[2,2]` feet, which is the interval for $\beta_1$.
+
+Note that this 99% confidence interval does **not** contain the hypothesized value of 0. Since it does not contain 0, it is equivalent to rejecting the test of $H_0: \beta_1 = 0$ vs $H_1: \beta_1 \neq 0$ at $\alpha = 0.01$, which we had seen previously.
+
+You should be somewhat suspicious of the confidence interval for $\beta_0$, as it covers negative values, which correspond to negative stopping distances. Technically the interpretation would be that we are 99% confident that the average stopping distance of a car traveling 0 miles per hour is between `r confint(stop_dist_model, level = 0.99)[1,1]` and `r confint(stop_dist_model, level = 0.99)[1,2]` feet, but we don't really believe that, since we are actually certain that it would be non-negative.
+
+Note, we can extract specific values from this output a number of ways. This code is not run, and instead, you should check how it relates to the output of the code above.
+
+```{r, eval = FALSE}
+confint(stop_dist_model, level = 0.99)[1,]
+confint(stop_dist_model, level = 0.99)[1, 1]
+confint(stop_dist_model, level = 0.99)[1, 2]
+confint(stop_dist_model, parm = "(Intercept)", level = 0.99)
+confint(stop_dist_model, level = 0.99)[2,]
+confint(stop_dist_model, level = 0.99)[2, 1]
+confint(stop_dist_model, level = 0.99)[2, 2]
+confint(stop_dist_model, parm = "speed", level = 0.99)
+```
+
+We can also verify that calculations that `R` is performing for the $\beta_1$ interval.
+
+```{r}
+# store estimate
+beta_1_hat = coef(stop_dist_model)[2]
+
+# store standard error
+beta_1_hat_se = summary(stop_dist_model)$coefficients[2, 2]
+
+# calculate critical value for two-sided 99% CI
+crit = qt(0.995, df = length(resid(stop_dist_model)) - 2)
+
+# est - margin, est + margin
+c(beta_1_hat - crit * beta_1_hat_se, beta_1_hat + crit * beta_1_hat_se)
+```
+
+## Confidence Interval for Mean Response
+
+In addition to confidence intervals for $\beta_0$ and $\beta_1$, there are two other common interval estimates used with regression. The first is called a **confidence interval for the mean response**. Often, we would like an interval estimate for the mean, $E[Y \mid X = x]$ for a particular value of $x$.
+
+In this situation we use $\hat{y}(x)$ as our estimate of $E[Y \mid X = x]$. We modify our notation slightly to make it clear that the predicted value is a function of the $x$ value.
+
+\[
+\hat{y}(x) = \hat{\beta}_0 + \hat{\beta}_1 x
+\]
+
+Recall that,
+
+\[
+\text{E}[Y \mid X = x] = \beta_0 + \beta_1 x.
+\]
+
+Thus, $\hat{y}(x)$ is a good estimate since it is unbiased:
+
+\[
+\text{E}[\hat{y}(x)] = \beta_0 + \beta_1 x.
+\]
+
+We could then derive,
+
+\[
+\text{Var}[\hat{y}(x)] = \sigma^2 \left(\frac{1}{n}+\frac{(x-\bar{x})^2}{S_{xx}}\right).
+\]
+
+Like the other estimates we have seen, $\hat{y}(x)$ also follows a normal distribution. Since $\hat{\beta}_0$ and $\hat{\beta}_1$ are linear combinations of normal random variables, $\hat{y}(x)$ is as well.
+
+\[
+\hat{y}(x) \sim N \left(\beta_0 + \beta_1 x, \sigma^2 \left(\frac{1}{n}+\frac{(x-\bar{x})^2}{S_{xx}}\right) \right)
+\]
+
+And lastly, since we need to estimate this variance, we arrive at the standard error of our estimate,
+
+\[
+\text{SE}[\hat{y}(x)] = s_e \sqrt{\frac{1}{n}+\frac{(x-\bar{x})^2}{S_{xx}}}.
+\]
+
+We can then use this to find the confidence interval for the mean response,
+
+\[
+\hat{y}(x) \pm t_{\alpha/2, n - 2} \cdot s_e\sqrt{\frac{1}{n}+\frac{(x-\bar{x})^2}{S_{xx}}}
+\]
+
+To find confidence intervals for the mean response using `R`, we use the `predict()` function. We give the function our fitted model as well as new data, stored as a data frame. (This is important, so that `R` knows the name of the predictor variable.) Here, we are finding the confidence interval for the mean stopping distance when a car is travelling 5 miles per hour and when a car is travelling 21 miles per hour.
+
+```{r}
+new_speeds = data.frame(speed = c(5, 21))
+predict(stop_dist_model, newdata = new_speeds, 
+        interval = c("confidence"), level = 0.99)
+```
+
+## Prediction Interval for New Observations
+
+Sometimes we would like an interval estimate for a new observation, $Y$, for a particular value of $x$. This is very similar to an interval for the mean response, $\text{E}[Y \mid X = x]$, but different in one very important way.
+
+Our best guess for a new observation is still $\hat{y}(x)$. The estimated mean is still the best prediction we can make. The difference is in the amount of variability. We know that observations will vary about the true regression line according to a $N(0, \sigma^2)$ distribution. Because of this we add an extra factor of $\sigma^2$ to our estimate's variability in order to account for the variability of observations about the regression line.
+
+\[
+\begin{aligned}
+\text{Var}[\hat{y}(x) + \epsilon] &= \text{Var}[\hat{y}(x)] + \text{Var}[\epsilon] \\[2ex]
+&= \sigma^2 \left(\frac{1}{n}+\frac{(x-\bar{x})^2}{S_{xx}}\right) + \sigma^2 \\[2ex]
+&= \sigma^2 \left(1 + \frac{1}{n}+\frac{(x-\bar{x})^2}{S_{xx}}\right)
+\end{aligned}
+\]
+
+\[
+\hat{y}(x) + \epsilon \sim N \left(\beta_0 + \beta_1 x, \ \sigma^2 \left(1 + \frac{1}{n}+\frac{(x-\bar{x})^2}{S_{xx}}\right) \right)
+\]
+
+\[
+\text{SE}[\hat{y}(x) + \epsilon] = s_e \sqrt{1 + \frac{1}{n}+\frac{(x-\bar{x})^2}{S_{xx}}}
+\]
+
+We can then find a **prediction interval** using,
+
+\[
+\hat{y}(x) \pm t_{\alpha/2, n - 2} \cdot s_e\sqrt{1 + \frac{1}{n}+\frac{(x-\bar{x})^2}{S_{xx}}}.
+\]
+
+To calculate this for a set of points in `R` notice there is only a minor change in syntax from finding a confidence interval for the mean response.
+
+```{r}
+predict(stop_dist_model, newdata = new_speeds, 
+        interval = c("prediction"), level = 0.99)
+```
+
+Also notice that these two intervals are wider than the corresponding confidence intervals for the mean response.
+
+## Confidence and Prediction Bands
+
+Often we will like to plot both confidence intervals for the mean response and prediction intervals for all possible values of $x$. We calls these confidence and prediction bands.
+
+```{r, fig.height = 8, fig.width = 10, message = TRUE}
+speed_grid = seq(min(cars$speed), max(cars$speed), by = 0.01)
+dist_ci_band = predict(stop_dist_model, 
+                       newdata = data.frame(speed = speed_grid), 
+                       interval = "confidence", level = 0.99)
+dist_pi_band = predict(stop_dist_model, 
+                       newdata = data.frame(speed = speed_grid), 
+                       interval = "prediction", level = 0.99) 
+
+plot(dist ~ speed, data = cars,
+     xlab = "Speed (in Miles Per Hour)",
+     ylab = "Stopping Distance (in Feet)",
+     main = "Stopping Distance vs Speed",
+     pch  = 20,
+     cex  = 2,
+     col  = "grey",
+     ylim = c(min(dist_pi_band), max(dist_pi_band)))
+abline(stop_dist_model, lwd = 5, col = "darkorange")
+
+lines(speed_grid, dist_ci_band[,"lwr"], col = "dodgerblue", lwd = 3, lty = 2)
+lines(speed_grid, dist_ci_band[,"upr"], col = "dodgerblue", lwd = 3, lty = 2)
+lines(speed_grid, dist_pi_band[,"lwr"], col = "dodgerblue", lwd = 3, lty = 3)
+lines(speed_grid, dist_pi_band[,"upr"], col = "dodgerblue", lwd = 3, lty = 3)
+points(mean(cars$speed), mean(cars$dist), pch = "+", cex = 3)
+```
+
+Some things to notice:
+
+- We use the `ylim` argument to stretch the $y$-axis of the plot, since the bands extend further than the points.
+- We add a point at the point $(\bar{x}, \bar{y})$.
+    - This is a point that the regression line will **always** pass through. (Think about why.)
+    - This is the point where both the confidence and prediction bands are the narrowest. Look at the standard errors of both to understand why.
+- The prediction bands (dotted blue) are less curved than the confidence bands (dashed blue). This is a result of the extra factor of $\sigma^2$ added to the variance at any value of $x$.
+
+## Significance of Regression, F-Test
+
+In the case of simple linear regression, the $t$ test for the significance of the regression is equivalent to another test, the $F$ test for the significance of the regression. This equivalence will only be true for simple linear regression, and in the next chapter we will only use the $F$ test for the significance of the regression.
+
+Recall from last chapter the decomposition of variance we saw before calculating $R^2$,
+
+\[
+\sum_{i=1}^{n}(y_i - \bar{y})^2 = \sum_{i=1}^{n}(y_i - \hat{y}_i)^2 + \sum_{i=1}^{n}(\hat{y}_i - \bar{y})^2,
+\]
+
+or, in short,
+
+\[
+\text{SST} = \text{SSE} + \text{SSReg}.
+\]
+
+To develop the $F$ test, we will arrange this information in an **ANOVA** table,
+
+| Source     | Sum of Squares  | Degrees of Freedom | Mean Square | $F$ |
+|------------|-----------------|------------|-----------|-----------|
+| Regression | $\sum_{i=1}^{n}(\hat{y}_i - \bar{y})^2$ | $1$ | $\text{SSReg} / 1$     | $\text{MSReg} / \text{MSE}$ |
+| Error      | $\sum_{i=1}^{n}(y_i - \hat{y}_i)^2$     | $n - 2$ | $\text{SSE} / (n - 2)$ |             |
+| Total      | $\sum_{i=1}^{n}(y_i - \bar{y})^2$       | $n - 1$ |                 |             |
+
+ANOVA, or Analysis of Variance which we have seen last week. 
+
+\[
+F = \frac{\sum_{i=1}^{n}(\hat{y}_i - \bar{y})^2 / 1}{\sum_{i=1}^{n}(y_i - \hat{y}_i)^2 / (n - 2)} \sim F_{1, n - 2}
+\]
+
+which follows an $F$ distribution with degrees of freedom $1$ and $n - 2$ under the null hypothesis. An $F$ distribution is a continuous distribution which takes only positive values and has two parameters, which are the two degrees of freedom.
+
+Recall, in the significance of the regression test, $Y$ does **not** depend on $x$ in the null hypothesis.
+
+\[
+H_0: \beta_1 = 0 \quad \quad Y_i = \beta_0 + \epsilon_i
+\]
+
+While in the alternative hypothesis $Y$ may depend on $x$.
+
+\[
+H_1: \beta_1 \neq 0 \quad \quad Y_i = \beta_0 + \beta_1 x_i + \epsilon_i
+\]
+
+We can use the $F$ statistic to perform this test.
+
+\[
+F = \frac{\sum_{i=1}^{n}(\hat{y}_i - \bar{y})^2 / 1}{\sum_{i=1}^{n}(y_i - \hat{y}_i)^2 / (n - 2)}
+\]
+
+In particular, we will reject the null when the $F$ statistic is large, that is, when there is a low probability that the observations could have come from the null model by chance. We will let `R` calculate the p-value for us.
+
+To perform the $F$ test in `R` you can look at the last row of the output from `summary()` called `F-statistic` which gives the value of the test statistic, the relevant degrees of freedom, as well as the p-value of the test.
+
+```{r}
+summary(stop_dist_model)
+```
+
+Additionally, you can use the `anova()` function to display the information in an ANOVA table.
+
+```{r}
+anova(stop_dist_model)
+```
+
+This also gives a p-value for the test. You should notice that the p-value from the $t$ test was the same. You might also notice that the value of the test statistic for the $t$ test, $`r beta_1_hat_t`$, can be squared to obtain the value of the $F$ statistic, $`r beta_1_hat_t ^ 2`$.
+
+Note that there is another equivalent way to do this in `R`, which we will return to often to compare two models.
+
+```{r}
+anova(lm(dist ~ 1, data = cars), lm(dist ~ speed, data = cars))
+```
+
+The model statement `lm(dist ~ 1, data = cars)` applies the model $Y_i = \beta_0 + \epsilon_i$ to the cars data. Note that $\hat{y} = \bar{y}$ when $Y_i = \beta_0 + \epsilon_i$.
+
+The model statement `lm(dist ~ speed, data = cars)` applies the model $Y_i = \beta_0 + \beta_1 x_i + \epsilon_i$.
+
+We can then think of this usage of `anova()` as directly comparing the two models. (Notice we get the same p-value again.)
+
+
+
+# In class (time allowing)
+
+The movie Moneyball focuses on the “quest for the secret of success in baseball”. It
+follows a low-budget team, the Oakland Athletics, in the early 2000’s, who believed that
+underused statistics, such as a player’s ability to get on base, actually better predicts the
+ability to score runs than typical statistics like homeruns, RBIs (runs batted in), and
+batting average. In fact, obtaining players who excelled in these underused statistics
+turned out to be much more affordable for the team.
+In this lab we’ll be looking at data from all 30 Major League Baseball teams and examining the linear relationship between runs scored in a season and a number of other
+player statistics. Our aim will be to summarize these relationships both graphically and
+numerically in order to find which variable, if any, best helps us predict a team’s runs
+scored in a season.
+
+### The Data
+Let’s load up the batting data for the 2009 season.
+
+```{r}
+mlb = read.csv("http://stat.duke.edu/courses/Spring12/sta101.1/labs/mlb09.csv")
+```
+In addition to runs scored, there are seven traditionally-used variables in the data set:
+at-bats, hits, homeruns, batting average, strikeouts, walks and stolen bases.1 The last
+three variables in the data set are newer: on-base percentage, slugging percentage, and
+on base plus slugging.
+
+__Exercise 1.__ Plot runs as the response variable and at bats as the explanatory variable. Does
+the relationship look linear? If you knew a team’s at-bats, would you feel confident
+in your ability to make a good prediction of their runs?
+
+```{r}
+ggplot(mlb, aes(x=at_bats,y=runs)) +
+  geom_point()+
+  theme_bw()
+```
+
+
+### Sum of squared residuals
+Besides correlation, another way to summarize the relationship between these two variables is finding the line that best follows their association. Use the following interactive
+function to select the line that you think does the best job of going through the cloud
+of points.
+
+```{r}
+source("http://stat.duke.edu/courses/Fall11/sta101.02/labs/plot_ss.R")
+plot_ss(x = mlb$at_bats, y = mlb$runs)
+```
+
+__Question 2.__ Using plot ss(), choose a line that does the best job of minimizing the sum of
+squares. Run the function several times to get the lowest possible value. What is
+that value? How does it compare to your neighbors?
+
+### The linear model
+
+It is rather cumbersome to try to get the correct least squares line, i.e. the line that
+minimizes the sum of squared residuals, through trial and error. Instead we can use one
+of the built in functions in R, lm() (stands for “linear model”) to fit the regression line.
+`m1 <- lm(runs ~ at_bats, data = mlb)`.
+The first argument in the function lm() takes the form `y ~ x`, or `response by explanatory`.
+We want to make a linear model of runs as a function of at bats. The second argument
+specifies that R should look in the mlb09 dataset to find these variables.
+The output of `lm()` is an object that contains all of the information we need about the
+linear model that was just fit. We can pull up the basic information with 
+`summary(m1)`.
+At the top of the output is the formula that you specified, runs as a function of at-bats.
+Below that is a table that contains summary statistics on the residuals and below that is
+the regression output. The coefficient estimate of the intercept is shown in the first row,
+next to `(Intercept)`, and the estimate of the slope is shown in the second line, next to
+at bats. How do these compare to your model from Exercise Exercise 2.? Standard
+errors, t-statistics, and p-values testing whether each coefficient is significantly different
+from 0 are also given.
+
+__Question 3.__ Using the estimates from the R output write the equation of the regression line
+for predicting runs from at-bats. Interpret the slope coefficient. Is the slope
+significantly different from 0?
+
+```{r}
+summary(reg<-lm(runs~ at_bats, mlb))
+```
+
+
+### Prediction
+
+
+
+__Question 4__ Overlay the regression line on the scatterplot of runs vs. at-bats. Using the estimates from the R output write the equation of the regression line
+for predicting runs from at-bat. If a team manager saw the least squares regression line and not the actual data how many runs would he or she predict for a team that had 5,578 at-bats? The
+Phillies had 5,578 at-bats... is the prediction based on the model an overestimate
+or an underestimate, and by how much?
+
+```{r}
+ggplot(mlb, aes(x=at_bats,y=runs)) +
+  geom_point()+
+  geom_smooth(formula= y~x, method="lm")+
+  theme_bw()
+
+print(preds <- predict(reg, newdata =data.frame("at_bats" = c(5578))))
+print(preds - mlb$runs[which(mlb$at_bats ==5578 )])
+```
+
+
+We can easily get all the predicted values using the predict() function in R:
+yhat = predict(m1)
+
+
+__Question 5.__ Plot the actual values against the predicted values. Informally, does the model
+appear to be doing a good job?
+
+```{r}
+mlb$yhat = reg$fitted.values
+ggplot(mlb, aes(x=runs,y=yhat)) +
+  geom_point()+
+  geom_smooth(formula= y~x, method="lm")+
+  theme_bw()
+
+```
+To get interval estimates instead of just point estimates, we include the interval=
+argument. You can generate confidence intervals and prediction intervals for all the
+data points with
+`predict(m1, interval="confidence")`
+`predict(m1, interval="prediction")`
+
+The output of the predict function with the interval= argument includes the first column, fit, which gives the predicted (or “fitted” values), and then the next two columns
+give the lower and upper bounds of the interval estimate (confidence or prediction, depending on which you specify). The default level of confidence is 95%.
+We can also make predictions for new data. To generate a prediction interval for a team
+that has 5550 at-bats, we first need to create “new data” for a team with 5550 at-bats,
+then input this newdata into the predict function with the model:
+`newdata = as.data.frame(cbind(at_bats = 5550))`
+`predict(m1, newdata, interval="prediction")`
+__Question 6.__ Create a confidence and prediction interval for the number of runs for a team with 5000 at-bats, and interpret both intervals.
+
+
+```{r}
+newdata = as.data.frame(cbind(at_bats = 5550))
+predict(reg, newdata, interval="prediction")
+
+```
+### Model diagnostics
+
+In order to check if the conditions for a linear regression are met we should check for
+(1) linearity, (2) constant variability, and (3) nearly normal residuals. You can get the
+residuals with `m1$residuals.`
+
+__Question 7.__  Do the three conditions appear to be met?
+
+```{r}
+mlb$residuals = reg$residuals
+ggplot(mlb, aes(x=runs,y=residuals)) +
+  geom_point()+
+  theme_bw()
+
+ggplot(mlb, aes(sample= residuals)) + stat_qq() + stat_qq_line()
+```
+
+### Exploring Other Variables
+
+__Question 8.__  Now that you can summarize the linear relationship between two variables, investigate the relationships between runs and all other traditional variables, one at a
+time (no need to show each investigation, only the best one). Which variable best
+predicts runs?
+
+__Question 9.__  Now examine the three newer variables. These are the statistics used in Moneyball to predict a team’s success. In general, are they more or less effective at predicting
+runs than the old variables? Explain using appropriate graphical and numerical
+evidence. Of all ten variables we’ve analyzed, which seems to be the best predictor
+of runs? Using the limited (or not so limited) information you know about these
+baseball statistics, does your result make sense? 
+
+
+__Acknowledgements__
+
+This lab is based on the material from David Dalpiaz's [Applied Stats course](https://github.com/daviddalpiaz/appliedstats), and the practical from [Duke's Stats 101 course](https://www2.stat.duke.edu/courses/Spring14/sta101.001/lab10.pdf).
