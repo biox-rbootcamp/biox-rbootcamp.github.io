@@ -16,11 +16,11 @@ layout: cme195
 - [Lab 10](./biox-rbootcamp.github.io/assets/lectures/testing_lectures/lab13_hypothesis_testing.html): Hypothesis testing
 - [Lab 11](./biox-rbootcamp.github.io/assets/lectures/testing_lectures/multiple_testing.html): Multiple hypothesis testing
 - [Lab 12](./biox-rbootcamp.github.io/assets/lectures/testing_lectures/anova.html): ANOVA 
-- Lab 13:
-- Lab 14: 
-- Lab 15:
-- Lab 16: 
-- Lab 17:
+- [Lab 13](./biox-rbootcamp.github.io/assets/lectures/linear_regression/slr.html): Simple linear regression
+- [Lab 14](./biox-rbootcamp.github.io/assets/lectures/linear_regression/mlr.html): Multivariate linear regression 
+- [Lab 15](./biox-rbootcamp.github.io/assets/lectures/linear_regression/Poisson-Regression.html): Poisson regression
+- [Lab 16](./biox-rbootcamp.github.io/assets/lectures/linear_regression/Generalized-Linear-Models.html): Generalized linear model 
+- [Lab 17](./biox-rbootcamp.github.io/assets/lectures/Lab5b_mixtures/Lab5b_mixtures.html): Mixtures
 - Lab 18: 
 - Lab 19:
 - Lab 20:
