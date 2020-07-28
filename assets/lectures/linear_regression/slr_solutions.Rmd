@@ -2222,6 +2222,9 @@ ggplot(mlb, aes(sample= residuals)) + stat_qq() + stat_qq_line()
 ```
 
 ### Exploring Other Variables
+```{r}
+
+```
 
 __Question 8.__  Now that you can summarize the linear relationship between two variables, investigate the relationships between runs and all other traditional variables, one at a
 time (no need to show each investigation, only the best one). Which variable best

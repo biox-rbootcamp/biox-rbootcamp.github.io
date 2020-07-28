@@ -15,7 +15,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ## Objective
 
 The purpose of this exercise is to make you apply what you learned so far -- both from the hypothesis testing perspective and in terms of linear modeling.
-This is inspired from a real case study that was presented in the Statistics consulting workshop (STATS 398) over the last few months. The data was confidential, thus the data that we present here is simulated to simulate the real one.
+This is inspired from a real case study that was presented in the Statistics consulting workshop (STATS 398) over the last few months. The data was confidential, thus the data that we present here is simulated to make it behave a little like the real one. The idea here is to try to see how we could start thinking about leading an analysis of such data.
 
 
 ## Setting
@@ -31,18 +31,14 @@ His dataset consists of the weekly ICU admissions per disease category since 201
 
 ## Aggregate Analysis
 
-__Question 1__ Load the data, and start plotting the admission number for a few diseases. Is there any evidence to support his theory?
+__Question 1__ Load [the data](https://raw.githubusercontent.com/biox-rbootcamp/biox-rbootcamp.github.io/master/assets/lectures/linear_regression/data/mock_ICU_data.csv), and start plotting the admission number for a few diseases. Is there any evidence to support his theory?
 
 *Solution:* Not all diseases show such an effect.
 
 ```{r}
-library(tiidyverse)
+library(tidyverse)
 library(reshape2)
-data <- read.csv("/Users/cdonnat/Dropbox/biox-rbootcamp.github.io/assets/lectures/linear_regression/data/mock_ICU_data.csv", row.names = 1)
-data = data[,c(1:5, 7,9, 10, 11, 13, 16,17:23) ]
-data$date = seq(from=as.Date("2018-12-31"),
-                  to = as.Date("2020-04-25"), by="week" )
-data$month= sapply(data$date , function(x){month(as.POSIXlt(x + 4, format="%Y-%m-%d"), label=TRUE)})
+data <- read.csv("data/mock_ICU_data.csv")
 
 data2 = melt(data, id.vars = c("year","label","date","month","week","week2"))
 
@@ -246,10 +242,12 @@ Only the acs passes the Benjamini-Hochberg correction (in all three tests of sig
 
 ### Organ-group aggregated data
 
-The diagnoses data might be a bit to granular for us to see anything. Let's look instead at organ data. Load the organ data from the website. Repeat the analysis: are any of the organs admission significantly different before and after SIP?
+The diagnoses data might be a bit to granular for us to see anything. Let's look instead at organ data. 
+
+__Question 6__ Load the [organ data](https://raw.githubusercontent.com/biox-rbootcamp/biox-rbootcamp.github.io/master/assets/lectures/linear_regression/data/mock_organ_data.csv) from the website. Repeat the analysis: are any of the organs admission significantly different before and after SIP?
 
 ```{r }
-data  = read.csv( "/Users/cdonnat/Dropbox/biox-rbootcamp.github.io/assets/lectures/linear_regression/data/mock_organ_data.csv", row.names = 1)
+data  = read.csv( "data/mock_organ_data.csv", row.names = 1)
 
 data2 = melt(data, id.vars = names(data)[9:13])
 B = 10000
@@ -313,7 +311,7 @@ for (n in names_condition){
 
 ```
 
-```{r display_results}
+```{r display_results_organs}
 results = data.frame(results, row.names = 1)
 colnames(results) = c( "nb_rejected",  "pval_coef","pval_rejection")
 print(results)
