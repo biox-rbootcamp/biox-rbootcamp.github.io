@@ -1,0 +1,124 @@
+---
+title: 'Multiple Testing: In-class Exercise'
+author: "bioX R-Summer bootcamp"
+date: "7/30/2020"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Objective
+
+The purpose of this exercise is to make you apply what you learned so far -- both from the hypothesis testing perspective and in terms of linear modeling.
+This is inspired from a real case study that was presented in the Statistics consulting workshop (STATS 398) over the last few months. The data was confidential, thus the data that we present here is simulated to make it behave a little like the real one. The idea here is to try to see how we could start thinking about leading an analysis of such data.
+
+
+## Setting
+
+Suppose that you are enrolled as a statistics consultant. You get a request for help one afternoon from a doctor in the medical school. The doctor has a dataset of ICU admissions, and wants to investigate whether or not there has been a significant drop in ICU admissions since the beginning of the shelter-in-place in Santa Clara .
+
+His dataset consists of the weekly ICU admissions per disease category since 2019, up to end of April this year:
+- We have different diseases, and the admission counts per week.
+- the column "week" indicates which week of the year it is (1-52)
+
+
+
+
+## Aggregate Analysis
+
+__Question 1__ Load [the data](https://raw.githubusercontent.com/biox-rbootcamp/biox-rbootcamp.github.io/master/assets/lectures/linear_regression/data/mock_ICU_data.csv), and start plotting the admission number for a few diseases. Is there any evidence to support his theory?
+
+*Solution:* Not all diseases show such an effect.
+
+```{r}
+library(tidyverse)
+library(reshape2)
+data <- read.csv("data/mock_ICU_data.csv")
+
+data2 = melt(data, id.vars = c("year","label","date","month","week","week2"))
+
+ggplot(data2, aes(x=date, y=value, colour=label)) +
+  geom_point()+
+  labs(title = "Diagnoses",
+       y = "Weekly admissions", x = "") + 
+  facet_wrap(variable~.) +
+  theme_bw()
+```
+
+
+__Question 2__ Aggregate the data to consider the total number of admissions per week (over all diagnoses). Does there seem to be evidence (from the graph) to support this claim?
+
+
+*Solution:* It would seem so.
+
+```{r}
+
+sum_week= data2 %>% 
+  group_by(year, month, week, date, label) %>% 
+  summarise(tot_week = sum(value))
+
+
+ggplot(sum_week, aes(x=date, y=tot_week)) +
+  geom_point(aes(colour=label)) +
+  theme_bw()
+```
+
+__Question 3__ One of the issues with hospital data is that it could inherently vary due to different factors. Can you think of any factors that might affect the number of admissions? Test if these factors are significant in your current model.
+
+*Solution:*  The questiom is particular that we are interested in is the following: is there a seasonal effect? The weekly plot doesn't seem strikingly different throughout the year. We divide the different months into their corresponding seasons, and fit a Poisson regression model, with a different mean for each season. Denoting  as $X$ the number of ICU admissions per week, this model can be written as:
+$$ \forall i, X_i \sim Poisson(\lambda + \alpha_2 \mathbf{1}_{G[i]=\text{spring}} + \alpha_3 \mathbf{1}_{G[i]=\text{summer}} + \alpha_4 \mathbf{1}_{G[i]=\text{fall}}) $$
+
+By fitting this model, we realize that the effect of the season is negligible.
+
+```{r seasonal_poisson}
+sum_week$season = c(rep("Winter",13), rep("Spring",13),
+                    rep("Summer",13), rep("Fall",13), rep("Winter",13), rep("Spring",4))
+m_season <- glm(tot_week ~ 1. + season , family="poisson",
+                data=sum_week %>%filter(label == "Normal"))
+summary(m_season)
+
+print(paste0("Goodness-of-fit test for the seasonal model: ",
+      toString(pchisq(m_season$deviance, df=m_season$df.residual, lower.tail=FALSE))))
+```
+
+
+__Question 4__ Having accounted (or not) on these potential confounding factors, let's try to formulate his hypothesis from a mathematical perspective and test if the total number of admissions per week has decreased.
+    (a) How would you model the data? What distribution would you use?
+    (b) Write down the null hypothesis.
+    (c) Devise a hypothesis test to test the null.
+    (d) Test the null.
+    
+What are your findings? What is the effect of the Shelter-In-Place on the overall ICU activity?
+
+
+
+
+## Granular Analysis
+
+Let's now try to do the analysis for each ``diagnoses''. This might be a little tricky, because there are a lot of them... Which one substantially decreased during SIP?
+
+__Question 5__ How would you test the different diseases? Describe the procedure that you would use to find which disease was substantially lower during SIP. What is the model that you are using? What assumptions are you making? Don't hesitate to plot and visualize the data to guide your reasoning. Implement the procedure, and report your results.
+
+*Solution:* Since there are a lot of them, we'll have to correct for multiple hypothesis testing. Let's go for the BH corrected p-values. We repeat the test we have done for the aggregated data. Note that here, the Poisson regression might not be the ideal, since there are fewer counts...
+
+
+
+   
+
+
+### Organ-group aggregated data
+
+The diagnoses data might be a bit to granular for us to see anything. Let's look instead at organ data. 
+
+__Question 6__ Load the [organ data](https://raw.githubusercontent.com/biox-rbootcamp/biox-rbootcamp.github.io/master/assets/lectures/linear_regression/data/mock_organ_data.csv) from the website. Repeat the analysis: are any of the organs admission significantly different before and after SIP?
+
+
+
+
+
+
