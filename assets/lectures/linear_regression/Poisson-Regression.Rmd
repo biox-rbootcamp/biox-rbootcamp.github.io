@@ -626,6 +626,8 @@ There are several reasons why lack-of-fit may be observed. We may be missing imp
 
 Students want to feel safe and secure when attending a college or university. In response to legislation, the US Department of Education seeks to provide data and reassurances to students and parents alike. All postsecondary institutions that participate in federal student aid programs are required by the Jeanne Clery Disclosure of Campus Security Policy and Campus Crime Statistics Act and the Higher Education Opportunity Act to collect and report data on crime occurring on campus to the Department of Education. In turn, this data is publicly available on the website of the Office of Postsecondary Education. We are interested in looking at whether there are regional differences in violent crime on campus controlling for differences in the type of school.
 
+You can find the dataset [here](https://raw.githubusercontent.com/biox-rbootcamp/biox-rbootcamp.github.io/master/assets/data/c_data.csv).
+
 ### Data Organization
 
 Each row of `c_data.csv` contains crime information from a post secondary institution, either a college or university. The variables include:
@@ -836,6 +838,8 @@ In summary, we explored the possibility of differences in the violent crime rate
 ## Case Study: Weekend drinking {#cs:drinking}
 
 Sometimes when analyzing Poisson data, you may see many more zeros in your data set than you would expect for a Poisson random variable. For example, an informal survey of students in an introductory statistics course included the question, "How many alcoholic drinks did you consume last weekend?"  This survey was conducted on a dry campus where no alcohol is officially allowed, even among students of drinking age, so we expect that some portion of the respondents never drink. The non-drinkers would thus always report zero drinks. However, there will also be students who are drinkers reporting zero drinks because they just did not happen to drink during the past weekend. Our zeros, then, are a mixture of responses from non-drinkers and drinkers who abstained. Ideally, we'd like to sort out the non-drinkers and drinkers when performing our analysis.
+
+You can find the dataset [here](https://raw.githubusercontent.com/biox-rbootcamp/biox-rbootcamp.github.io/master/assets/data/weekendDrinks.csv).
 
 ```{r, include=FALSE}
 #Getting started-weekenddrinks
