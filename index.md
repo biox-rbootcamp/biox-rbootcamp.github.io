@@ -10,17 +10,25 @@ No prior knowledge of R or of statistics is required. This is not a graded class
 
 ## [](#announcements) Announcements
 
-**Solutions for Lab 12 & 13 are posted!**
+**Please fill out the Week 5 feedback survey [here](https://forms.gle/4ah17aN4KqM6ryse9)**
 
-**TO DO for session 14 (Wednesday, July 29th):** 
+**Solutions for Lab 14 & 15 are posted!**
+
+**TO DO for session 16 (Monday, August 3rd):** 
+
+* Finish in-class exercise from session 15
+* Watch the video lectures for the session 
+* Complete Lab 16 **prior to the discussion.**
+
+**TO DO for session 17 (Wednesday, August 5th):** 
 
 * Watch the video lectures for the session 
-* Complete Lab 14 **prior to the discussion.**
+* Complete Lab 17 **prior to the discussion.**
 
-**TO DO for session 15 (Friday, August 30th):** 
+**TO DO for session 18 (Thursday, August 6th):** 
 
 * Watch the video lectures for the session 
-* Complete Lab 15 **prior to the discussion.**
+* Complete Lab 18 **prior to the discussion.**
 
 
 ## [](#logistics) Logistics
@@ -54,7 +62,7 @@ _Objectives:_ getting familiar with R, Rstudio, R markdown, and basic statistics
 
 **Week 5:** Linear Models
 
-**Week 6:** Mixtures and permutations 
+**Week 6:** Linear Models & Permutations 
 
 **Week 7:** Clustering
 
