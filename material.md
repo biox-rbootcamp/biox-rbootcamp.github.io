@@ -24,12 +24,12 @@ layout: cme195
 | 16 | M | GLMs and Bootstrap tests | [Lecture: Generalized Linear Models](https://www.youtube.com/watch?v=hc06BXFYd_w)| [Lab 16: GLM](./biox-rbootcamp.github.io/assets/lectures/linear_regression/Generalized-Linear-Models.html) |  |  |
 | 17 | W |  | [Lecture: Logistic Regression]()  | [Lab 17: Logistic Regression](./biox-rbootcamp.github.io/assets/lectures/linear_regression/logistic_regression.html) | [Lab 17 Material Rmd](./biox-rbootcamp.github.io/assets/lectures/linear_regression/logistic_regression.Rmd)  |  |
 | 18 | Th |  | [Lecture: Permutation tests and the Bootstrap]()   |  [Lab 18]() |  |
-| 19 | M | Clustering | [Lecture: Kmeans and density based clustering](https://drive.google.com/file/d/1ekIRX3Fi_TWMnwJhTeW4RrXslfot_sVE/view?usp=sharing) | [Lab 19]() |  |  |
-| 20 | W |  | [Lecture: Hierarchical Clustering]()| [Lab 20]() |  |
-| 21 | Th |  |  [Lecture: Machine Learning]() | [Lab 21]()  |  |
-| 22 | M |  Multivariate analysis | [Lecture: Multivariate analysis overview](https://drive.google.com/file/d/1BBNvt2EWtZnixHbGxnXg-vbivP7Iu0EI/view?usp=sharing)  | [Lab 22]() |  |  |
-| 23 | W | High-dimensional statistics | [Lecture: High-dimensional statistics (I) ]()  | [Lab 23]() |  |
-| 24 | Th |Networks | [Lecture: High-dimensional statistics (II)  | [Lab 24]() |  |
+| 19 | M | Unsupervised Learning | [Lecture: Multivariate analysis/Dimensionality reduction overview](https://drive.google.com/file/d/1BBNvt2EWtZnixHbGxnXg-vbivP7Iu0EI/view?usp=sharing)  | [Lab 22]() |  |
+| 20 | W |  | [Lecture: Clustering](https://drive.google.com/file/d/1ekIRX3Fi_TWMnwJhTeW4RrXslfot_sVE/view?usp=sharing) | [Lab 19]() |  |
+| 21 | Th |  |  [Lecture: Mixtures]() | [Lab 21]()  |  |
+| 22 | M |  |  [Lecture: Machine Learning]() | [Lab 21]()  |  |
+| 23 | W | High-dimensional statistics | [Lecture: High-dimensional statistics (I)]()  | [Lab 23]() |  |
+| 24 | Th |High-dimensional statistics | [Lecture: High-dimensional statistics (II)]()  | [Lab 24]() |  |
 
 
 ## [](#tut) Introductory Tutorials
