@@ -1,79 +1,59 @@
 ---
-title: "Permutation and the Bootstrap test"
-author: "Claire Donnat"
+title: "Permutation tests and the Bootstrap"
+author: "bioX R-Summer bootcamp"
 date: "7/30/2020"
-output: html_document
+output:
+  html_document:
+    toc: true
+    toc_float: true
+  pdf_document:
+    number_sections: yes
 ---
 
 
 # Goals
+
+Let us finish the past sequence of labs on statistical methods (before we delve into the more ML/unsupervised learning side of data analysis) by discussing a very useful class of non-parametric tests: permutation tests and the bootstrap.
+
 
 After completing this lab, you should be able to...
 
 - Simulate statistics from known distributions to estimate sampling distributions.
 - Bootstrap any statistic.
 - Create confidience intervals using bootstrap resampling.
+- Identify situations in which the bootstrap and permutation tests are appropriate.
+
+Watch the following videos:
+
+- on [permutation tests](https://www.youtube.com/watch?v=GmvpsJHGCxQ)
+- on the [bootstrap](https://www.youtube.com/watch?v=9STZ7MxkNVg)
+
+#  The Bootstrap
+
+"The bootstrap is a widely applicable and extremely powerful statistical tool that can be used to quantify the uncertainty associated with a given estimator or statistical learning method." — Page 187, An Introduction to Statistical Learning, 2013.
+
+The bootstrap method is a resampling technique used to estimate statistics on a population by sampling a dataset with replacement. It was proposed by Brad Efron (at Stanford) in 1985, and is an extremely versatile technique (hence, a need-to-know in data analysis), whether it comes to:
+
+- doing hypothesis testing (it's a non-parametric test, so typically when you don't know the distribution of the statistics you're computing, or you don't have enough data)
+- computing confidence intervals for your parameters
+- finding metrics for assessing the quality of clusters or mixtures (see upcoming discussions.)
+
+It can be used to estimate summary statistics such as the mean or standard deviation. It is used in applied machine learning to estimate the skill of machine learning models when making predictions on data not included in the training data.
+
+Read the section on the [Bootstrap](http://faculty.marshall.usc.edu/gareth-james/ISL/ISLR%20Seventh%20Printing.pdf) p187-190. Once you're done
 
 
-## Permutation test
 
-An increasingly common statistical tool for constructing sampling distributions is the permutation test (or sometimes called a randomization test). Like bootstrapping, a permutation test builds - rather than assumes - sampling distribution (called the “permutation distribution”) by resampling the observed data. Specifically, we can “shuffle” or permute the observed data (e.g., by assigning different outcome values to each observation from among the set of actually observed outcomes). Unlike bootstrapping, we do this without replacement.
+## Bootstrap for hypothesis testing
 
-Permutation tests are particularly relevant in experimental studies, where we are often interested in the sharp null hypothesis of no difference between treatment groups. In these situations, the permutation test perfectly represents our process of inference because our null hypothesis is that the two treatment groups do not differ on the outcome (i.e., that the outcome is observed independently of treatment assignment). When we permute the outcome values during the test, we therefore see all of the possible alternative treatment assignments we could have had and where the mean-difference in our observed data falls relative to all of the differences we could have seen if the outcome was independent of treatment assignment. While a permutation test requires that we see all possible permutations of the data (which can become quite large), we can easily conduct “approximate permutation tests” by simply conducting a vary large number of resamples. That process should, in expectation, approximate the permutation distribution.
+Bootstrap tests can be extremely useful for computing intricate null distributions.
+The recipe for these is the following:
 
-For example, if we have only n=20 units in our study, the number of permutations is:
-```{r}
-factorial(20)
-```
-
-That number exceeds what we can reasonably compute. But we can randomly sample from that permutation distribution to obtain the approximate permutation distribution, simply by running a large number of resamples. Let's look at this as an example using some made up data:
-```{r}
-set.seed(1)
-n <- 100
-tr <- rbinom(100, 1, 0.5)
-y <- 1 + tr + rnorm(n, 0, 3)
-```
-The difference in means is, as we would expect (given we made it up), about 1:
-```{r}
-diff(by(y, tr, mean))
-```
-To obtain a single permutation of the data, we simply resample without replacement and calculate the difference again:
-```{r}
-s <- sample(tr, length(tr), FALSE)
-diff(by(y, s, mean))
-```
-Here we use the permuted treatment vector s instead of tr to calculate the difference and find a very small difference. If we repeat this process a large number of times, we can build our approximate permutation distribution (i.e., the sampling distribution for the mean-difference). We'll use replicate do repeat our permutation process. The result will be a vector of the differences from each permutation (i.e., our distribution):
-```{r}
-dist <- replicate(2000, diff(by(y, sample(tr, length(tr), FALSE), mean)))
-```
-We can look at our distribution using hist and draw a vertical line for our observed difference:
-
-```{r}
-hist(dist, xlim = c(-3, 3), col = "black", breaks = 100)
-abline(v = diff(by(y, tr, mean)), col = "blue", lwd = 2)
-```
-
-At face value, it seems that our null hypothesis can probably be rejected. Our observed mean-difference appears to be quite extreme in terms of the distribution of possible mean-differences observable were the outcome independent of treatment assignment. But we can use the distribution to obtain a p-value for our mean-difference by counting how many permuted mean-differences are larger than the one we observed in our actual data. We can then divide this by the number of items in our permutation distribution (i.e., 2000 from our call to replicate, above):
-```{r}
-sum(dist > diff(by(y, tr, mean)))/2000  # one-tailed test
-sum(abs(dist) > abs(diff(by(y, tr, mean))))/2000  # two-tailed test
-```
-Using either the one-tailed test or the two-tailed test, our difference is unlikely to be due to chance variation observable in a world where the outcome is independent of treatment assignment.
-
-### library(coin)
-We don't always need to build our own permutation distributions (though it is good to know how to do it). R provides a package to conduct permutation tests called coin. We can compare our p-value (and associated inference) from above with the result from coin:
-```{r}
-library(coin)
-independence_test(y ~ tr, alternative = "greater")  # one-tailed
-```
-
-```{r}
-independence_test(y ~ tr)  # two-tailed
-```
-
-Clearly, our approximate permutation distribution provided the same inference and a nearly identical p-value. coin provides other permutation tests for different kinds of comparisons, as well. Almost anything that you can address in a parametric framework can also be done in a permutation framework (if substantively appropriate). and anything that coin doesn't provide, you can build by hand with the basic permutation logic of resampling.
+## Bootstrap for Confidence Interval Estimation
 
 
+
+#  Permutation tests
 
 ## Exercise 1 - How Large is Large ?
 For this exercise we will use:
@@ -131,188 +111,61 @@ par(mfrow = c(1, 3))
 # add curve for normal density assuming CLT applies
 ```
 
-## Exercise 2 - How Long is a Trump Tweet?
-Twitter has become an increasingly important part of the American political discourse. The 2016 Presidential election was unique in that all major contenders were somewhat prolific tweeters. The eventual winner, Donald Trump, was undoubtedly the most prolific of them all, and continues to be an active twitter user now that we over two years into his presidency.
+# Permutation test
 
-This use of Twitter sparked an interesting analysis by David Robinson who is currently the Chief Data Scientist at DataCamp and former Data Scientist at StackOverflow. His analysis, “Text analysis of Trump’s tweets confirms he writes only the (angrier) Android half”, became very popular leading up to the election.
+An increasingly common statistical tool for constructing sampling distributions is the permutation test (or sometimes called a randomization test). Like bootstrapping, a permutation test builds - rather than assumes - sampling distribution (called the “permutation distribution”) by resampling the observed data. Specifically, we can "shuffle" or permute the observed data (e.g., by assigning different outcome values to each observation from among the set of actually observed outcomes). Unlike bootstrapping, we do this without replacement.
 
-Let’s take a look at this data. To do so, we’ll need a couple packages:
+Permutation tests are particularly relevant in experimental studies, where we are often interested in the sharp null hypothesis of no difference between treatment groups. In these situations, the permutation test perfectly represents our process of inference because our null hypothesis is that the two treatment groups do not differ on the outcome (i.e., that the outcome is observed independently of treatment assignment). When we permute the outcome values during the test, we therefore see all of the possible alternative treatment assignments we could have had and where the mean-difference in our observed data falls relative to all of the differences we could have seen if the outcome was independent of treatment assignment. While a permutation test requires that we see all possible permutations of the data (which can become quite large), we can easily conduct “approximate permutation tests” by simply conducting a vary large number of resamples. That process should, in expectation, approximate the permutation distribution.
 
+For example, if we have only n=20 units in our study, the number of permutations is:
 ```{r}
-library(dplyr)
-library(tidyr)
-```
-Then to load the data in a data frame named trump_tweets_df, we use:
-```{r}
-load(url("http://varianceexplained.org/files/trump_tweets_df.rda"))
-```
-We then create a new data frame named tweets based on the raw data:
-
-```{r}
-tweets = trump_tweets_df %>%
-  select(id, statusSource, text, created) %>%
-  extract(statusSource, "source", "Twitter for (.*?)<") %>%
-  filter(source %in% c("iPhone", "Android"))
-tweets
-```
-This dataset is a collection of 1390 tweets from Twitter user @realDonaldTrump. For this exercise we will be interested in the text variable which contains the text of each tweet.
-
-For example:
-
-```{r}
-tweets[2, "text"]
+factorial(20)
 ```
 
-More specifically, we’ll be interested in the lengths of these tweets:
-
-```{r}
-tweet_lengths = nchar(tweets$text)
-head(tweet_lengths)
-## [1]  67 114  64 134 135 138
-hist(tweet_lengths, col = "darkgrey",
-     main = "@realdonaldtrump Tweets",
-     xlab = "Number of Characters")
-box()
-grid()
-```
-
-Here we see that the sample standard deviation, $s$, is
-
-```{r}
-sd(tweet_lengths)
-```
-
-Notice that many of these tweets are close to the (at the time) 140 character limit.
-
-Create a 90% bootstrap confidence interval for $\sigma$, the true standard deviation of tweet length in characters. Use 10,000 bootstrap samples. Also plot a histogram of the bootstrap replicates of s, the estimator of $\sigma$.
-
-```{r}
-set.seed(42)
-boot_sd = rep(0, 10000)
-# perform bootstrap resampling here
-# store the bootstrap replicates in boot_sd
-# create histogram here
-# calculate confidence interval here
-```
-
-
-## Exercise 3 - How Much Do Professors Earn?
-For this exercise we will use the Salaries data from the carData package.
-
-```{r}
-head(carData::Salaries)
-```
-
-We’ll focus on the salary variable.
-
-```{r}
-prof_salary = carData::Salaries$salary
-hist(prof_salary, col = "darkgrey", breaks = 20,
-     xlab = "Salary (Dollars)", main = "Histogram of Professor Salaries")
-box()
-grid()
-```
-
-What is the 10th percentile, $\hat{p}_0.10$ of this data? That is, what is the salary that 10% of the professors make less than?
-
-```{r}
-quantile(prof_salary, probs = 0.10)
-```
-Create a 99% bootstrap confidence interval for $p_{0.10}$, the true 10th percentile of professor salaries. Use 5000 bootstrap samples. Also plot a histogram of the bootstrap replicates of $\hat{p}_{0.10}$.
-
+That number exceeds what we can reasonably compute. But we can randomly sample from that permutation distribution to obtain the approximate permutation distribution, simply by running a large number of resamples. Let's look at this as an example using some made up data:
 ```{r}
 set.seed(1)
-boot_10th = rep(0, 5000)
-# perform bootstrap resampling here
-# store the bootstrap replicates in boot_10th
-# create histogram here
-# calculate confidence interval here
+n <- 100
+tr <- rbinom(100, 1, 0.5)
+y <- 1 + tr + rnorm(n, 0, 3)
 ```
-
-
-## Exercise 4 - How Long Will You Survive Cancer?
-For this exercise we will use the Melanoma data from the MASS package.
+The difference in means is, as we would expect (given we made it up), about 1:
+```{r}
+diff(by(y, tr, mean))
+```
+To obtain a single permutation of the data, we simply resample without replacement and calculate the difference again:
+```{r}
+s <- sample(tr, length(tr), FALSE)
+diff(by(y, s, mean))
+```
+Here we use the permuted treatment vector s instead of tr to calculate the difference and find a very small difference. If we repeat this process a large number of times, we can build our approximate permutation distribution (i.e., the sampling distribution for the mean-difference). We'll use replicate do repeat our permutation process. The result will be a vector of the differences from each permutation (i.e., our distribution):
+```{r}
+dist <- replicate(2000, diff(by(y, sample(tr, length(tr), FALSE), mean)))
+```
+We can look at our distribution using hist and draw a vertical line for our observed difference:
 
 ```{r}
-head(MASS::Melanoma)
+hist(dist, xlim = c(-3, 3), col = "black", breaks = 100)
+abline(v = diff(by(y, tr, mean)), col = "blue", lwd = 2)
 ```
 
-We’ll focus on the time variable which is survival time in days.
+At face value, it seems that our null hypothesis can probably be rejected. Our observed mean-difference appears to be quite extreme in terms of the distribution of possible mean-differences observable were the outcome independent of treatment assignment. But we can use the distribution to obtain a p-value for our mean-difference by counting how many permuted mean-differences are larger than the one we observed in our actual data. We can then divide this by the number of items in our permutation distribution (i.e., 2000 from our call to replicate, above):
 ```{r}
-mel_survive = MASS::Melanoma$time
-hist(mel_survive, col = "darkgrey",
-     xlab = "Survival (Days)", main = "Histogram of Melanoma Survival")
-box()
-grid()
+sum(dist > diff(by(y, tr, mean)))/2000  # one-tailed test
+sum(abs(dist) > abs(diff(by(y, tr, mean))))/2000  # two-tailed test
 ```
+Using either the one-tailed test or the two-tailed test, our difference is unlikely to be due to chance variation observable in a world where the outcome is independent of treatment assignment.
 
-What is the probability of surviving longer that 10 years? That is, if X is the survival time in years, what is $\mathbb{P}[X>10]$?
-
-With this data, we could estimate. We calculate $\hat{P}[X>10]$ using
+### library(coin)
+We don't always need to build our own permutation distributions (though it is good to know how to do it). R provides a package to conduct permutation tests called coin. We can compare our p-value (and associated inference) from above with the result from coin:
 ```{r}
-mean(mel_survive > 10 * 365)
+library(coin)
+independence_test(y ~ tr, alternative = "greater")  # one-tailed
 ```
-
-Create a 95% bootstrap confidence interval for $\mathbb{P}[X>10]$, the probability of surviving longer that 10 years. Use 20,000 bootstrap samples. Also plot a histogram of the bootstrap replicates of $\hat{P}[X>10]$.
 
 ```{r}
-set.seed(1)
-boot_10_year_surv = rep(0, 20000)
-# perform bootstrap resampling here
-# store the bootstrap replicates in boot_10_year_surv
-# create histogram here
-# calculate confidence interval here
+independence_test(y ~ tr)  # two-tailed
 ```
 
-## Exercise 5 - Who’s Tweeting?
-Returning to the tweet data, the David Robinson analysis attempted to show that there were two different groups tweeting on the @realDonaldTrump account. (This is a common occurrence for public figures. Some will be from a media team, while others are from the individual. Some choose to disclose when this occurs, others, like the Donald Trump account, do not.)
+Clearly, our approximate permutation distribution provided the same inference and a nearly identical p-value. coin provides other permutation tests for different kinds of comparisons, as well. Almost anything that you can address in a parametric framework can also be done in a permutation framework (if substantively appropriate). and anything that coin doesn't provide, you can build by hand with the basic permutation logic of resampling.
 
-In this case the hypothesis was that the tweets sent from an iPhone were from campaign staff, while the tweets sent from Android were sent from Donald Trump.
-
-```{r}
-android_tweets = nchar(subset(tweets, source == "Android")$text)
-iphone_tweets  = nchar(subset(tweets, source == "iPhone")$text)
-```
-
-The posted analysis uses many detailed analyses to argue for this difference, but we’ll resort to some simpler methods.
-
-```{r}
-par(mfrow = c(1, 2))
-hist(android_tweets, col = "darkorange",
-     main = "@realdonaldtrump Android Tweets",
-     xlab = "Number of Characters")
-box()
-grid()
-hist(iphone_tweets, col = "dodgerblue",
-     main = "@realdonaldtrump iPhone Tweets",
-     xlab = "Number of Characters")
-box()
-grid()
-```
-
-Looking at these two histograms, we see a clear difference in distributions. However, this could just be due to chance…
-
-Further simplifying, let’s look at the sample standard deviations of these two datasets.
-```{r}
-sd(android_tweets)
-sd(iphone_tweets)
-
-sAndroid=26.34
-siPhone=30.86
-```
-
-If they were sent by the same person, you’d expect them to be equal. (The distributions should be the same, so the standard deviations should be the same.) Or in reality, at least close, but different due to random chance.
-
-Is this difference due to chance?
-
-Create a 95% bootstrap confidence interval for σAndroidσiPhone the ratio of standard deviation of tweet lengths between DJT Android and iPhone tweets. Use 5000 bootstrap samples. Also plot a histogram of the bootstrap replicates of sAndroidsiPhone, the estimates of the ratio of standard deviations. (If the interval contains the value one, we might believe the two groups are the same people, if not, we will doubt they are the same people.)
-Hint: This is a two sample problem. You’ll need to create two “resamples,” one of the Android data and one of the iPhone data to create each bootstrap resample.
-
-```{r}
-set.seed(1)
-boot_sd_ratio = rep(0, 5000)
-# perform bootstrap resampling here
-# store the bootstrap replicates in boot_sd_ratio
-# create histogram here
-# calculate confidence interval here
-```

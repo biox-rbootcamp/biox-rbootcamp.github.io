@@ -23,11 +23,11 @@ layout: cme195
 | 15 | Th |  | [Lecture: Poisson regression](https://www.youtube.com/watch?v=0XfXHYDYoBA) |  [Lab 15: Poisson Regression with solutions](./biox-rbootcamp.github.io/assets/lectures/linear_regression/Poisson-Regression_solutions.html) [Lab 15: In Class](./biox-rbootcamp.github.io/assets/lectures/linear_regression/Summary_inclass.html) | [Lab 15 Material Rmd](./biox-rbootcamp.github.io/assets/lectures/linear_regression/Poisson-Regression.Rmd) [Lab 15: In Class Exercise Rmd](./biox-rbootcamp.github.io/assets/lectures/linear_regression/Summary_inclass.Rmd) [Lab 15: In Class Exercise Solutions (part1)](./biox-rbootcamp.github.io/assets/lectures/linear_regression/Poisson_regression_inclass_solutions_part1.html)|
 | 16 | M | GLMs and Bootstrap tests | [Lecture: Generalized Linear Models](https://www.youtube.com/watch?v=hc06BXFYd_w)| [Lab 16: GLM](./biox-rbootcamp.github.io/assets/lectures/linear_regression/Generalized-Linear-Models.html)| | 
 | 17 | W |  | [Lecture: Logistic Regression]()  | [Lab 17: Logistic Regression](./biox-rbootcamp.github.io/assets/lectures/linear_regression/logistic_regression.html)| [Lab 17 Material Rmd](./biox-rbootcamp.github.io/assets/lectures/linear_regression/logistic_regression.Rmd)|  |
-| 18 | Th |  | [Lecture: Permutation tests and the Bootstrap]()|  [Lab 18]() |  |
-| 19 | M | Unsupervised Learning | [Lecture: Multivariate analysis/Dimensionality reduction overview](https://drive.google.com/file/d/1BBNvt2EWtZnixHbGxnXg-vbivP7Iu0EI/view?usp=sharing)| [Lab 22]()| |
-| 20 | W | | [Lecture: Clustering](https://drive.google.com/file/d/1ekIRX3Fi_TWMnwJhTeW4RrXslfot_sVE/view?usp=sharing) | [Lab 19]() | |
-| 21 | Th |  | [Lecture: Mixtures]() | [Lab 21]()|  |
-| 22 | M | Model Building  |  [Lecture: Machine Learning]() | [Lab 21]()|  |
+| 18 | Th |  | Summary: statistical models|  [Lab 18]() |  |
+| 19 | M | Unsupervised Learning | [Lecture: Multivariate analysis/Dimensionality reduction overview](https://drive.google.com/file/d/1BBNvt2EWtZnixHbGxnXg-vbivP7Iu0EI/view?usp=sharing)| [Lab 19]()| |
+| 20 | W | | [Lecture: Clustering](https://drive.google.com/file/d/1ekIRX3Fi_TWMnwJhTeW4RrXslfot_sVE/view?usp=sharing) | [Lab 20]() | |
+| 21 | Th |  | Lecture: [Permutation tests](https://www.youtube.com/watch?v=GmvpsJHGCxQ) and the [Bootstrap](https://www.youtube.com/watch?v=9STZ7MxkNVg)|  [Lab 21]() |  |
+| 22 | M | Model Building  |  [Lecture: Machine Learning]() | [Lab 22]()|  |
 | 23 | W | | [Lecture: High-dimensional statistics (I)]()| [Lab 23]() |  |
 | 24 | Th | | [Lecture: High-dimensional statistics (II)]()| [Lab 24]() |  |
 

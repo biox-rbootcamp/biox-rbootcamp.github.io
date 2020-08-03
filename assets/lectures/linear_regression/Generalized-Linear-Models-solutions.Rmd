@@ -1,5 +1,5 @@
 ---
-title: "Generalized Linear Models (GLMs): A Unifying Theory"
+title: "Generalized Linear Models (GLMs)"
 author: "bioX R-Summer bootcamp"
 date: "8/3/2020"
 output: 
@@ -196,11 +196,51 @@ __Question 1__ A researcher B wants to predict the number of awards that a newly
 Load [the data](www.ats.ucla.edu/stat/data/poisson_sim.csv) at the following link: "https://stats.idre.ucla.edu/stat/data/poisson_sim.csv"
 and tell researcher B how we should proceed. What model should he use? What assumption should he make? How should he interpret the output?
 
+*Solution*
+
+```{r}
+library(tidyverse)
+p <- read.csv("https://stats.idre.ucla.edu/stat/data/poisson_sim.csv")
+ggplot(p)+
+  geom_histogram(aes(x=num_awards)) + 
+  theme_bw()
+
+mod <- glm(num_awards ~ prog + math, data = p, family="poisson")
+print(summary(mod))
+```
+
 __Question 2__  Suppose you want to study the length of hospital stay, in days, as a function of age, kind of health insurance and whether or not the patient died while in the hospital. Length of hospital stay is recorded as a minimum of at least one day. 
 We have a hypothetical data file, [ztp.dta](https://stats.idre.ucla.edu/stat/data/ztp.dta) with 1,493 observations. The length of hospital stay variable is stay. The variable age gives the age group from 1 to 9 which will be treated as interval in this example. The variables hmo and died are binary indicator variables for HMO insured patients and patients who died while in the hospital, respectively.
 
 a. Look at histograms of stay broken down by hmo on the rows and died on the columns. We also include the marginal distributions. We use a log base 10 scale to approximate the canonical link function of the negative binomial distribution (natural logarithm). Comment on the plot. Is there a day that seems inflated with respect to the rest?
 
+
+```{r}
+
+require(foreign)
+require(ggplot2)
+require(VGAM)
+require(boot)
+dat <- read.dta("https://stats.idre.ucla.edu/stat/data/ztp.dta")
+
+ggplot(dat, aes(stay)) + geom_histogram() + scale_x_log10() + facet_grid(hmo ~ 
+    died, margins = TRUE, scales = "free_y")
+
+```
+
+The distribution of length of stay does not seem to vary much across age groups. This observation from the raw data is corroborated by the relatively flat loess line. 
+
+
+From the histograms, it looks like the density of the distribution, does vary across levels of hmo and died, with shorter stays for those in HMOs (1) and shorter for those who did die, including what seems to be an inflated number of 1 day stays. To examine how stay varies across age groups, we can use conditional violin plots which show a kernel density estimate of the distribution of stay mirrored (hence the violin) and conditional on each age group. To further understand the raw data going into each density estimate, we add raw data on top of the violin plots with a small amount of random noise (jitter) to alleviate over plotting. Finally, to get a sense of the overall trend, we add a locally weighted regression line.
+
+```{r}
+
+ggplot(dat, aes(factor(age), stay)) +
+  geom_violin() +
+  geom_jitter(size=1.5) +
+  scale_y_log10() +
+  stat_smooth(aes(x = age, y = stay, group=1), method="loess")
+```
 
 Analysis methods you might consider
 Below is a list of some analysis methods you may have encountered. Some of the methods listed are quite reasonable while others have either fallen out of favor or have limitations.
@@ -214,6 +254,94 @@ Below is a list of some analysis methods you may have encountered. Some of the m
 b. Argue why you could use here a zero-truncated negative binomial model and model `stay ~ age + hmo + died` using the `vglm` library.
 
 
+To fit the zero-truncated negative binomial model, we use the vglm function in the VGAM package. This function fits a very flexible class of models called vector generalized linear models to a wide range of assumed distributions. In our case, we believe the data come from the negative binomial distribution, but without zeros. Thus the values are strictly positive poisson, for which we use the positive negative binomial family via the posnegbinomial function passed to vglm.
+
+
+```{r}
+
+
+m1 <- vglm(stay ~ age + hmo + died, family = posnegbinomial(), data = dat)
+print(summary(m1))
+```
+
+
+The output looks very much like the output from an OLS regression:
+
+- It begins by echoing the function call showing us what we modeled.
+- Next comes the spread of the residuals, there is at least one high residual because the max is much higher than the min.
+- Following the residuals are the parameter estimates and standard errors. The z values ($\frac{Estimate}{SE}$) are also printed. No p values are given, although if one wished to assume that the estimates followed the normal distribution, one could easily compute the probability of obtaining that z value. The first intercept is what we know as the typical intercept. The second is the over dispersion parameter, (alpha).
+- The number of linear predictors is two, one for the expected mean (lambda) and one for the over dispersion.
+- Next the dispersion parameter is printed, assumed to be one after accounting for overdispersion.
+- Finally the log likelihood `-4755.2796` is printed along with the number of iterations needed to reach convergence.
+
+Now let’s look at a plot of the residuals versus fitted values. We add random horizontal noise as well as 50 percent transparency to alleviate over plotting and better see where most residuals fall. Note that these residuals are for the mean prediction.
+
+
+```{r}
+output <- data.frame(resid = resid(m1)[, 1], fitted = fitted(m1))
+ggplot(output, aes(fitted, resid)) + geom_jitter(position = position_jitter(width = 0.25), 
+    alpha = 0.5) + stat_smooth(method = "loess")
+```
+
+
+The mean is around zero across all the fitted levels it looks like. However, there are some values that look rather extreme. To see if these have much influence, we can fit lines using quantile regression, these lines represent the 75th, 50th, and 25th percentiles.
+
+```{r}
+ggplot(output, aes(fitted, resid)) +
+  geom_jitter(position=position_jitter(width=.25), alpha=.5) +
+  stat_quantile(method="rq")
+```
+
+
+Here we see the spread narrowing at higher levels. Let’s cut the data into intervals and check box plots for each. We will get the breaks from the algorithm for a histogram.
+
+
+```{r}
+output <- within(output, {
+  broken <- cut(fitted, hist(fitted, plot=FALSE)$breaks)
+})
+
+ggplot(output, aes(broken, resid)) +
+ geom_boxplot() +
+ geom_jitter(alpha=.25)
+```
 
 
 
+Here we see the spread narrowing at higher levels. Let’s cut the data into intervals and check box plots for each. We will get the breaks from the algorithm for a histogram.
+
+```{r}
+output <- within(output, {
+  broken <- cut(fitted, hist(fitted, plot=FALSE)$breaks)
+})
+
+ggplot(output, aes(broken, resid)) +
+ geom_boxplot() +
+ geom_jitter(alpha=.25)
+```
+
+To test whether we need to estimate over dispersion, we could fit a zero-truncated Poisson model and compare the two.
+
+
+```{r}
+m2 <- vglm(formula = stay ~ age + hmo + died, family = pospoisson(), data = dat)
+
+## change in deviance
+print(dLL <- 2 * (logLik(m1) - logLik(m2)))
+
+## p-value, 1 df---the overdispersion parameter
+pchisq(dLL, df = 1, lower.tail = FALSE)
+```
+
+Based on this, we would conclude that the negative binomial model is a better fit to the data.
+
+
+
+
+__Things to consider__ 
+
+- Count data often use exposure variable to indicate the number of times the event could have happened. You can incorporate exposure into your model by using the offset() option.
+- It is not recommended that zero-truncated negative models be applied to small samples. What constitutes a small sample does not seem to be clearly defined in the literature.
+
+__See Also__
+Zero-truncated Poisson regression in R useful when there is not overdispersion.
