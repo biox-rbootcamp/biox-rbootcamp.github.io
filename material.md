@@ -32,6 +32,7 @@ layout: cme195
 | 24 | Th | | [Lecture: High-dimensional statistics (II)]()| [Lab 24]() |  |
 
 
+
 ## [](#tut) Introductory Tutorials
 
 * Week-1 related (basics of R coding):
