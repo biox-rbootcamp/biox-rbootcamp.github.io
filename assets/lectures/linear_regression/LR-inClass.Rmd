@@ -1,0 +1,257 @@
+---
+title: "Session 18 In-Class Exercise"
+author: "BioX R Bootcamp"
+date: "08/06/2020"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Simple Linear Regression
+
+Download the [dataset meap93.Rdata](https://raw.githubusercontent.com/biox-rbootcamp/biox-rbootcamp.github.io/master/assets/lectures/linear_regression/data/meap93.Rdata). Take $y$ to  be  the  variable `math10` which denotes  the  percentage of tenth graders at  a  high  school receiveing a passing score on a standardized mathematics exam.  Take $x$ to be the variable `lnchprg` which  denotes  the  percentage  of  students who  are  eligible  for  a  federally funded school lunch program.
+
+```{r}
+load("meap93.Rdata") # the loaded dataset will be called `data`
+```
+
+a) Fit a simple linear regression model for $y$ on $x$.  Report the estimates of $\beta_0$ and $\beta_1$ together with their standard errors. 
+
+b) We would expect the lunch program to have a positive effect on student performance.  Does your model support such a positive relationship?  If yes, explainwhy.  If no, what went wrong?
+
+**Now we want to explore the relationship between the math pass rate (`math10`) and spending per student (`expend`).**
+
+c) Do you think each additional dollar spent has the same effect on the pass rate, or does a diminishing effect seem more appropriate?  Explain. 
+
+d) In the model $\text{math10} = \beta_0+ \beta_1 log(\text{expend}) +e$, argue that $\beta_1/10$ is the percentage point change in `math10` given a 10 percent increase in expend.
+
+**Hint** Let $y$ represent the `math10` variable and $x$ represent the `expend` variable. We are interested in the difference $y_2-y_1$, where
+
+$$ y_1 = \beta_0 + \beta_1 log(x_1) + e$$
+
+$$ y_2 = \beta_0 + \beta_1 log(x_1 * 1.10) + e$$
+
+e) Use the data to estimate the parameters $\beta_0$ and $\beta_1$ in the above model. Report the estimates and standard errors. 
+
+f) How big is the estimated spending effect i.e., if spending increases by 10 percent,what is the estimated percentage point increase in `math10`?
+
+g) One might worry that regression analysis can produce fitted values for `math10` that are greater than 100. Why is this not much of a worry in this dataset? (Hint: can use a histogram to plot `hist()`)
+
+## Multiple Regression
+Let's reconsider the cross-sectional wage data sampled from the 1976 US Population Survey[^1] that we explored last time. It consists of 526 observations of average hourly wages, and 
+various covariates such as education, race, gender, or marital status. 
+
+[^1]: Wooldridge, J.~M. (2000), Introductory Econometrics: A Modern Approach, South-Western College Publishing.
+
+### Loading the wages dataset
+```{r}
+# uncomment the install.packages if you do not have this package
+# install.packages('wooldridge')
+require('wooldridge')
+data('wage1')
+head(wage1)
+```
+
+As a refresher, let's look at the distribution of wages, in dollars per hour. Recall that if we subset the data by gender, we get two histograms that look different. This suggests that gender likely has an effect on wage, and we should include it in our regression analysis. 
+```{r}
+library(dplyr)
+library(ggplot2)
+# A histogram of wages
+wage1 %>% ggplot() + 
+  geom_histogram(aes(x = wage), 
+                  fill = 'light blue', 
+                  color = 'blue')
+
+# we can color by gender, for example
+# ggplot is great for making clear labels and customizing plots with pretty colors
+wage1 %>% mutate(gender = as.factor(female)) %>%
+  ggplot() + 
+  geom_histogram(aes(x = wage,fill = gender), position = "dodge") +
+  scale_fill_manual(labels = c("Men", "Women"), values = c("seagreen", "orchid")) 
+
+# we could also just look at simple boxplots:
+ggplot(wage1) + geom_boxplot(aes(x=factor(female), y = log(wage))) +
+  labs(x = "Gender") + scale_x_discrete(labels = c("Men", "Women"))
+```
+
+### Multiple regression model
+
+Multiple linear regression allows us to include multiple variables in our linear model. Let's visually explore the effect of some variables.
+
+Pick a few variables that you think might affect wages, and make some plots that would visually display the effect of this variable on wage. (Hint for making better plots: last time, we discussed that taking the log of wage was a good idea.)
+
+The variables in the dataset are:
+
+* wage                     average hourly earnings
+* educ                     years of education
+* exper                    years potential experience
+* tenure                   years with current employer
+* nonwhite                 =1 if nonwhite
+* female                   =1 if female
+* married                  =1 if married
+* numdep                   number of dependents
+* smsa                     =1 if live in SMSA
+* northcen                 =1 if live in north central U.S
+* south                    =1 if live in southern region
+* west                     =1 if live in western region
+* construc                 =1 if work in construc. indus.
+* ndurman                  =1 if in nondur. manuf. indus.
+* trcommpu                 =1 if in trans, commun, pub ut
+* trade                    =1 if in wholesale or retail
+* services                 =1 if in services indus.
+* profserv                 =1 if in prof. serv. indus.
+* profocc                  =1 if in profess. occupation
+* clerocc                  =1 if in clerical occupation
+* servocc                  =1 if in service occupation
+* lwage                    log(wage)
+* expersq                  exper^2
+* tenursq                  tenure^2
+
+```{r}
+# Make plots examining the effect of some other variables (besides education) on wage
+
+```
+
+Let's create a model that examines the effects of gender, education, and tenure on (log) wages. What is the regression model?
+
+Fit this model and print the coefficients: 
+```{r}
+# fit a multiple linear regression of wage on gender, education, and tenure:
+
+```
+
+**Important Questions**
+
+What are the estimated coefficients? What do they mean? 
+
+How is the interpretation different from simple linear regression?
+
+### Dummy variables (just for thoughts, nothing needs to be done)
+
+Gender is a categorial variable: it is not a numeric observation like years of education. How can we use this variable in a linear model? 
+
+A *dummy variable*, or *indicator varible*, is used to represent the levels of a categorical variable. 
+In this dataset, we can see that the gender variable has already been transformed into a dummy variable:
+
+```{r}
+head(wage1)
+table(wage1$female)
+```
+
+In R, we could fit a model by first transforming any categorical variable into a dummy variable, like the wage dataset has done. This is not necessary, however. We could just as easily use a factor variable in the lm() function.
+```{r}
+# let's add a categorial variable to indicate gender rather than using the dummy variable
+wage1$gender<- wage1$female
+wage1$gender[wage1$gender == 1]<- "women"
+wage1$gender[wage1$gender == 0]<- "men"
+wage1$gender<- factor(wage1$gender) # now we have gender stored as a factor variable
+table(wage1$gender)
+lm(log(wage) ~ educ + gender, data = wage1) # factor variable
+lm(log(wage) ~ educ + female, data = wage1) # dummy variable
+```
+
+So if we give lm() a categorical variable, lm() will transform this into a dummy variable behind the scenes so that it can do the mathematical computation of fitting the model.
+
+So if we give lm() a categorical variable, lm() will transform this into a dummy variable behind the scenes so that it can do the mathematical computation of fitting the model.
+
+What happens if we have more than two categories for a categorical variable? For example, we might be interested in how the region of the country affects wages. We could collect this information in our dataset with a variable *region* with categories north/central, south, west, and other. How can we make a dummy variable for this variable?
+
+One idea might be to just use values of $0, 1, 2, 3$ to represent the different regions. Are there problems with this approach?
+
+The problem here is that using non-binary numbers imposes an ordering on the categories of our regions. By giving the regions numeric values, we are essentially saying that wages for the north will be lower than the south, which are lower than the west, which are lower than the other category. We do not want to impose this sort of ordering on the variable.
+
+The solution is to create multiple binary dummy variables: specifically, one dummy variable for whether or not the region is "south", another dummy variable for whether or not the region is "west", and one dummy variable for whether or not the region is "north/central". 
+Note that we only need 3 dummy variables. (Why?)
+
+The wage dataset is actually already set up with dummy variables. 
+Let's imagine that we had a categorical variable region to see how the dummy variables correspond to the region variable.
+
+```{r}
+# make a categorical variable region
+wage1$region<- "other"
+wage1$region[wage1$northcen == 1]<- "northcen"
+wage1$region[wage1$south == 1]<- "south"
+wage1$region[wage1$west == 1]<- "west"
+wage1$region<- factor(wage1$region, levels = c("other", "northcen", "south", "west"))
+
+# recording the data as a categorical variable makes plotting multiple categories simpler
+ggplot(wage1) + geom_boxplot(aes(x=region, y = log(wage)))
+
+# take a look at how the dummy variables correspond to the region variable
+wage1[490:515,c("wage", "northcen", "south", "west", "region")]
+```
+
+What do the dummy variables mean here? How do they correspond to the region variable?
+
+Now if we wanted to include region in our model, we could use the region variable, and the lm() function would create its own dummy variables, just like the wage dataset has already done.
+Fit a linear model of log wages by education and region. Compare the results if you give lm() region as a categorial variable versus if you give lm() the dummy variables. Are they the same?
+
+```{r}
+# fit a linear model of education by region,
+# first by using the factor variable region:
+lm(log(wage) ~ educ + region, data = wage1)
+# next by using the dummy variables for region:
+lm(log(wage) ~ educ + northcen + south + west, data = wage1)
+
+# in both cases, R constructs the design matrix in the same way:
+head(model.matrix(~educ + region, data = wage1))
+head(model.matrix(~educ + northcen + south + west, data = wage1))
+```
+
+In summary, if we give the lm() function a categorial variable, it will create dummy variables as shown above to represent the categorical variable.
+
+
+## Logistic Regression
+
+An article in the *Journal of Animal Ecology* by Bishop (1972) investigated whether moths provide evidence of “survival of the fittest” with their camouflage traits.  Researchers glued equal numbers of light and dark morph moths in lifelike positions on tree trunks at 7 locations from 0 to 51.2 km from Liverpool.  They then recorded the numbers of moths removed after 24 hours, presumably by predators.  The hypothesis was that, since tree trunks near Liverpool were blackened by pollution, light morph moths would be more likely to be removed near Liverpool. 
+
+Data can be found in `moth.csv` and contains the following variables:
+
+ -  `MOPRH` = light or dark
+ -  `DISTANCE` = kilometers from Liverpool
+ -  `PLACED` = number of moths of a specific morph glued to trees at that location
+ -  `REMOVED` = number of moths of a specific morph removed after 24 hours
+
+```{r, eval = FALSE}
+moth <- read_csv("https://raw.githubusercontent.com/biox-rbootcamp/biox-rbootcamp.github.io/master/assets/lectures/linear_regression/sdata/moth.csv")
+moth <- mutate(moth, notremoved = PLACED - REMOVED, 
+               logit1 = log(REMOVED / notremoved),
+               prop1 = REMOVED / PLACED, 
+               dark = ifelse(MORPH=="dark",1,0) )
+```
+
+
+ a. What are logits in this study? 
+ b. Create empirical logit plots (logits vs. distance by morph). What can we conclude from this plot?
+ c. Create a model with `DISTANCE` and `dark`. Interpret all the coefficients.
+ d. Create a model with `DISTANCE`, `dark`, and the interaction between both variables. Interpret all the coefficients. 
+ e. Interpret a drop-in-deviance test and a Wald test to test the significance of the interaction term in (d). 
+ f. Test the goodness of fit for the interaction model.  What can we conclude about this model?
+ g. Is there evidence of overdispersion in the interaction model?  What factors might lead to overdispersion in this case? Regardless of your answer, repeat (d) adjusting for overdispersion.
+ h. Compare confidence intervals that you find in (g) and in (d). 
+ i. What happens if we expand the data set to contain one row per moth (968 rows)?  Now we can run a logistic binary regression model.  How does the logistic binary regression model compare to the binomial regression model?  What are similarities and differences?  Would there be any reason to run a binomial regression rather than a logistic regression in a case like this? The following is some starter code:
+ 
+```{r, eval = FALSE}
+mtemp1 = rep(moth$dark[1],moth$REMOVED[1])
+dtemp1 = rep(moth$DISTANCE[1],moth$REMOVED[1])
+rtemp1 = rep(1,moth$REMOVED[1])
+mtemp1 = c(mtemp1,rep(moth$dark[1],moth$PLACED[1]-moth$REMOVED[1]))
+dtemp1 = c(dtemp1,rep(moth$DISTANCE[1],moth$PLACED[1]-moth$REMOVED[1]))
+rtemp1 = c(rtemp1,rep(0,moth$PLACED[1]-moth$REMOVED[1]))
+for(i in 2:14)  {
+  mtemp1 = c(mtemp1,rep(moth$dark[i],moth$REMOVED[i]))
+  dtemp1 = c(dtemp1,rep(moth$DISTANCE[i],moth$REMOVED[i]))
+  rtemp1 = c(rtemp1,rep(1,moth$REMOVED[i]))
+  mtemp1 = c(mtemp1,rep(moth$dark[i],moth$PLACED[i]-moth$REMOVED[i]))
+  dtemp1 = c(dtemp1,rep(moth$DISTANCE[i],moth$PLACED[i]-moth$REMOVED[i]))
+  rtemp1 = c(rtemp1,rep(0,moth$PLACED[i]-moth$REMOVED[i]))  }
+newdata = data.frame(removed=rtemp1,dark=mtemp1,dist=dtemp1)
+newdata[1:25,]
+cdplot(as.factor(rtemp1)~dtemp1)
+```
+
