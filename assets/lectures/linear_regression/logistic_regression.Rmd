@@ -256,6 +256,8 @@ The unit of observation for this data is a community in Hale County. We will foc
 
 - `distance` = the distance, in miles, the proposed railroad is from the community
 
+You can find the dataset [here](https://raw.githubusercontent.com/biox-rbootcamp/biox-rbootcamp.github.io/master/assets/data/RR_Data_Hale.csv)
+
 ```{r, include=FALSE, comment=NA}
 community <- c("Carthage","Cederville","Greensboro","Havana")
 pctBlack <- c("58.4","92.4","59.4","58.4")
@@ -601,6 +603,8 @@ Answers to Q66 are used to define our response variable: Y = 1 corresponds to "(
 BMI is included in this study as the percentile for a given BMI for members of the same sex. This facilitates comparisons when modeling with males and females. We will use the terms *BMI* and *BMI percentile* interchangeably with the understanding that we are always referring to the percentile.
 
 With our sample, we use only the cases that include all of the data for these four questions. This is referred to as a __complete case analysis__. That brings our sample of 500 to 426. There are limitations of complete case analyses that we address in the Discussion.   
+
+You can find the dataset [here](https://raw.githubusercontent.com/biox-rbootcamp/biox-rbootcamp.github.io/master/assets/data/yrbs09.sav)
 
 ### Exploratory Data Analysis
 
