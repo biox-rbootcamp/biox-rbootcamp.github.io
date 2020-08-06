@@ -235,3 +235,55 @@ head(model.matrix(~educ + northcen + south + west, data = wage1))
 ```
 
 In summary, if we give the lm() function a categorial variable, it will create dummy variables as shown above to represent the categorical variable.
+
+
+
+
+## Logistic Regression
+
+An article in the *Journal of Animal Ecology* by Bishop (1972) investigated whether moths provide evidence of “survival of the fittest” with their camouflage traits.  Researchers glued equal numbers of light and dark morph moths in lifelike positions on tree trunks at 7 locations from 0 to 51.2 km from Liverpool.  They then recorded the numbers of moths removed after 24 hours, presumably by predators.  The hypothesis was that, since tree trunks near Liverpool were blackened by pollution, light morph moths would be more likely to be removed near Liverpool. 
+
+Data can be found in `moth.csv` and contains the following variables:
+
+ -  `MOPRH` = light or dark
+ -  `DISTANCE` = kilometers from Liverpool
+ -  `PLACED` = number of moths of a specific morph glued to trees at that location
+ -  `REMOVED` = number of moths of a specific morph removed after 24 hours
+
+```{r, eval = FALSE}
+moth <- read_csv("https://raw.githubusercontent.com/biox-rbootcamp/biox-rbootcamp.github.io/master/assets/lectures/linear_regression/sdata/moth.csv")
+moth <- mutate(moth, notremoved = PLACED - REMOVED, 
+               logit1 = log(REMOVED / notremoved),
+               prop1 = REMOVED / PLACED, 
+               dark = ifelse(MORPH=="dark",1,0) )
+```
+
+
+ a. What are logits in this study? 
+ b. Create empirical logit plots (logits vs. distance by morph). What can we conclude from this plot?
+ c. Create a model with `DISTANCE` and `dark`. Interpret all the coefficients.
+ d. Create a model with `DISTANCE`, `dark`, and the interaction between both variables. Interpret all the coefficients. 
+ e. Interpret a drop-in-deviance test and a Wald test to test the significance of the interaction term in (d). 
+ f. Test the goodness of fit for the interaction model.  What can we conclude about this model?
+ g. Is there evidence of overdispersion in the interaction model?  What factors might lead to overdispersion in this case? Regardless of your answer, repeat (d) adjusting for overdispersion.
+ h. Compare confidence intervals that you find in (g) and in (d). 
+ i. What happens if we expand the data set to contain one row per moth (968 rows)?  Now we can run a logistic binary regression model.  How does the logistic binary regression model compare to the binomial regression model?  What are similarities and differences?  Would there be any reason to run a binomial regression rather than a logistic regression in a case like this? The following is some starter code:
+ 
+```{r, eval = FALSE}
+mtemp1 = rep(moth$dark[1],moth$REMOVED[1])
+dtemp1 = rep(moth$DISTANCE[1],moth$REMOVED[1])
+rtemp1 = rep(1,moth$REMOVED[1])
+mtemp1 = c(mtemp1,rep(moth$dark[1],moth$PLACED[1]-moth$REMOVED[1]))
+dtemp1 = c(dtemp1,rep(moth$DISTANCE[1],moth$PLACED[1]-moth$REMOVED[1]))
+rtemp1 = c(rtemp1,rep(0,moth$PLACED[1]-moth$REMOVED[1]))
+for(i in 2:14)  {
+  mtemp1 = c(mtemp1,rep(moth$dark[i],moth$REMOVED[i]))
+  dtemp1 = c(dtemp1,rep(moth$DISTANCE[i],moth$REMOVED[i]))
+  rtemp1 = c(rtemp1,rep(1,moth$REMOVED[i]))
+  mtemp1 = c(mtemp1,rep(moth$dark[i],moth$PLACED[i]-moth$REMOVED[i]))
+  dtemp1 = c(dtemp1,rep(moth$DISTANCE[i],moth$PLACED[i]-moth$REMOVED[i]))
+  rtemp1 = c(rtemp1,rep(0,moth$PLACED[i]-moth$REMOVED[i]))  }
+newdata = data.frame(removed=rtemp1,dark=mtemp1,dist=dtemp1)
+newdata[1:25,]
+cdplot(as.factor(rtemp1)~dtemp1)
+```

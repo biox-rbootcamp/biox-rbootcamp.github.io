@@ -16,7 +16,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 Download the [dataset meap93.Rdata](https://raw.githubusercontent.com/biox-rbootcamp/biox-rbootcamp.github.io/master/assets/lectures/linear_regression/data/meap93.Rdata). Take $y$ to  be  the  variable `math10` which denotes  the  percentage of tenth graders at  a  high  school receiveing a passing score on a standardized mathematics exam.  Take $x$ to be the variable `lnchprg` which  denotes  the  percentage  of  students who  are  eligible  for  a  federally funded school lunch program.
 
-```{r}
+```{r, eval=FALSE}
 load("meap93.Rdata") # the loaded dataset will be called `data`
 ```
 
@@ -218,7 +218,7 @@ Data can be found in `moth.csv` and contains the following variables:
  -  `REMOVED` = number of moths of a specific morph removed after 24 hours
 
 ```{r, eval = FALSE}
-moth <- read_csv("https://raw.githubusercontent.com/biox-rbootcamp/biox-rbootcamp.github.io/master/assets/lectures/linear_regression/sdata/moth.csv")
+moth <- read_csv("https://raw.githubusercontent.com/biox-rbootcamp/biox-rbootcamp.github.io/master/assets/lectures/linear_regression/data/moth.csv")
 moth <- mutate(moth, notremoved = PLACED - REMOVED, 
                logit1 = log(REMOVED / notremoved),
                prop1 = REMOVED / PLACED, 

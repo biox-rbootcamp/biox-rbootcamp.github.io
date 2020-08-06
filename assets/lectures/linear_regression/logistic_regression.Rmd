@@ -24,10 +24,7 @@ if(knitr::is_html_output()){options(knitr.table.format = "html")} else {options(
 - Interpret estimated coefficients in logistic regression.
 - Differentiate between logistic regression models with binary and binomial responses.
 - Use the residual deviance to compare models, to test for lack-of-fit when appropriate, and to check for unusual observations or needed transformations.
-
-Watch the following videos:
-()
-
+s
 Then go through the following lab.
 
 

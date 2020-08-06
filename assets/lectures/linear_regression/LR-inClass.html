@@ -538,7 +538,7 @@ head(model.matrix(~educ + region, data = wage1))</code></pre>
 <li><code>PLACED</code> = number of moths of a specific morph glued to trees at that location</li>
 <li><code>REMOVED</code> = number of moths of a specific morph removed after 24 hours</li>
 </ul>
-<pre class="r"><code>moth &lt;- read_csv(&quot;https://raw.githubusercontent.com/biox-rbootcamp/biox-rbootcamp.github.io/master/assets/lectures/linear_regression/sdata/moth.csv&quot;)
+<pre class="r"><code>moth &lt;- read_csv(&quot;https://raw.githubusercontent.com/biox-rbootcamp/biox-rbootcamp.github.io/master/assets/lectures/linear_regression/data/moth.csv&quot;)
 moth &lt;- mutate(moth, notremoved = PLACED - REMOVED, 
                logit1 = log(REMOVED / notremoved),
                prop1 = REMOVED / PLACED, 
