@@ -14,7 +14,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Simple Linear Regression
 
-Download the [dataset meap93.Rdata](https://raw.githubusercontent.com/biox-rbootcamp/biox-rbootcamp.github.io/master/assets/lectures/linear_regression/data/meap93.Rdata). Take $y$ to  be  the  variable `math10` which denotes  the  percentage of tenth graders at  a  high  school receiveing a passing score on a standardized mathematics exam.  Take $x$ to be the variable `lnchprg` which  denotes  the  percentage  of  students who  are  eligible  for  a  federally funded school lunch program.
+Download the dataset meap93.Rdata. You can find the dataset [here](https://biox-rbootcamp.github.io/material) next to the lab 18 Rmd file. Take $y$ to  be  the  variable `math10` which denotes  the  percentage of tenth graders at  a  high  school receiveing a passing score on a standardized mathematics exam.  Take $x$ to be the variable `lnchprg` which  denotes  the  percentage  of  students who  are  eligible  for  a  federally funded school lunch program.
 
 ```{r}
 load("meap93.Rdata") # the loaded dataset will be called `data`
