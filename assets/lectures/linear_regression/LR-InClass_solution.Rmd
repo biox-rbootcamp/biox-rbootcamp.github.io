@@ -23,7 +23,7 @@ knitr::opts_chunk$set(
 Download the dataset meap93.Rdata. Take $y$ to  be  the  variable `math10` which denotes  the  percentage of tenth graders at  a  high  school receiveing a passing score on a standardized mathematics exam.  Take $x$ to be the variable `lnchprg` which  denotes  the  percentage  of  students who  are  eligible  for  a  federally funded school lunch program.
 
 ```{r}
-load("meap93.Rdata") # the loaded dataset will be called `data`
+load("data/meap93.Rdata") # the loaded dataset will be called `data`
 ```
 
 a) Fit a simple linear regression model for $y$ on $x$.  Report the estimates of $\beta_0$ and $\beta_1$ together with their standard errors. 
@@ -250,8 +250,9 @@ Data can be found in `moth.csv` and contains the following variables:
  -  `PLACED` = number of moths of a specific morph glued to trees at that location
  -  `REMOVED` = number of moths of a specific morph removed after 24 hours
 
-```{r, eval = FALSE}
-moth <- read_csv("https://raw.githubusercontent.com/biox-rbootcamp/biox-rbootcamp.github.io/master/assets/lectures/linear_regression/sdata/moth.csv")
+```{r, eval = TRUE}
+library(tidyverse)
+moth <- read_csv("https://raw.githubusercontent.com/biox-rbootcamp/biox-rbootcamp.github.io/master/assets/lectures/linear_regression/data/moth.csv")
 moth <- mutate(moth, notremoved = PLACED - REMOVED, 
                logit1 = log(REMOVED / notremoved),
                prop1 = REMOVED / PLACED, 
@@ -260,14 +261,71 @@ moth <- mutate(moth, notremoved = PLACED - REMOVED,
 
 
  a. What are logits in this study? 
+ 
+ *Solution* The logits are whether the moth was eaten or not.
+ 
+ 
  b. Create empirical logit plots (logits vs. distance by morph). What can we conclude from this plot?
+ 
+```{r}
+ggplot(moth)+
+  geom_point(aes(x=DISTANCE, y = logit1))+
+  theme_bw()
+ 
+ 
+```
+ There might be a linear correlation between the logits and the distance.
+ 
+ 
  c. Create a model with `DISTANCE` and `dark`. Interpret all the coefficients.
+ 
+```{r}
+summary(log.reg <- glm(cbind(REMOVED, PLACED - REMOVED)  ~ DISTANCE + dark,family=binomial, data = moth))
+ 
+```
+ 
+ An increase of one unit in distance induces increases the likelihood by $exp(0.0053)-1\approx 0.5$ percent. The effect of the distance is not significant. Dark moths are $exp(0.40)=1.49$ times more likely to be removed than light ones. The effect here is significant.
+ 
  d. Create a model with `DISTANCE`, `dark`, and the interaction between both variables. Interpret all the coefficients. 
+ 
+```{r}
+ summary(log.reg2 <- glm(cbind(REMOVED, PLACED - REMOVED)  ~ DISTANCE + dark + DISTANCE * dark,family=binomial, data = moth))
+ 
+```
+ An increase of one unit in distance induces decreases the likelihood by $1-exp(-0.0053\approx 1$ percent. The effect of the distance is not significant. The only significant coefficient is the interaction term: for black moths, a unit increase in distance increases the likelihood of being removed by roughly 2.7%.
+
  e. Interpret a drop-in-deviance test and a Wald test to test the significance of the interaction term in (d). 
+```{r}
+anova(log.reg, log.reg2, test = "Chisq")
+ 
+```
+ The nested model is significantly better than the model with no interaction (coefficient in the log regression is significant -- that's the Wald test, and the anova also yields a significant p-value.)
+ 
  f. Test the goodness of fit for the interaction model.  What can we conclude about this model?
+  *Solution*
+ We have to compare the residual deviance of the interaction model with the $\chi^2$ test with n-p(4) degrees of freedom.
+```{r}
+ 1-pchisq(13.230, 10)
+```
+
+The p=-value is not significant, so w e can't reject the null hypothesis that the model is correct....
+
  g. Is there evidence of overdispersion in the interaction model?  What factors might lead to overdispersion in this case? Regardless of your answer, repeat (d) adjusting for overdispersion.
+ 
+ Let's compute $\hat{\phi} = \frac{\sum \text{residuals^2}}{n-p}$.
+ 
+```{r}
+ phi = sum(log.reg2$residuals^2)/(14-4)
+
+summary(glm(formula = cbind(REMOVED, PLACED - REMOVED)  ~ DISTANCE + dark + DISTANCE * dark, family = quasibinomial, data = moth))
+```
+ There does not seem to be overdispersion.
+ 
  h. Compare confidence intervals that you find in (g) and in (d). 
+ 
+  *Solution*They are wider.
  i. What happens if we expand the data set to contain one row per moth (968 rows)?  Now we can run a logistic binary regression model.  How does the logistic binary regression model compare to the binomial regression model?  What are similarities and differences?  Would there be any reason to run a binomial regression rather than a logistic regression in a case like this? The following is some starter code:
+ 
  
 ```{r, eval = FALSE}
 mtemp1 = rep(moth$dark[1],moth$REMOVED[1])
@@ -286,4 +344,6 @@ for(i in 2:14)  {
 newdata = data.frame(removed=rtemp1,dark=mtemp1,dist=dtemp1)
 newdata[1:25,]
 cdplot(as.factor(rtemp1)~dtemp1)
+
+summary(glm(formula = removed  ~ dist * dark, family = binomial, data = newdata))
 ```
