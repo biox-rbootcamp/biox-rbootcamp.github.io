@@ -10,24 +10,10 @@ No prior knowledge of R or of statistics is required. This is not a graded class
 
 ## [](#announcements) Announcements
 
-**Please fill out the Week 5 feedback survey [here](https://forms.gle/4ah17aN4KqM6ryse9)**
-
-**Solutions for Lab 14 & 15 are posted!**
-
-**TO DO for session 16 (Monday, August 3rd):** 
-
-* Finish in-class exercise from session 15
-* Watch the video lectures for the session 
-* Complete Lab 16 **prior to the discussion.**
-
-**TO DO for session 17 (Wednesday, August 5th):** 
-
-* Watch the video lectures for the session 
-* Complete Lab 17 **prior to the discussion.**
+**Solutions for Lab 16 & 17 are posted!**
 
 **TO DO for session 18 (Thursday, August 6th):** 
 
-* Watch the video lectures for the session 
 * Complete Lab 18 **prior to the discussion.**
 
 
