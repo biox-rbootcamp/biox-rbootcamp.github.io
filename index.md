@@ -10,12 +10,9 @@ No prior knowledge of R or of statistics is required. This is not a graded class
 
 ## [](#announcements) Announcements
 
-**Solutions for Lab 16 & 17 are posted!**
+**Session 19 (Monday, August 9th):** 
 
-**TO DO for session 18 (Thursday, August 6th):** 
-
-* Complete Lab 18 **prior to the discussion.**
-
+Professor Holmes will be giving a lecture next Monday. 
 
 ## [](#logistics) Logistics
 
