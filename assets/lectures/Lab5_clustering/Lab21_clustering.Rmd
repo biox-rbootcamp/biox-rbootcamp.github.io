@@ -1,0 +1,399 @@
+---
+title: 'Lab 20: Clustering'
+author: "BioX R Bootcamp"
+date: "08/12/2020"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+
+```{r include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.width=7, fig.height=5) 
+```
+
+
+## Videos for the discussion session
+
+The topic of this discussion is clustering -- one of the simplest and most useful tools that you can deploy in data analysis.
+Indeed, data analysis is a way of finding structure (or patterns) in data. These patterns can be:
+
+- clusters (or ``blobs'') of similar observations,
+
+- a relationship between a quantity of interest and other variables (e.g. $y = \alpha x$),
+
+- associations between observations (e.g, in microbiology, bacteria that always co-occur in a given environment)
+
+
+-etc.
+
+Today, we are going to focus on the first bullet point --- that is, look into ways of finding groups of similar observations. This is a part of a wider domain, called unsupervised learning -- we don't know what the clusters should nor if there are any.
+
+
+## Goal
+
+In this lab we will learn the basics of clustering using a mass cytometry 
+example. Work through this lab by running all the R code on your computer and making sure 
+that you understand the input and the output. Make alterations where you see
+fit. We are going to consider a biological example (CyTOF) that might be relevant to you in your furture research.
+
+## Mass cytometry (CyTOF)
+
+Install and load packages.
+
+```{r setup, warning=FALSE, message=FALSE, results='hide'}
+pkgs_needed = c("dbscan","tidyverse","GGally", "pheatmap",
+                "flowCore","flowViz","flowPeaks", "ggcyto") # packages for cytometry data analysis)
+letsinstall = setdiff(pkgs_needed, installed.packages()) 
+if (length(letsinstall) > 0) {
+  BiocManager::install(letsinstall)
+}
+```
+
+```{r}
+library("tidyverse")
+library("flowCore")
+library("flowViz")
+library("flowPeaks")
+library("ggcyto")
+```
+
+Cytometry is a biophysical technology that allows you to measure
+physical and chemical characteristics of cells. The determination of these characteristics is crucial in many research applications, including in medical fields including immunology, hematology, and oncology. Indeed, these physical properties are used to cluster cell types. We chose this example as mass/flow cytometry is a type of data that many of you at bio-X will potentially encounter.  
+
+Modern flow and mass 
+cytometry allows for simultaneous multiparametric analysis of thousands of 
+particles per second.
+
+[Flow cytometry](https://en.wikipedia.org/wiki/Flow_cytometry) enables the 
+simultaneous measurement of 15, whereas 
+[mass cytometry (CyTOF)](https://en.wikipedia.org/wiki/Mass_cytometry) of as 
+many as 40 proteins per single cell.
+
+We start by downloading and reading in a CyTOF dataset. The dataset 
+comes from a single-cell mass cytometry study by 
+[Bendall et al.](http://science.sciencemag.org/content/332/6030/687.full)
+on differential immune drug responsed across human hematopoietic cells
+over time.
+
+```{r}
+download.file(url = "http://web.stanford.edu/class/bios221/data/Bendall_2011.fcs",
+              destfile = "Bendall_2011.fcs",mode = "wb")
+fcsB = read.FCS("Bendall_2011.fcs")
+slotNames(fcsB)
+```
+
+**Quiz question 1**: Look at the structure of the `fcsB` object (hint: the 
+`colnames` function). How many variables were measured? 
+
+**Quiz question 2**: How many cells were measured in the `fcsB` object? 
+(hint: use `exprs(fcsB)`).
+
+
+### Data preprocessing
+
+First we load the data table that reports the mapping between isotopes and 
+markers (antibodies); then, we replace the isotope names in the column 
+names of `fcsB` with the marker names. This is simply to make the subsequent 
+analysis and plotting code more readable.
+
+```{r}
+markersB = read_csv(url("http://web.stanford.edu/class/bios221/data/Bendall_2011_markers.csv"))
+mt = match(markersB$isotope, colnames(fcsB))
+stopifnot(!any(is.na(mt)))
+colnames(fcsB)[mt] = markersB$marker
+```
+
+Below, we show how to plot the joint distribution of the cell lengths and 
+the `DNA191` (indicates the activity of the cell whether cell is dead or alive).
+The information is included in the `fcsB` object (of class `flowFrame`).
+
+```{r}
+flowPlot(fcsB, plotParameters = c("Cell_length", "DNA191"), logy=TRUE)
+```
+
+It is standard to transform both flow and mass cytometry data using one of 
+several special functions, we take the example of the inverse hyperbolic sine 
+(arcsinh), which serves as a variance stabilizing transformation. 
+First, we show the distribution on untransformed raw data:
+
+```{r}
+# `densityplotvis()` is from `densityplot` package
+densityplot(~`CD3all`, fcsB)
+```
+
+To apply the transformation and to plot the data you can use functions
+from the `flowCore`` package. After the transformation the cells seem to 
+form two clusters: Based solely on one dimension (CD3all) we see two cell subsets 
+(the two modes).
+
+```{r}
+asinhT = arcsinhTransform(a = 0.1, b = 1)
+cols_to_transform <- setdiff(colnames(fcsB), c("Time", "Cell_length", "absoluteEventNumber"))
+trans1 = transformList(cols_to_transform, asinhT)
+fcsBT = transform(fcsB, trans1)
+densityplot(~`CD3all`, fcsBT)
+```
+
+Let's cluster cells into two groups using one-dimensional k-means filter.
+To learn more about the arguments of the functions type `?kmeansFilter`
+and `?flowCore::filter`
+
+```{r}
+kf = kmeansFilter("CD3all"=c("Pop1","Pop2"), filterId="myKmFilter")
+fres = filter(fcsBT, kf)
+summary(fres)
+```
+
+```{r}
+fcsBT1 = split(fcsBT, fres, population="Pop1")
+fcsBT2 = split(fcsBT, fres, population="Pop2")
+```
+
+We can also cluster cell with the `flowPeaks()` function from `flowPeaks` 
+package. The algorithm for this clustering algorithm is specified
+in detail in a paper by
+[Ge Y. et al (2012)](https://academic.oup.com/bioinformatics/article/28/15/2052/236255).
+
+
+```{r}
+dat = data.frame(exprs(fcsBT)[ , c("CD56", "CD3all")])
+fp = flowPeaks(dat)
+plot(fp)
+```
+
+**Quiz question 3**: How many dimensions (markers) does the above code use 
+to split the data into 4 cell subsets using kmeans?
+
+A Bioconductor package ``ggcyto`` build on top of ``ggplot2`` 
+includes functions for generating visualizations specifically
+for cytometry data. Note that here `fcsB` or `fcsBT` are not 
+'data.frames' but objects of class  'flowFrame'. This means
+that you cannot use `fcsB` and `fcsBT`  (without conversion to data.frame)
+as inputs to `ggplot()`. 'flowFrame' objects hold marker expression
+data and sample information data, so you can access any variables you need.
+
+```{r ggcytoCD4CD8}
+library("ggcyto")
+# Untransformed data
+ggcyto(fcsB,aes(x = CD4)) + geom_histogram(bins = 60) 
+```
+
+
+```{r}
+# Transformed data
+ggcyto(fcsBT, aes(x=CD4)) + geom_histogram(bins=90) 
+```
+
+```{r}
+# ggcyto automatic plotting
+autoplot(fcsBT, "CD4")
+```
+
+```{r}
+ggcyto(fcsBT, aes(x = CD4, y = CD8)) + geom_density2d(colour="black") 
+```
+
+```{r}
+ggcyto(fcsBT, aes(x = CD4, y = CD8)) + geom_hex(bins = 50) 
+```
+
+
+```{r}
+# ggcyto automatic plotting
+autoplot(fcsBT, "CD4", "CD8", bins = 50)
+```
+
+
+For more details on capabilities of `ggcyto` refer to the following
+[link](https://bioconductor.org/packages/release/bioc/vignettes/ggcyto/inst/doc/autoplot.html)
+
+## Density based clustering
+
+Data sets such as flow cytometry containing only a few markers and a large 
+number of cells are amenable to density clustering. DBSCAN algorithm looks for 
+regions of high density separated by sparse emptier regions. This method has 
+the advantage of being able to cope with clusters that are not necessarily 
+convex (i.e. not blob-shaped). One implementation of such a method is called 
+``dbscan``, let us look at an example by running the code below:
+
+```{r dbscanfcs5}
+library("dbscan")
+# Select a small subset of 5 protein markers
+mc5 = exprs(fcsBT)[, c("CD4", "CD8", "CD20", "CD3all", "CD56")]
+res5 = dbscan::dbscan(mc5, eps = .65, minPts = 30)
+mc5df = data.frame(mc5)
+mc5df$cluster = as.factor(res5$cluster)
+```
+
+
+**Quiz question 4**: How many clusters did `dbscan()` find?
+
+**Quiz question 5**: How many cells were clustered into cluster 3
+by `dbscan()`?
+
+
+
+
+We can now generate a CD8-vs-CD4 2d-density plot for the cells colored
+by their assigned cluster labels, computed by `dbscan()`:
+
+```{r}
+ggplot(mc5df, aes(x = CD4, y = CD8, colour = cluster)) + geom_density2d()
+```
+
+Adn do the same for CD3all and CD20 markers:
+
+```{r}
+ggplot(mc5df,aes(x = CD3all, y = CD20, colour = cluster))+ geom_density2d()
+```
+
+Observe that **the nature nature of the clustering is multidimensional**,
+as the projections into two dimensions show overlapping clusters.
+
+## Validating and choosing the number of clusters
+
+The clustering methods we have described are tailored to deliver the best 
+grouping of the data under various constrains, however they will always deliver 
+groups, even if there are none. This is important, e.g. when performing
+kmeans clustering, as we have to set the 'k' parameter (for the number
+of clusters to group observations into) ahead of time. What choice of 'k'
+is valid though?
+
+Here we want to illustate the use of the "wss" (within sum of squares) statistic 
+to evaluate the quality of a clustering. Note that as $k$ (number of cluster for 
+k-means algorithm) increases, wss will also decrease. We simulate data coming 
+from 4 groups. In particular, we generate 2-dimensional observations
+(as if there were only 2 proteins measured for each cell). The four groups
+are generated from 2-d multivariate normals with centers at
+$\mu_1 = (0, 0)$, $\mu_2 = (0, 8)$, $\mu_3 = (8, 0)$, $\mu_4 = (8, 8)$.
+In this simulation, we know the ground truth (4 groups), but we will
+try to cluster the data using the `kmeans` argorithm with different choices for the 'k'
+parameter. We will see how the wss statistic varies as we vary `k`.
+
+We have  used the `%>%` operator from the ``dplyr`` package (if you do not 
+understand the code, try to see what `simul4` contains and repeat the same using
+code that does not use the `%>%` operator).
+
+```{r Fake4}
+simul4 = lapply(c(0,8), function(x){
+  lapply(c(0,8), function(y){
+    data.frame(x = rnorm(100, x, 2),
+               y = rnorm(100, y, 2), 
+               class = paste(x, y, sep = "")
+    )
+  }) %>% do.call(rbind,.)
+}) %>% do.call(rbind,.)
+```
+
+```{r}
+ggplot(simul4, aes(x = x, y = y)) +
+  geom_point(aes(color = class), size = 2)
+```
+
+
+
+```{r}
+# Compute the kmeans within group wss for k=1 to 12
+wss = rep(0,8)
+# for a single cluster the WSS statistic is just sum of squares of centered data
+wss[1] = sum(apply(scale(simul4[,1:2], scale = F), 2, function(x){ x^2 }))
+# for k = 2, 3, ... we perform kmeans clustering and compute the associated WSS statistic
+for (k in 2:8) {
+  km4 <- kmeans(simul4[,1:2],k)
+    wss[k] =  sum(km4$withinss)
+}
+# Now, we are ready to plot the computed statistic:
+ggplot(data.frame(k = 1:length(wss), wss = wss)) +
+  geom_point(aes(x = k, y = wss), color = "blue", size= 3) +
+  xlab('k') + ylab('WSS(k)')
+```
+
+
+Within sum of squares (wss) statistic, we see that the last substantial decrease
+of the statistic occurres before $k=4$, and for values $k = 5, 6, \dots$
+the quantity 'levels-off'. In practice, we would choose $k=4$, a value
+happening at the 'elbow' of the plot (elbow-rul). Of course this choice is 
+still somewhat subjective. The book chapter describes additional ways of
+choosing `k` (e.g. the gap statistic).
+
+
+## Hierarchical clustering
+
+The Morder data are gene expression measurements for 156 genes on T cells of 
+3 types (naïve, effector, memory) from 10 patients (Holmes et al. 2005).
+Here we load the `Morder` data.frame from the online directory.
+
+```{r}
+load(url("http://web.stanford.edu/class/bios221/data/Morder.RData"))
+dim(Morder)
+```
+
+In 'base' R a function to perform hierarchical clustering is `hclust()`.
+To cluster the genes with hierarchical clustering you first need
+to compute a distance matrix storing all pairwise (gene-to-gene)
+dissimilarities. The following commands would be useful:
+
+
+```{r, fig.width=15, fig.height=8}
+D <- dist(t(Morder))
+gene_clust <- hclust(d = D)
+plot(gene_clust)
+```
+
+**Quiz question 6**: Why in the provided code the input to `dist()`
+function is `t(Morder)`? 
+
+In class, you saw that in hierarchical clustering one needs to choose
+the method for agglomerating the clusters. By default `hclust()`
+uses a "complete" linkage method. Please redo hierarchical clustering
+with "ward.D2" method. Note that in the `hclust()`  there are "ward.D"
+and "ward.D2" methods available. Please call `?hclust` to read
+about the difference between the two methods.
+
+```{r}
+# Your code:
+
+```
+
+**Quiz question 7**: Note that the height of the dendrogram is changed when
+you redid the clustering with a different linkage method. What do the y-axis 
+values on the hclust dendrogram plot correspond to?
+
+Now, instead of clustering genes, apply hierarchical clustering
+for samples (observations), with default linkage method.
+
+```{r}
+# we don't transpose the matrix now (samples are rows)
+D_samples <- dist(Morder)
+sample_clust <- hclust(d = D_samples)
+plot(sample_clust)
+```
+
+
+**Quiz question 8**: How many clusters of samples are there at the dendrogram 
+height of 12. Hint the `abline()` function might be helpful.
+
+
+Now that you know how to perform hierarchical clustering, use `pheatmap()`
+to generate a heatmap with rows and columns grouped according
+to computed dendrograms. 
+
+```{r fig.height=10, fig.width=8}
+library(pheatmap)
+pheatmap(Morder, fontsize_col=12, fontsize_row = 15) 
+```
+
+
+**Quiz question 9**: In `pheatmap` you can specify what distance metric to 
+compute for clustering rows and columns. What type of distance does `pheatmap`
+use by default?
+
+**Quiz question 10**: What type of clustering (agglomeration) method does
+`pheatmap` use by default?
+
+
+
+
+

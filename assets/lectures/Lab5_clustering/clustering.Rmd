@@ -1,0 +1,367 @@
+---
+title: 'Lab 20: Clustering'
+author: "BioX R Bootcamp"
+date: "08/12/2020"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+# Introduction
+
+The algorithms (generalized linear models, etc) that we have described up to now are examples of a general approach referred to as _supervised_ machine learning. The name comes from the fact that we use the outcomes in a training set to _supervise_ the creation of our prediction algorithm. There is another subset of machine learning referred to as _unsupervised_. In this subset we do not necessarily know the outcomes and instead are interested in discovering groups. These algorithms are also referred to as _clustering_ algorithms since predictors are used to define _clusters_. 
+
+In the two examples we have shown here, clustering would not be very useful. In the first example, if we are simply given the heights we will not be able to discover two groups, males and females, because the intersection is large. In the second example, we can see from plotting the predictors that discovering the two digits, two and seven, will be challenging:
+
+```{r mnist-27-unsupervised, message=FALSE, warning=FALSE}
+library(tidyverse)
+#install.packages("dslabs")
+library(dslabs)
+data("mnist_27")
+mnist_27$train %>% qplot(x_1, x_2, data = .)
+```
+
+However, there are applications in which unsupervised learning can be a powerful technique, in particular as an exploratory tool. 
+
+
+## Objectives
+
+The topic of this discussion is clustering -- one of the simplest and most useful tools that you can deploy in data analysis.
+Indeed, data analysis is a way of finding structure (or patterns) in data. These patterns can be:
+
+- clusters (or ``blobs'') of similar observations,
+
+- a relationship between a quantity of interest and other variables (e.g. $y = \alpha x$),
+
+- associations between observations (e.g, in microbiology, bacteria that always co-occur in a given environment)
+
+
+-etc.
+
+Today, we are going to focus on the first bullet point --- that is, look into ways of finding groups of similar observations. This is a part of a wider domain, called unsupervised learning -- we don't know what the clusters should nor if there are any.
+
+Watch the following videos and go through the follwoing lab, running the code on your computer and makiing sure that you understand the different parts. We will correct the exercises in class -- make sure you have a look before comin gto the discussion in order to be as efficient as possible.
+
++ [Clustering](https://www.youtube.com/watch?v=NqH8kUfsFGc)
++ [Randomness and Clustering](https://www.youtube.com/watch?v=waqcU-Lxc-I)
++ [Hierarchical Clustering](https://www.youtube.com/watch?v=3OB4_th9UsA)
++ [Kmeans](https://www.youtube.com/watch?v=pBYANQH9lLc)
++ [Kmeans in R](https://www.youtube.com/watch?v=4qODn72BvTo)
++ [Heatmaps](https://www.youtube.com/watch?v=Ffu-Bt_VDEs)
+
+# Clustering
+
+A first step in any clustering algorithm is defining __a distance between observations or groups of observations__. Then we need to decide how to join observations into clusters. There are many algorithms for doing this. Here we introduce two as examples: hierarchical and k-means.
+
+We will construct a simple example based on movie ratings. Here we quickly construct a matrix `x` that has ratings for the 50 movies with the most ratings.
+
+```{r}
+data("movielens")
+top <- movielens %>%
+  group_by(movieId) %>%
+  summarize(n=n(), title = first(title)) %>%
+  top_n(50, n) %>%
+  pull(movieId)
+
+x <- movielens %>% 
+  filter(movieId %in% top) %>%
+  group_by(userId) %>%
+  filter(n() >= 25) %>%
+  ungroup() %>% 
+  select(title, userId, rating) %>%
+  spread(userId, rating)
+
+row_names <- str_remove(x$title, ": Episode") %>% str_trunc(20)
+x <- x[,-1] %>% as.matrix()
+x <- sweep(x, 2, colMeans(x, na.rm = TRUE))
+x <- sweep(x, 1, rowMeans(x, na.rm = TRUE))
+rownames(x) <- row_names
+```
+
+We want to use these data to find out if there are clusters of movies based on the ratings from  `r ncol(x)` movie raters. A first step is to find the distance between each pair of movies using the `dist` function: 
+
+```{r}
+d <- dist(x)
+```
+
+## Hierarchical clustering
+
+With the distance between each pair of movies computed, we need an algorithm to define groups from these. Hierarchical clustering starts by defining each observation as a separate group, then the two closest groups are joined into a group iteratively until there is just one group including all the observations. The `hclust` function implements this algorithm and it takes a distance as input.
+
+```{r}
+h <- hclust(d)
+```
+
+We can see the resulting groups using a _dendrogram_. 
+
+```{r, eval=FALSE}
+plot(h, cex = 0.65, main = "", xlab = "")
+```
+
+```{r dendrogram, out.width="100%", fig.width = 8, fig.height = 3, echo=FALSE}
+rafalib::mypar()
+plot(h, cex = 0.65, main = "", xlab = "")
+```
+
+To interpret this graph we do the following. To find the distance between any two movies, find the first location from top to bottom that the movies split into two different groups. The height of this location is the distance between the groups. So the distance between the _Star Wars_ movies is 8 or less, while the distance between _Raiders of the Lost of Ark_ and _Silence of the Lambs_ is about 17. 
+
+To generate actual groups we can do one of two things: 1) decide on a minimum distance needed for observations to be in the same group or 2) decide on the number of groups you want and then find the minimum distance that achieves this. The function `cutree` can be applied to the output of `hclust` to perform either of these two operations and generate groups.
+
+```{r}
+groups <- cutree(h, k = 10)
+```
+
+Note that the clustering provides some insights into types of movies. Group 4 appears to be 
+blockbusters:
+
+```{r}
+names(groups)[groups==4]
+```
+
+And group 9 appears to be nerd movies:
+
+```{r}
+names(groups)[groups==9]
+```
+
+We can change the size of the group by either making `k` larger or `h` smaller. We can also explore the data to see if there are clusters of movie raters.
+
+```{r}
+h_2 <- dist(t(x)) %>% hclust()
+```
+
+<!--
+```{r dendrogram-2, , out.width="100%", fig.height=4}
+plot(h_2, cex = 0.35)
+```
+-->
+
+## k-means
+
+
+### Background
+
+$k$-means clustering is a classic technique that aims to partition cells into $k$ clusters.
+Each cell is assigned to the cluster with the closest centroid, which is done by minimizing the within-cluster sum of squares using a random starting configuration for the $k$ centroids.
+The main advantage of this approach lies in its speed, given the simplicity and ease of implementation of the algorithm.
+However, it suffers from a number of serious shortcomings that reduce its appeal for obtaining interpretable clusters:
+
+- It implicitly favors spherical clusters of equal radius.
+This can lead to unintuitive partitionings on real datasets that contain groupings with irregular sizes and shapes.
+- The number of clusters $k$ must be specified beforehand and represents a hard cap on the resolution of the clustering..
+For example, setting $k$ to be below the number of cell types will always lead to co-clustering of two cell types, regardless of how well separated they are.
+In contrast, other methods like graph-based clustering will respect strong separation even if the relevant resolution parameter is set to a low value.
+- It is dependent on the randomly chosen initial coordinates.
+This requires multiple runs to verify that the clustering is stable.
+
+That said, $k$-means clustering is still one of the best approaches for sample-based data compression. 
+In this application, we set $k$ to a large value such as the square root of the number of cells to obtain fine-grained clusters.
+These are not meant to be interpreted directly, but rather, the centroids are treated as "samples" for further analyses.
+The idea here is to obtain a single representative of each region of the expression space, reducing the number of samples and computational work in later steps like, e.g., trajectory reconstruction [@ji2016tscan].
+This approach will also eliminate differences in cell density across the expression space, ensuring that the most abundant cell type does not dominate downstream results.
+
+
+
+
+## In Practice
+
+Base R provides the `kmeans()` function that does as its name suggests.
+We call this on our top PCs to obtain a clustering for a specified number of clusters in the `centers=` argument, after setting the random seed to ensure that the results are reproducible.
+In general, the $k$-means clusters correspond to the visual clusters on the $t$-SNE plot in Figure \@ref(fig:tsne-clust-kmeans), though there are some divergences that are not observed in, say, Figure \@ref(fig:tsne-clust-graph).
+(This is at least partially due to the fact that $t$-SNE is itself graph-based and so will naturally agree more with a graph-based clustering strategy.)
+
+
+```{r tsne-clust-kmeans, fig.cap="$t$-SNE plot of the 10X PBMC dataset, where each point represents a cell and is coloured according to the identity of the assigned cluster from $k$-means clustering."}
+set.seed(100)
+clust.kmeans <- kmeans(reducedDim(sce.pbmc, "PCA"), centers=10)
+table(clust.kmeans$cluster)
+
+colLabels(sce.pbmc) <- factor(clust.kmeans$cluster)
+plotReducedDim(sce.pbmc, "TSNE", colour_by="label")
+```
+
+If we were so inclined, we could obtain a "reasonable" choice of $k$ by computing the gap statistic using methods from the `r CRANpkg("cluster")` package.
+This is the log-ratio of the expected to observed within-cluster sum of squares, where the expected value is computed by randomly distributing cells within the minimum bounding box of the original data.
+A larger gap statistic represents a lower observed sum of squares - and thus better clustering - compared to a population with no structure.
+Ideally, we would choose the $k$ that maximizes the gap statistic, but this is often unhelpful as the tendency of $k$-means to favor spherical clusters drives a large $k$ to capture different cluster shapes.
+Instead, we choose the most parsimonious $k$ beyond which the increases in the gap statistic are considered insignificant (Figure \@ref(fig:kmeans-gap)).
+It must be said, though, that this process is time-consuming and the resulting choice of $k$ is not always stable.
+
+```{r kmeans-gap, fig.cap="Gap statistic with respect to increasing number of $k$-means clusters in the 10X PBMC dataset. The red line represents the chosen $k$."}
+library(cluster)
+set.seed(110010101)
+gaps <- clusGap(reducedDim(sce.pbmc, "PCA"), kmeans, K.max=20)
+best.k <- maxSE(gaps$Tab[,"gap"], gaps$Tab[,"SE.sim"])
+best.k
+
+plot(gaps$Tab[,"gap"], xlab="Number of clusters", ylab="Gap statistic")
+abline(v=best.k, col="red")
+```
+
+```{r, echo=FALSE}
+# Check that the results are reasonable, as sometimes
+# the gap statistic gets funny stochastic results.
+stopifnot(identical(best.k, 9L))
+```
+
+A more practical use of $k$-means is to deliberately set $k$ to a large value to achieve overclustering.
+This will forcibly partition cells inside broad clusters that do not have well-defined internal structure.
+For example, we might be interested in the change in expression from one "side" of a cluster to the other, but the lack of any clear separation within the cluster makes it difficult to separate with graph-based methods, even at the highest resolution.
+$k$-means has no such problems and will readily split these broad clusters for greater resolution, though obviously one must be prepared for the additional work involved in interpreting a greater number of clusters.
+
+```{r tsne-clust-kmeans-best, fig.cap="$t$-SNE plot of the 10X PBMC dataset, where each point represents a cell and is coloured according to the identity of the assigned cluster from $k$-means clustering with $k=20$."}
+set.seed(100)
+clust.kmeans2 <- kmeans(reducedDim(sce.pbmc, "PCA"), centers=20)
+table(clust.kmeans2$cluster)
+
+colLabels(sce.pbmc) <- factor(clust.kmeans2$cluster)
+plotTSNE(sce.pbmc, colour_by="label", text_by="label")
+```
+
+As an aside: if we were already using `clusterRows()` from `r Biocpkg("bluster")`, we can easily switch to $k$-means clustering by supplying a `KmeansParam()` as the second argument.
+This requires the number of clusters as a fixed integer or as a function of the number of cells - the example below sets the number of clusters to the square root of the number of cells, which is an effective rule-of-thumb for vector quantization. 
+
+```{r}
+set.seed(10000)
+sq.clusts <- clusterRows(reducedDim(sce.pbmc, "PCA"), KmeansParam(centers=sqrt))
+nlevels(sq.clusts)
+```
+
+### Assessing cluster separation
+
+The within-cluster sum of squares (WCSS) for each cluster is the most relevant diagnostic for $k$-means, given that the algorithm aims to find a clustering that minimizes the WCSS.
+Specifically, we use the WCSS to compute the root-mean-squared deviation (RMSD) that represents the spread of cells within each cluster.
+A cluster is more likely to have a low RMSD if it has no internal structure and is separated from other clusters (such that there are not many cells on the boundaries between clusters, which would result in a higher sum of squares from the centroid).
+
+```{r}
+ncells <- tabulate(clust.kmeans2$cluster)
+tab <- data.frame(wcss=clust.kmeans2$withinss, ncells=ncells)
+tab$rms <- sqrt(tab$wcss/tab$ncells)
+tab
+```
+
+(As an aside, the RMSDs of the clusters are poorly correlated with their sizes in Figure \@ref(fig:tsne-clust-kmeans-best).
+This highlights the risks of attempting to quantitatively interpret the sizes of visual clusters in $t$-SNE plots.)
+
+To explore the relationships between $k$-means clusters, a natural approach is to compute distances between their centroids.
+This directly lends itself to visualization as a tree after hierarchical clustering (Figure \@ref(fig:kmeans-tree)). 
+
+```{r kmeans-tree, fig.cap="Hierarchy of $k$-means cluster centroids, using Ward's minimum variance method."}
+cent.tree <- hclust(dist(clust.kmeans2$centers), "ward.D2")
+plot(cent.tree)
+```
+
+### In two-step procedures
+
+As previously mentioned, $k$-means is most effective in its role of vector quantization, i.e., compressing adjacent cells into a single representative point.
+This allows $k$-means to be used as a prelude to more sophisticated and interpretable - but expensive - clustering algorithms.
+The `clusterRows()` function supports a "two-step" mode where $k$-means is initially used to obtain representative centroids that are subjected to graph-based clustering.
+Each cell is then placed in the same graph-based cluster that its $k$-means centroid was assigned to (Figure \@ref(fig:tsne-kmeans-graph-pbmc)).
+
+```{r tsne-kmeans-graph-pbmc, fig.cap="$t$-SNE plot of the PBMC dataset, where each point represents a cell and is coloured according to the identity of the assigned cluster from combined $k$-means/graph-based clustering."}
+# Setting the seed due to the randomness of k-means.
+set.seed(0101010)
+kgraph.clusters <- clusterRows(reducedDim(sce.pbmc, "PCA"),
+    TwoStepParam(
+        first=KmeansParam(centers=1000),
+        second=NNGraphParam(k=5)
+    )
+)
+table(kgraph.clusters)
+
+plotTSNE(sce.pbmc, colour_by=I(kgraph.clusters))
+```
+
+The obvious benefit of this approach over direct graph-based clustering is the speed improvement.
+We avoid the need to identifying nearest neighbors for each cell and the construction of a large intermediate graph,
+while benefiting from the relative interpretability of graph-based clusters compared to those from $k$-means.
+This approach also mitigates the "inflation" effect discussed in Section \@ref(clustering-graph).
+Each centroid serves as a representative of a region of space that is roughly similar in volume,
+ameliorating differences in cell density that can cause (potentially undesirable) differences in resolution.
+
+The choice of the number of $k$-means clusters (defined here by the `kmeans.clusters=` argument) determines the trade-off between speed and fidelity.
+Larger values provide a more faithful representation of the underlying distribution of cells,
+at the cost of requiring more computational work by the second-stage clustering procedure.
+Note that the second step operates on the centroids, so increasing `kmeans.clusters=` may have further implications if the second-stage procedure is sensitive to the total number of input observations. 
+For example, increasing the number of centroids would require an concomitant increase in `k=` (the number of neighbors in graph construction) to maintain the same level of resolution in the final output.
+
+
+## Original text
+
+To use the k-means clustering algorithm we have to pre-define $k$, the number of clusters we want to define. The k-means algorithm is iterative.
+The first step is to define $k$ centers. Then each observation is assigned to the cluster with the closest center to that observation. In a second step the centers are redefined using the observation in each cluster: the column means are used to define a _centroid_. We repeat these two steps until the centers converge.
+
+The `kmeans` function included in R-base does not handle NAs. For illustrative purposes we will fill out the NAs with 0s. In general, the choice of how to fill in missing data, or if one should do it at all, should be made with care.
+
+```{r}
+x_0 <- x
+x_0[is.na(x_0)] <- 0
+k <- kmeans(x_0, centers = 10)
+```
+
+The cluster assignments are in the `cluster` component:
+
+```{r}
+groups <- k$cluster
+```
+
+Note that because the first center is chosen at random, the final clusters are random. We impose some stability by repeating the entire function several times and averaging the results. The number of random starting values to use can be assigned through the `nstart` argument.
+
+```{r}
+k <- kmeans(x_0, centers = 10, nstart = 25)
+```
+
+## Heatmaps
+
+A powerful visualization tool for discovering clusters or patterns in your data is the heatmap. The idea is simple: plot an image of your data matrix with colors used as the visual cue and both the columns and rows ordered according to the results of a clustering algorithm. We will demonstrate this with the `tissue_gene_expression` dataset. We will scale the rows of the gene expression matrix.
+
+The first step is compute: 
+```{r}
+data("tissue_gene_expression")
+x <- sweep(tissue_gene_expression$x, 2, colMeans(tissue_gene_expression$x))
+h_1 <- hclust(dist(x))
+h_2 <- hclust(dist(t(x)))
+```
+
+
+Now we can use the results of this clustering to order the rows and columns.
+
+```{r heatmap, out.width="100%", fig.height=7, eval=FALSE}
+image(x[h_1$order, h_2$order])
+```
+
+But there is `heatmap` function that does it for us:
+
+```{r heatmap-2, out.width="100%", fig.height=7, eval=FALSE}
+heatmap(x, col = RColorBrewer::brewer.pal(11, "Spectral"))
+```
+
+We do not show the results of the heatmap function because there are too many features for the plot to be useful. We will therefore filter some columns and remake the plots.
+
+## Filtering features
+
+If the information about clusters in included in just a few features, including all the features can add enough noise that detecting clusters 
+becomes challenging. One simple approach to try to remove features with no information is to only include those with high variance. In the movie example, a user with low variance in their ratings is not really informative: all the movies seem about the same to them. Here is an example of how we can include only the features with high variance.
+
+```{r heatmap-3, out.width="100%", fig.height=5, fig.width=6, message=FALSE, warning=FALSE}
+library(matrixStats)
+sds <- colSds(x, na.rm = TRUE)
+o <- order(sds, decreasing = TRUE)[1:25]
+heatmap(x[,o], col = RColorBrewer::brewer.pal(11, "Spectral"))
+```
+
+
+# Exercises 
+
+1\. Load the `tissue_gene_expression` dataset. Remove the row means and compute the distance between each observation. Store the result in `d`.
+
+
+2\. Make a hierarchical clustering plot and add the tissue types as labels.
+
+
+3\. Run a k-means clustering on the data with $K=7$. Make a table comparing the identified clusters to the actual tissue types. Run the algorithm several times to see how the answer changes.
+
+
+4\. Select the 50 most variable genes. Make sure the observations show up in the columns, that the predictors are centered, and add a color bar to show the different tissue types. Hint: use the `ColSideColors` argument to assign colors. Also, use `col = RColorBrewer::brewer.pal(11, "RdBu")` for a better use of colors.
+
