@@ -24,12 +24,12 @@ layout: cme195
 | 16 | M | GLMs and Bootstrap tests | [Lecture: Generalized Linear Models](https://www.youtube.com/watch?v=hc06BXFYd_w)| [Lab 16: GLM](./biox-rbootcamp.github.io/assets/lectures/linear_regression/Generalized-Linear-Models.html) [[Solution]](./biox-rbootcamp.github.io/assets/lectures/linear_regression/Generalized-Linear-Models-solutions.html)| | 
 | 17 | W |  | [Lecture: Logistic Regression]()  | [Lab 17: Logistic Regression](./biox-rbootcamp.github.io/assets/lectures/linear_regression/logistic_regression.html) [[Solution]](./biox-rbootcamp.github.io/assets/lectures/linear_regression/logistic_regression_solutions.html)| [Lab 17 Material Rmd](./biox-rbootcamp.github.io/assets/lectures/linear_regression/logistic_regression.Rmd)|  |
 | 18 | Th |  | Summary: statistical models|  [Lab 18](./biox-rbootcamp.github.io/assets/lectures/linear_regression/LR-inClass.html)  [[Solution]](./biox-rbootcamp.github.io/assets/lectures/linear_regression/LR-inClass_solution.html) | [Lab 18 Rmd](./biox-rbootcamp.github.io/assets/lectures/linear_regression/LR-inClass.Rmd) [[Data]](./biox-rbootcamp.github.io/assets/lectures/linear_regression/data/meap93.RData)|
-| 19 | M | Unsupervised Learning | Lecture: Multivariate analysis/Dimensionality reduction overview| [Slides](https://web.stanford.edu/class/bios221/PCA_Slides.html)| |
-| 20 | W | | [Lecture: Clustering](https://drive.google.com/file/d/1ekIRX3Fi_TWMnwJhTeW4RrXslfot_sVE/view?usp=sharing)| [Lab 20](./biox-rbootcamp.github.io/assets/lectures/unsupervised_learning/clustering_lab.html)|[Lab 20 [Rmd]](./biox-rbootcamp.github.io/assets/lectures/unsupervised_learning/clustering_lab.Rmd)|
-| 21 | Th |  | In class on Clustering|  [Lab 21: In class]() | [Lab 21 Rmd]()   |
-| 22 | M | Machine Learning |  [Lecture: Model Building]() | [Lab 22]()|  |
+| 19 | M | Unsupervised Learning | Lecture: Multivariate analysis/Dimensionality reduction overview|[Slides](https://web.stanford.edu/class/bios221/PCA_Slides.html)| |
+| 20 | W | | [Lecture: Clustering](https://drive.google.com/file/d/1ekIRX3Fi_TWMnwJhTeW4RrXslfot_sVE/view?usp=sharing) | [Lab 20](./biox-rbootcamp.github.io/assets/lectures/unsupervised_learning/clustering_lab.html) | [Lab 20 [Rmd]](./biox-rbootcamp.github.io/assets/lectures/unsupervised_learning/clustering_lab.Rmd)|
+| 21 | Th |  | In class on Clustering| [Lab 21: In class]() | [Lab 21 Rmd]() |
+| 22 | M | Machine Learning | [Lecture: Model Building]() | [Lab 22]()| |
 | 23 | W | | [Lecture: Classification]()| [Lab 23]() |  |
-| 24 | Th | | [In-class Exercise]()| [Lab 24]() |  |
+| 24 | Th | | [In-class Exercise]() | [Lab 24]() |  |
 
 
 
