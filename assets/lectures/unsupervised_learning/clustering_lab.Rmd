@@ -574,7 +574,7 @@ For example, complete linkage aims to merge clusters with the smallest maximum d
 In the context of scRNA-seq, the main advantage of hierarchical clustering lies in the production of the dendrogram.
 This is a rich summary that describes the relationships between cells and subpopulations at various resolutions and in a quantitative manner based on the branch lengths.
 Users can easily "cut" the tree at different heights to define clusters with different granularity, where clusters defined at high resolution are guaranteed to be nested within those defined at a lower resolution.
-(Guaranteed nesting can be helpful for interpretation, as discussed in Section \@ref(subclustering).)
+(Guaranteed nesting can be helpful for interpretation.)
 The dendrogram is also a natural representation of the data in situations where cells have descended from a relatively recent common ancestor.
 
 In practice, hierachical clustering is too slow to be used for anything but the smallest scRNA-seq datasets.
@@ -585,12 +585,14 @@ Nonetheless, we will still demonstrate the application of hierarchical clusterin
 ## Implementation
 
 As the PBMC dataset is too large, we will demonstrate on the 416B dataset instead.
-The @lun2017assessing dataset contains two 96-well plates of 416B cells (an immortalized mouse myeloid progenitor cell line), processed using the Smart-seq2 protocol [@picelli2014fulllength].
+The @lun2017assessing dataset contains two 96-well plates of 416B cells (an immortalized mouse myeloid progenitor cell line), processed using the Smart-seq2 protocol [Picelli 2014].
 A constant amount of spike-in RNA from the External RNA Controls Consortium (ERCC) was also added to each cell's lysate prior to library preparation.
 High-throughput sequencing was performed and the expression of each gene was quantified by counting the total number of reads mapped to its exonic regions.
 Similarly, the quantity of each spike-in transcript was measured by counting the number of reads mapped to the spike-in reference sequences.
 
 ## Data loading
+
+Load [the data](https://biox-rbootcamp.github.io/material) from the class website.
 
 We convert the blocking factor to a `factor` so that downstream steps do not treat it as an integer.
 
