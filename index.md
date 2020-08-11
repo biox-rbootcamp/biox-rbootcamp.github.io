@@ -10,9 +10,10 @@ No prior knowledge of R or of statistics is required. This is not a graded class
 
 ## [](#announcements) Announcements
 
-**Session 19 (Monday, August 9th):** 
+**Session 20 (Wednesday, August 11th):** 
 
-Professor Holmes will be giving a lecture next Monday. 
+* Watch the video lectures for the session 
+* Complete Lab 20 **prior** to discussion
 
 ## [](#logistics) Logistics
 
