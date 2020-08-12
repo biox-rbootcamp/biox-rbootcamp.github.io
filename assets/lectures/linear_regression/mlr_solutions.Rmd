@@ -1125,6 +1125,7 @@ __Question #0__ Load and start exploring the data.
 
 ```{r}
 library(ggplot2); theme_set(theme_bw())
+library(dplyr)
 data = read.csv("https://raw.githubusercontent.com/biox-rbootcamp/biox-rbootcamp.github.io/master/assets/data/professor_salaries.csv", row.names = 1)
 names(data)
 
