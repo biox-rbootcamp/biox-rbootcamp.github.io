@@ -19,6 +19,7 @@ The dataset has 11 dimensions, that is more than it is possible to visualize at
 the same.
 
 ```{r}
+library(tidyverse)
 head(mtcars)
 ```
 
@@ -26,48 +27,20 @@ a. Use `prcomp()` to compute a PCA for `mtcars`. Remember to set the
 scale parameter, as the variables are in different units and have different
 ranges
 
-```{r}
-mtcars.pca <- prcomp(mtcars, scale=TRUE)
-```
+
 
 b. Generate a scree plot and note how many dimensions should you retain.
 
-```{r}
-library(factoextra)
-
-# Percent of variance explained:
-fviz_eig(mtcars.pca) 
-```
 
 c. Compute the percentage of variance explained by each of the principal
 components.
 
-```{r}
-eig <- mtcars.pca$sdev^2
-(var.exp <- 100*eig/sum(eig))
-```
+
 
 d. Generate a biplot for the PCA projection. Use the loadings matrix to inspect
 which variables contributes most to PC1 and which to PC2. What do the PC1 and
 PC2 correspond to? How are the cars distributed on this representation?
 Does the "car map" make sense?
-
-```{r, fig.width=8, fig.height=6}
-fviz_pca_biplot(mtcars.pca) + coord_fixed() 
-```
-
-```{r}
-mtcars.pca$rotation
-```
-
-```{r}
-fviz_contrib(mtcars.pca, choice = "var", axes = 1) 
-```
-
-```{r}
-fviz_contrib(mtcars.pca, choice = "var", axes = 2) 
-```
-
 
 
 # Exercise 2: Cluster Analysis
@@ -90,46 +63,23 @@ ggplot(DF, aes(x, y, color = cluster)) +
 ```
 
 a. Apply k-means with k = 3 (as you know the true number of clusters).
-Pring the cluster centers.
+Print the cluster centers.
 
-```{r}
-kmeans.res <- kmeans(x = DF[, -1], centers = 3)
-kmeans.res$centers
-```
+
 
 b. Print a confusion map to compare k-means cluster assignment with
 the true cluster labels.
 
-```{r}
-table(kmeans = kmeans.res$cluster, true = DF$cluster)
-```
+
 
 
 c. Generate a scatter plot of points, now colored by the cluster assignment.
 
 
-```{r}
-library(ggplot2)
-DF$kmeans <- factor(kmeans.res$cluster)
-ggplot(DF, aes(x, y)) + 
-  geom_point(alpha = 0.5, aes( color = kmeans)) + 
-  geom_point(data = data.frame(x = kmeans.res$centers[, 1], 
-                               y = kmeans.res$centers[, 2]), size = 3, aes(x, y), color = "Black")
-```
-
 d. Now pretend that you don't know the real number of clusters. Use k = 4
 and recompute kmeans. Plot the results and see what happened.
 
-```{r}
-kmeans.res2 <- kmeans(x = DF[, -1], centers = 4)
-kmeans.res2$centers
-```
-
-```{r}
-DF$kmeans2 <- factor(kmeans.res2$cluster)
-ggplot(DF, aes(x, y, color = kmeans2)) + 
-  geom_point(alpha = 0.5)
-```
+e. Still Pretending that you do not know the real number of clusters, how would you select it? USe your favorite method (elbow, gap statistic or silhouette) to find a reasonable estimate of the number of clusters
 
 
 ## Part 2: Hierarchical Clustering
@@ -157,15 +107,7 @@ dim(gene.expression)
 
 a. Compute a (Euclidean) distance matrix between each pair of samples.
 
-```{r}
-D <- dist(gene.expression)
-```
-
 b. Perform hierarchical clustering using average linkage.
-
-```{r}
-khan.hclust <- hclust(D, method = "average")
-```
 
 c. Plot a dendrogram associated with the hierarchical clustering you just
 computed. In this example, you actually have the lables of the tissue samples,
@@ -173,9 +115,6 @@ however, the algorithms was blinded to them. By adding labels to the dendrogram
 corresponding to `Khan$ytrain`, check if the clustering performed groups the 
 observations from same tumor class nearby. 
 
-```{r}
-plot(khan.hclust, labels = Khan$ytrain)
-```
 
 
 ## Exercise Extra: 2D visualization of MNIST data
@@ -192,9 +131,9 @@ images of digits (0-9). The data is composed of:
 (on the scale of 0-255), and together form the vectorized version of 
 the 28x28 pixel digit image
 
-![](../lectures/Lecture8-figure//mnistExamples.png)
+![](mnistExamples.png)
 
-Download the data from the course repository:
+Download the data from the CME195  course repository:
 
 ```{r}
 # load the already subsetted MNIST data.
@@ -207,53 +146,20 @@ train[1:10, 1:10]
 a. Compute and the PCA for the data. Then, extract the first two principal
 component scores for the data.
 
-```{r}
-# compare with pca
-pca <- prcomp(train[,-1])
-coord.pca <- data.frame(pca$x[, 1:2])
-coord.pca$label <- factor(train$label)
-```
-
 b. Plot the 2D principal component scores matrix.
 
-```{r}
-ggplot(coord.pca, aes(x= PC1, y = PC2)) + ggtitle("PCA") +
-  geom_text(aes(label = label, color = label), alpha = 0.8)
-```
-
 c. Compute a tSNE embedding.
-```{r}
-# Use tsne
-library(Rtsne)
-set.seed(123) # for reproducibility
-tsne <- Rtsne(train[,-1], dims = 2, perplexity=30, 
-              verbose=FALSE, max_iter = 500)
-coord.tsne <- data.frame(tsne$Y)
-coord.tsne$label <- factor(train$label)
-```
 
 d. Visualize the tSNE 2D projection.
 
-```{r}
-ggplot(coord.tsne, aes(x= X1, y = X2)) + ggtitle("tSNE") +
-  geom_text(aes(label = label, color = label), alpha = 0.8)
-```
-
 e. What do you observe? How does tSNE compare with PCA in this case?
 
-tSNE seems to be much better at separating digits from each other
-
-
-
-```{r}
-sessionInfo()
-```
 
 
 
 
 
-# Bonus
+# Exercise 3: Ads
 
 a. Read the data from "http://www-bcf.usc.edu/~gareth/ISL/Advertising.csv"
 containing information on sales of a product and the amount spent on advertising
@@ -288,6 +194,48 @@ g. Look at the summary output for the multiple regression model and note which
 of the coefficient in the model is significant. Are all of them significant?
 If not refit the model including only the features found significant.
 Which of the models should you choose? 
+
+
+# Exercise 4: Doctor Visits
+
+Data was collected on doctor visits from a sample of 5,190 people in the 1977/1978 Australian Health Survey. Cameron (1986) sought to explain the variation in doctor visits using one or more explanatory variables. The data can be found in an R data set from `library(AER)` accessible with the command `DoctorVisits`. Variable descriptions can be found under `help("DoctorVisits")`
+
+Explore the use of a zero-inflated model for this data. Begin with a histogram of the number of visits, some EDA, and fitting several models. Summarize your results.Summarize your results. Compare your results with a standard Poisson.
+
+
+
+# Exercise 5: Movies
+
+Recall the movies data-frame we used ealier in the bootcamp. It contains
+information on movies from the last three decates, which was scrapped from
+the IMDB database.
+
+```{r}
+library(dplyr)
+url <- "https://raw.githubusercontent.com/Juanets/movie-stats/master/movies.csv"
+movies <- tbl_df(read.csv(url))
+```
+
+a. Generate a boxplot of runtimes for action movies and comedies
+with jittered points overlaid on top. You might consider setting collor, 
+fill and alpha arguments to modify clarity and transparency of the plot.
+
+
+b. Test a hypothesis that the action movies have higher mean runtime (length)
+than the comedies. Is the difference statistically greater than zero
+at significance level $\alpha = 0.05$?
+
+
+c. Test the hypothesis that the scores are the same across movie types (keep the movie genre which have at least 20 movies). Plot the data before making a test of your choice. State all the assumptions that you are making when devising your test.
+
+
+
+d. Is there a reason to believe that the scores might differ according to genre? How would you test which one is different (do the test if you have reason to believe that this is the case).
+
+
+
+e. Now, suppose your friend at Hollywood wants to know the recipe for making a movie with the best margin (gross-budget). Which genre and runtime should he aim for? Could you fit a model to try to help him out?
+
 
 
 

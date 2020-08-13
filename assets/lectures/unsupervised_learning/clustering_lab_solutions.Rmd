@@ -596,7 +596,7 @@ We convert the blocking factor to a `factor` so that downstream steps do not tre
 
 ```{r loading2}
 library(scRNAseq)
-load("~/Downloads/sce416b.RData")
+load("sce416b.RData")
 ```
 
 
@@ -998,132 +998,97 @@ If cell types or states span cluster boundaries, conditioning on the putative ce
 
 # Exercises: Clustering
 
+__Question 1: Implementing k-means__
+It is important for you to understand how k-means works.
+k-means is an iterative procedure, the most common way of implementing is as follows:
+
+1. Initialize randomly the k-centers to k points of your dataset
+2. While convergence has not been reached (e.g, too many point assignments are changing or the number of iteration t is below 100 ), do:
+  a. Compute the pairwise distance between each point and its centroid (this yields a N x k matrix)
+  b. Assign each data point to its nearest centroid
+  c. Update the centroid (mean of all the coordinates of the points that belong to that cluster)
+  
+Implement the k-means algorithm from scratch. Check it on the following dataset, and compute your algorithm's accuracy. 
+
+```{r}
+
+df = data.frame(x = c(rnorm(30,0,0.5), rnorm(30,4,1),rnorm(30,-2,0.5), rnorm(30,0,0.5)),
+                y =  c(rnorm(30,0,0.5), rnorm(30,2,0.5), rnorm(30,-1,1),rnorm(30,3,0.5)),
+                group= c(rep(1,30), rep(2,30), rep(3, 30), rep(4,30)))
+df$group = as.factor(df$group)
+ggplot(df)+
+  geom_point(aes(x=x, y=y, colour=group)) +
+  theme_bw()
 
 
-A first step in any clustering algorithm is defining __a distance between observations or groups of observations__. Then we need to decide how to join observations into clusters. There are many algorithms for doing this. Here we introduce two as examples: hierarchical and k-means.
+```
+  
+  
+```{r}
+library(pdist)
+library(tidyverse)
+k=4
+n = nrow(df)
+centers =cbind(df$x, df$y)[sample(1:n, 4, replace=FALSE),] ### init
+D = matrix(0, n, k)
+it = 0
+while(it <100){
+  D = as.matrix(pdist(cbind(df$x, df$y), centers))
+  Z = sapply(1:n, function(i){which.min(D[i,])})
+  centers = rbind(apply(df[Z==1,1:2], 2, mean), apply(df[Z==2,1:2], 2, mean),
+                  apply(df[Z==3,1:2], 2, mean), apply(df[Z==4,1:2], 2, mean))
+  it = it + 1
+  df$imputed =as.factor( Z)
 
-We will construct a simple example based on movie ratings. Here we quickly construct a matrix `x` that has ratings for the 50 movies with the most ratings.
+  ggplot(df)+
+  geom_point(aes(x=x, y=y, colour=imputed)) +
+  theme_bw()
+}
+df$imputed =as.factor( Z)
+
+ggplot(df)+
+  geom_point(aes(x=x, y=y, colour=imputed)) +
+  theme_bw()
+```
+
+
+__Question 2__ Compare your algorithm's accuracy to the one of the algorithm implemented in Base R.
+
+```{r}
+library(caret)
+Z2 = kmeans(df[,1:2], 4)
+ggplot(df)+
+  geom_point(aes(x=x, y=y), colour=as.factor(Z2$cluster)) +
+  theme_bw()
+
+print(confusionMatrix(as.factor(Z2$cluster), as.factor(Z)))
+```
+
+__Question 3__ Using a method of your choice, choose the optimal number of cluster for the mock dataset in question 1.
 
 ```{r}
 
-#install.packages("dslabs")
-library(dslabs)
-data("movielens")
-top <- movielens %>%
-  group_by(movieId) %>%
-  summarize(n=n(), title = first(title)) %>%
-  top_n(50, n) %>%
-  pull(movieId)
+library(cluster)
+set.seed(110010101)
+gaps <- clusGap(df[,1:2], kmeans, K.max=20)
 
-x <- movielens %>% 
-  filter(movieId %in% top) %>%
-  group_by(userId) %>%
-  filter(n() >= 25) %>%
-  ungroup() %>% 
-  select(title, userId, rating) %>%
-  spread(userId, rating)
 
-row_names <- str_remove(x$title, ": Episode") %>% str_trunc(20)
-x <- x[,-1] %>% as.matrix()
-x <- sweep(x, 2, colMeans(x, na.rm = TRUE))
-x <- sweep(x, 1, rowMeans(x, na.rm = TRUE))
-rownames(x) <- row_names
+plot(gaps$Tab[,"gap"], xlab="Number of clusters", ylab="Gap statistic")
+
+
 ```
 
-
-We want to use these data to find out if there are clusters of movies based on the ratings from  `r ncol(x)` movie raters.
-
-__Question 1__ A first step is to find the distance between each pair of movies. Using the `dist` function, compute the pairwise distances between movies.
-
-__Question 2__ With the distance between each pair of movies computed, we need an algorithm to define groups from these. Hierarchical clustering starts by defining each observation as a separate group, then the two closest groups are joined into a group iteratively until there is just one group including all the observations. The `hclust` function implements this algorithm and it takes a distance as input. Compute the hierarchical clustering of our movies dataset.
-
-
-__Question3__ We can see the resulting groups using a _dendrogram_. 
-
-```{r, eval=FALSE}
-plot(h, cex = 0.65, main = "", xlab = "")
-```
-
-```{r dendrogram, out.width="100%", fig.width = 8, fig.height = 3, echo=FALSE}
-rafalib::mypar()
-plot(h, cex = 0.65, main = "", xlab = "")
-```
-
-To interpret this graph we do the following. To find the distance between any two movies, find the first location from top to bottom that the movies split into two different groups. The height of this location is the distance between the groups. So the distance between the _Star Wars_ movies is 8 or less, while the distance between _Raiders of the Lost of Ark_ and _Silence of the Lambs_ is about 17. 
-
-To generate actual groups we can do one of two things: 1) decide on a minimum distance needed for observations to be in the same group or 2) decide on the number of groups you want and then find the minimum distance that achieves this. The function `cutree` can be applied to the output of `hclust` to perform either of these two operations and generate groups.
-
-```{r}
-groups <- cutree(h, k = 10)
-```
-
-Note that the clustering provides some insights into types of movies. Group 4 appears to be 
-blockbusters:
-
-```{r}
-names(groups)[groups==4]
-```
-
-And group 9 appears to be nerd movies:
-
-```{r}
-names(groups)[groups==9]
-```
-
-We can change the size of the group by either making `k` larger or `h` smaller. We can also explore the data to see if there are clusters of movie raters.
-
-```{r}
-h_2 <- dist(t(x)) %>% hclust()
-```
-
-
-__Question4 __ To use the k-means clustering algorithm we have to pre-define $k$, the number of clusters we want to define. The k-means algorithm is iterative.
-The first step is to define $k$ centers. Then each observation is assigned to the cluster with the closest center to that observation. In a second step the centers are redefined using the observation in each cluster: the column means are used to define a _centroid_. We repeat these two steps until the centers converge.
-
-The `kmeans` function included in R-base does not handle NAs. For illustrative purposes we will fill out the NAs with 0s. In general, the choice of how to fill in missing data, or if one should do it at all, should be made with care.
+__Question 4__ Apply hierachical clustering to the mock dataset. Where would you cut it?
 
 
 ```{r}
-x_0 <- x
-x_0[is.na(x_0)] <- 0
-k <- kmeans(x_0, centers = 10)
+dist.df <- dist(df[,1:2])
+tree.df <- hclust(dist.df, "ward.D2")
+
+# Making a prettier dendrogram.
+library(dendextend)
+tree.df$labels <- seq_along(tree.df$labels)
+dend <- as.dendrogram(tree.df, hang=0.1)
+plot(dend)
 ```
 
-The cluster assignments are in the `cluster` component:
-
-```{r}
-groups <- k$cluster
-```
-
-Note that because the first center is chosen at random, the final clusters are random. We impose some stability by repeating the entire function several times and averaging the results. The number of random starting values to use can be assigned through the `nstart` argument.
-
-```{r}
-k <- kmeans(x_0, centers = 10, nstart = 25)
-```
-
-## Heatmaps
-
-A powerful visualization tool for discovering clusters or patterns in your data is the heatmap. The idea is simple: plot an image of your data matrix with colors used as the visual cue and both the columns and rows ordered according to the results of a clustering algorithm. We will demonstrate this with the `tissue_gene_expression` dataset. We will scale the rows of the gene expression matrix.
-
-The first step is compute: 
-```{r}
-data("tissue_gene_expression")
-x <- sweep(tissue_gene_expression$x, 2, colMeans(tissue_gene_expression$x))
-h_1 <- hclust(dist(x))
-h_2 <- hclust(dist(t(x)))
-```
-
-
-Now we can use the results of this clustering to order the rows and columns.
-
-```{r heatmap, out.width="100%", fig.height=7, eval=FALSE}
-image(x[h_1$order, h_2$order])
-```
-
-But there is `heatmap` function that does it for us:
-
-```{r heatmap-2, out.width="100%", fig.height=7, eval=FALSE}
-heatmap(x, col = RColorBrewer::brewer.pal(11, "Spectral"))
-```
-
-We do not show the results of the heatmap function because there are too many features for the plot to be useful. We will therefore filter some columns and remake the plots.

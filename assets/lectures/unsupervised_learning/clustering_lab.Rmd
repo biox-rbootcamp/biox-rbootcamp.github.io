@@ -641,7 +641,7 @@ labels_colors(dend) <- c(
     `20160325.induced`="salmon"
 )[combined.fac][order.dendrogram(dend)]
 
-plot(dend)
+
 ```
 
 ```{r, echo=FALSE, results="hide", fig.show="hide"}
@@ -998,7 +998,7 @@ It can also simplify the interpretation of the subclusters, which only need to b
 However, this is a double-edged sword as it is difficult for practitioners to consider the uncertainty of identification for parent clusters when working with deep nesting.
 If cell types or states span cluster boundaries, conditioning on the putative cell type identity of the parent cluster can encourage the construction of a "house of cards" of cell type assignments, e.g., where a subcluster of one parent cluster is actually contamination from a cell type in a separate parent cluster.
 
-# Exercises: Clustering
+
 
 
 
