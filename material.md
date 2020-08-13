@@ -26,7 +26,7 @@ layout: cme195
 | 18 | Th |  | Summary: statistical models|  [Lab 18](./biox-rbootcamp.github.io/assets/lectures/linear_regression/LR-inClass.html)  [[Solution]](./biox-rbootcamp.github.io/assets/lectures/linear_regression/LR-inClass_solution.html) | [Lab 18 Rmd](./biox-rbootcamp.github.io/assets/lectures/linear_regression/LR-inClass.Rmd) [[Data]](./biox-rbootcamp.github.io/assets/lectures/linear_regression/data/meap93.RData)|
 | 19 | M | Unsupervised Learning | Lecture: Multivariate analysis|[Slides](https://web.stanford.edu/class/bios221/PCA_SVD_Slides.html#(1))| |    
 | 20 | W | | [Lecture: Clustering](https://drive.google.com/file/d/1ekIRX3Fi_TWMnwJhTeW4RrXslfot_sVE/view?usp=sharing) | [Lab 20](./biox-rbootcamp.github.io/assets/lectures/unsupervised_learning/clustering_lab.html) | [Lab 20 [Rmd]](./biox-rbootcamp.github.io/assets/lectures/unsupervised_learning/clustering_lab.Rmd) [sce416b Data](./biox-rbootcamp.github.io/assets/lectures/unsupervised_learning/sce416b.RData)|    
-| 21 | Th |  | In class on Clustering| [Lab 21 In class]() | [Lab 21 Rmd]() |    
+| 21 | Th |  | In class on Clustering| [Lab 21 In class](./biox-rbootcamp.github.io/assets/lectures/unsupervised_learning/Unsupervised_learning_incass.html) | [Lab 21 Rmd](./biox-rbootcamp.github.io/assets/lectures/unsupervised_learning/Unsupervised_learning_incass.Rmd) |    
 | 22 | M | Machine Learning | [Lecture Model Building]() | [Lab 22]()| |    
 | 23 | W | | [Lecture Classification]()| [Lab 23]() |  |    
 | 24 | Th | | [In-class Exercise]() | [Lab 24]() |  |
