@@ -200,7 +200,7 @@ Which of the models should you choose?
 
 Data was collected on doctor visits from a sample of 5,190 people in the 1977/1978 Australian Health Survey. Cameron (1986) sought to explain the variation in doctor visits using one or more explanatory variables. The data can be found in an R data set from `library(AER)` accessible with the command `DoctorVisits`. Variable descriptions can be found under `help("DoctorVisits")`
 
-Explore the use of a zero-inflated model for this data. Begin with a histogram of the number of visits, some EDA, and fitting several models. Summarize your results.Summarize your results. Compare your results with a standard Poisson.
+Explore the use of a zero-inflated model for this data. Begin with a histogram of the number of visits, some EDA, and fitting several models. Summarize your results.Summarize your results. Compare your results with a standard Poisson. 
 
 
 
