@@ -1,7 +1,7 @@
 ---
-title: 'Lab 8: Machine Learning'
-author: "Bios221"
-date: "2019-07-11"
+title: 'Lab 22: Machine Learning'
+author: "BioX R Bootcamp"
+date: "2020-08-17"
 output: 
   html_document:
     toc: true
@@ -30,11 +30,9 @@ knitr::opts_chunk$set(echo = TRUE, cache = TRUE, autodep = TRUE)
 # Goal
 
 In this lab we will learn the basics of Machine Learning (ML). We will focus 
-on supervised learning. There is a corresponding quiz on Canvas -- the questions 
-are dispersed throughout this lab (called Quiz question). There are also 
-additional questions which you do not have to turn in. 
+on supervised learning. 
 
-# Setup Git and GitHub
+# Setup Git and GitHub (Optional)
 
 Before delving into the Machine Learning applications, we will first quickly learn how to use git and GitHub as a way to keep track of your code. This will hopefully be useful for you in your future data analysis projects!
 
@@ -266,9 +264,9 @@ be interesting to reduce the replications to 1 since with real datasets you
 don't have the luxury of repeating the data generation!)
 
 
-```{r curseofdim, warning = FALSE}
+```{r curseofdim, warning = FALSE, cache = T}
 n = 20
-p   = 2:20
+p = 2:20
 # This will take a while
 mcl = replicate(100, {
   xmat = matrix(rnorm(n * last(p)), nrow = n)
