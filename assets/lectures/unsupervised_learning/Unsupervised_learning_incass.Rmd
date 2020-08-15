@@ -161,7 +161,7 @@ e. What do you observe? How does tSNE compare with PCA in this case?
 
 # Exercise 3: Ads
 
-a. Read the data from "http://www-bcf.usc.edu/~gareth/ISL/Advertising.csv"
+a. Read the data from "http://faculty.marshall.usc.edu/gareth-james/ISL/Advertising.csv"
 containing information on sales of a product and the amount spent on advertising
 using different media channels.
 
