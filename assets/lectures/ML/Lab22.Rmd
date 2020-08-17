@@ -1,0 +1,1328 @@
+---
+title: "Lab 23: Model Selection and Non-linear methods"
+author: "bioX Data Science bootcamp "
+date: "8/19/2020"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Objectives and goals
+
+This last discussion (we'll do an in-class on Thursday) will focus on two last essential bricks of data analysis: (a) Variable selection and, as an optional (yet useful topic in predictions and Machine learning) (b) Random Forests.
+
+Your objectives for this week (no video this time!):
+
+- Read [Chapter 6 of ISL](http://faculty.marshall.usc.edu/gareth-james/ISL/ISLR%20Seventh%20Printing.pdf) for reference on variable selection and model building.
+- Optional: Read [Chapter 8 of ISL](http://faculty.marshall.usc.edu/gareth-james/ISL/ISLR%20Seventh%20Printing.pdf) for reference on tree based methods.
+- Go through the following lab. Run the chunks of code, make modifications as you see fit, and be prepared to answer questions during the discussion.
+
+
+
+# Variable Selection and Model Building
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(cache = TRUE, autodep = TRUE, fig.align = "center")
+```
+
+> "Choose well. Your choice is brief, and yet endless."
+>
+> --- **Johann Wolfgang von Goethe**
+
+After reading this chapter you will be able to:
+
+- Understand the trade-off between goodness-of-fit and model complexity.
+- Use variable selection procedures to find a good model from a set of possible models.
+- Understand the two uses of models: explanation and prediction.
+
+
+We discussed during the discussion on Monday the need to select a subset of predictors among many, in particular to avoid overfitting and to improve on the interpretability of our model --- aspects which are often essential in biology. This chapter, we will discuss several *criteria* and *procedures* for choosing a "good" model from among a choice of many.
+
+To give a little bit of motivation, here is the setting that we are considering. Suppose you have a dataset with $n$ observations of $p+1$ variables, and you would like to build a model to predict one of them (let's call it $y$ ) based on the remaining $p$. But $p$ is very large: suppose you are looking at genes, and $y$ is a binary variable (eg, cancer/ not cancer). Ideally, you would like to find a subset $p_1 <<< p$ of variables that you can associate with cancer. But how do you find that subset?
+
+The statistical recipe for this setting has two components, which are subsequently discussed:
+
++ An evaluation criterion (how do you judge whether one model is better than another)?
++ A variable selection procedure.
+
+## Quality Criterion
+
+So far, we have seen criteria such as $R^2$ and $\text{RMSE}$ for assessing quality of fit (see the labs on linear regression). However, both of these have a fatal flaw. By increasing the size of a model, that is adding predictors, that can at worst not improve. It is impossible to add a predictor to a model and make $R^2$ or $\text{RMSE}$ worse. That means, if we were to use either of these to chose between models, we would *always* simply choose the larger model. Eventually we would simply be fitting to noise.
+
+This suggests that we need a quality criteria that takes into account the size of the model, since our preference is for small models that still fit well. We are willing to sacrifice a small amount of "goodness-of-fit" for obtaining a smaller model. (Here we use "goodness-of-fit" to simply mean how far the data is from the model, the smaller the errors the better. Often in statistics, goodness-of-fit can have a more precise meaning.) We will look at three criteria that do this explicitly: $\text{AIC}$, $\text{BIC}$, and Adjusted $R^2$. We will also look at one, Cross-Validated $\text{RMSE}$, which implicitly considers the size of the model. 
+
+
+
+### Akaike Information Criterion
+
+The first criteria we will discuss is the Akaike Information Criterion, or $\text{AIC}$ for short. (Note that, when *Akaike* first introduced this metric, it was simply called *An* Information Criterion. The *A* has changed meaning over the years.)
+
+Recall, the maximized log-likelihood of a regression model can be written as
+
+\[
+\log L(\boldsymbol{\hat{\beta}}, \hat{\sigma}^2) = -\frac{n}{2}\log(2\pi) - \frac{n}{2}\log\left(\frac{\text{RSS}}{n}\right) - \frac{n}{2},
+\]
+
+where $\text{RSS} = \sum_{i=1}^n (y_i - \hat{y}_i) ^ 2$ and $\boldsymbol{\hat{\beta}}$ and $\hat{\sigma}^2$ were chosen to maximize the likelihood.
+
+Then we can define $\text{AIC}$ as
+
+\[
+\text{AIC} = -2 \log L(\boldsymbol{\hat{\beta}}, \hat{\sigma}^2) + 2p = n + n \log(2\pi) + n \log\left(\frac{\text{RSS}}{n}\right) + 2p,
+\]
+
+which is a measure of quality of the model. The smaller the $\text{AIC}$, the better. To see why, let's talk about the two main components of $\text{AIC}$, the **likelihood** (which measures "goodness-of-fit") and the **penalty** (which is a function of the size of the model).
+
+The likelihood portion of $\text{AIC}$ is given by
+
+\[
+-2 \log L(\boldsymbol{\hat{\beta}}, \hat{\sigma}^2) = n + n \log(2\pi) + n \log\left(\frac{\text{RSS}}{n}\right).
+\]
+
+For the sake of comparing models, the only term here that will change is $n \log\left(\frac{\text{RSS}}{n}\right)$, which is function of $\text{RSS}$. The 
+
+\[
+n + n \log(2\pi)
+\]
+
+terms will be constant across all models applied to the same data. So, when a model fits well, that is, has a low $\text{RSS}$, then this likelihood component will be small.
+
+Similarly, we can discuss the penalty component of $\text{AIC}$ which is,
+
+\[
+2p,
+\]
+
+where $p$ is the number of $\beta$ parameters in the model. We call this a penalty, because it is large when $p$ is large, but we are seeking to find a small $\text{AIC}$
+
+Thus, a good model, that is one with a small $\text{AIC}$, will have a good balance between fitting well, and using a small number of parameters. For comparing models
+
+\[
+\text{AIC} = n\log\left(\frac{\text{RSS}}{n}\right) + 2p
+\]
+
+is a sufficient expression, as $n + n \log(2\pi)$ is the same across all models for any particular dataset.
+
+### Bayesian Information Criterion
+
+The Bayesian Information Criterion, or $\text{BIC}$, is similar to $\text{AIC}$, but has a larger penalty. $\text{BIC}$ also quantifies the trade-off between a model which fits well and the number of model parameters, however for a reasonable sample size, generally picks a smaller model than $\text{AIC}$. Again, for model selection use the model with the smallest $\text{BIC}$.
+
+\[
+\text{BIC} = -2 \log L(\boldsymbol{\hat{\beta}}, \hat{\sigma}^2) + \log(n) p = n + n\log(2\pi) + n\log\left(\frac{\text{RSS}}{n}\right) + \log(n)p.
+\]
+
+Notice that the $\text{AIC}$ penalty was
+
+\[
+2p,
+\]
+
+whereas for $\text{BIC}$, the penalty is 
+
+\[
+\log(n) p.
+\]
+
+So, for any dataset where $log(n) > 2$ the $\text{BIC}$ penalty will be larger than the $\text{AIC}$ penalty, thus $\text{BIC}$ will likely prefer a smaller model.  
+
+Note that, sometimes the penalty is considered a general expression of the form
+
+\[
+k \cdot p.
+\]
+
+Then, for $\text{AIC}$ $k = 2$, and for $\text{BIC}$ $k = \log(n)$.
+
+For comparing models
+
+\[
+\text{BIC} = n\log\left(\frac{\text{RSS}}{n}\right) + \log(n)p
+\]
+
+is again a sufficient expression, as $n + n \log(2\pi)$ is the same across all models for any particular dataset.
+
+### Adjusted R-Squared
+
+Recall,
+
+\[
+R^2 = 1 - \frac{\text{SSE}}{\text{SST}} = 1 - \frac{\sum_{i=1}^{n}(y_i - \hat{y}_i)^2}{\sum_{i=1}^{n}(y_i - \bar{y})^2}.
+\]
+
+We now define
+
+\[
+R_a^2 = 1 - \frac{\text{SSE}/(n-p)}{\text{SST}/(n-1)} = 1 - \left(  \frac{n-1}{n-p} \right)(1-R^2)
+\]
+
+which we call the Adjusted $R^2$.
+
+Unlike $R^2$ which can never become smaller with added predictors, Adjusted $R^2$ effectively penalizes for additional predictors, and can decrease with added predictors. Like $R^2$, larger is still better.
+
+### Cross-Validated RMSE
+
+Each of the previous three metrics explicitly used $p$, the number of parameters, in their calculations. Thus, they all explicitly limit the size of models chosen when used to compare models.
+
+We'll now briefly introduce **overfitting** and **cross-validation**.
+
+```{r}
+make_poly_data = function(sample_size = 11) {
+  x = seq(0, 10)
+  y = 3 + x + 4 * x ^ 2 + rnorm(n = sample_size, mean = 0, sd = 20)
+  data.frame(x, y)
+}
+```
+
+```{r}
+set.seed(1234)
+poly_data = make_poly_data()
+```
+
+Here we have generated data where the mean of $Y$ is a quadratic function of a single predictor $x$, specifically,
+
+\[
+Y = 3 + x + 4 x ^ 2 + \epsilon.
+\]
+
+We'll now fit two models to this data, one which has the correct form, quadratic, and one that is large, which includes terms up to and including an eighth degree.
+
+```{r}
+fit_quad = lm(y ~ poly(x, degree = 2), data = poly_data)
+fit_big  = lm(y ~ poly(x, degree = 8), data = poly_data)
+```
+
+We then plot the data and the results of the two models.
+
+```{r}
+plot(y ~ x, data = poly_data, ylim = c(-100, 400), cex = 2, pch = 20)
+xplot = seq(0, 10, by = 0.1)
+lines(xplot, predict(fit_quad, newdata = data.frame(x = xplot)),
+      col = "dodgerblue", lwd = 2, lty = 1)
+lines(xplot, predict(fit_big, newdata = data.frame(x = xplot)),
+      col = "darkorange", lwd = 2, lty = 2)
+```
+
+We can see that the solid blue curve models this data rather nicely. The dashed orange curve fits the points better, making smaller errors, however it is unlikely that it is correctly modeling the true relationship between $x$ and $y$. It is fitting the random noise. This is an example of **overfitting**.
+
+We see that the larger model indeed has a lower $\text{RMSE}$.
+
+```{r}
+sqrt(mean(resid(fit_quad) ^ 2))
+sqrt(mean(resid(fit_big) ^ 2))
+```
+
+To correct for this, we will introduce cross-validation. We define the leave-one-out cross-validated RMSE to be
+
+\[
+\text{RMSE}_{\text{LOOCV}} = \sqrt{\frac{1}{n} \sum_{i=1}^n e_{[i]}^2}.
+\]
+
+The $e_{[i]}$ are the residual for the $i$th observation, when that observation is **not** used to fit the model.
+
+\[
+e_{[i]} = y_{i} - \hat{y}_{[i]}
+\]
+
+That is, the fitted value is calculated as
+
+\[
+\hat{y}_{[i]} = \boldsymbol{x}_i ^ \top \hat{\beta}_{[i]}
+\]
+
+where $\hat{\beta}_{[i]}$ are the estimated coefficients when the $i$th observation is removed from the dataset.
+
+In general, to perform this calculation, we would be required to fit the model $n$ times, once with each possible observation removed. However, for leave-one-out cross-validation and linear models, the equation can be rewritten as
+
+\[
+\text{RMSE}_{\text{LOOCV}} = \sqrt{\frac{1}{n}\sum_{i=1}^n \left(\frac{e_{i}}{1-h_{i}}\right)^2},
+\]
+
+where $h_i$ are the leverages and $e_i$ are the usual residuals. This is great, because now we can obtain the LOOCV $\text{RMSE}$ by fitting only one model! In practice 5 or 10 fold cross-validation are much more popular. For example, in 5-fold cross-validation, the model is fit 5 times, each time leaving out a fifth of the data, then predicting on those values. We'll leave in-depth examination of cross-validation to a machine learning course, and simply use LOOCV here.
+
+Let's calculate LOOCV $\text{RMSE}$ for both models, then discuss *why* we want to do so. We first write a function which calculates the LOOCV $\text{RMSE}$ as defined using the shortcut formula for linear models.
+
+```{r}
+calc_loocv_rmse = function(model) {
+  sqrt(mean((resid(model) / (1 - hatvalues(model))) ^ 2))
+}
+```
+
+Then calculate the metric for both models.
+
+```{r}
+calc_loocv_rmse(fit_quad)
+calc_loocv_rmse(fit_big)
+```
+
+Now we see that the quadratic model has a much smaller LOOCV $\text{RMSE}$, so we would prefer this quadratic model. This is because the large model has *severely* over-fit the data. By leaving a single data point out and fitting the large model, the resulting fit is much different than the fit using all of the data. For example, let's leave out the third data point and fit both models, then plot the result.
+
+```{r}
+fit_quad_removed = lm(y ~ poly(x, degree = 2), data = poly_data[-3, ])
+fit_big_removed  = lm(y ~ poly(x, degree = 8), data = poly_data[-3, ])
+
+plot(y ~ x, data = poly_data, ylim = c(-100, 400), cex = 2, pch = 20)
+xplot = seq(0, 10, by = 0.1)
+lines(xplot, predict(fit_quad_removed, newdata = data.frame(x = xplot)),
+      col = "dodgerblue", lwd = 2, lty = 1)
+lines(xplot, predict(fit_big_removed, newdata = data.frame(x = xplot)),
+      col = "darkorange", lwd = 2, lty = 2)
+```
+
+We see that on average, the solid blue line for the quadratic model has similar errors as before. It has changed very slightly. However, the dashed orange line for the large model, has a huge error at the point that was removed and is much different that the previous fit.
+
+This is the purpose of cross-validation. By assessing how the model fits points that were not used to perform the regression, we get an idea of how well the model will work for future observations. It assess how well the model works in general, not simply on the observed data.
+
+## Selection Procedures
+
+We've now seen a number of model quality criteria, but now we need to address which models to consider. Model selection involves both a quality criterion, plus a search procedure. 
+
+```{r}
+library(faraway)
+hipcenter_mod = lm(hipcenter ~ ., data = seatpos)
+coef(hipcenter_mod)
+```
+
+Let's return to the `seatpos` data from the `faraway` package. Now, let's consider only models with first order terms, thus no interactions and no polynomials. There are *eight* predictors in this model. So if we consider all possible models, ranging from using 0 predictors, to all eight predictors, there are 
+
+\[
+\sum_{k = 0}^{p - 1} {{p - 1} \choose {k}} = 2 ^ {p - 1} = 2 ^ 8 = 256
+\]
+
+possible models.
+
+If we had 10 or more predictors, we would already be considering over 1000 models! For this reason, we often search through possible models in an intelligent way, bypassing some models that are unlikely to be considered good. We will consider three search procedures: backwards, forwards, and stepwise.
+
+### Backward Search
+
+Backward selection procedures start with all possible predictors in the model, then considers how deleting a single predictor will effect a chosen metric. Let's try this on the `seatpos` data. We will use the `step()` function in `R` which by default uses $\text{AIC}$ as its metric of choice.
+
+```{r}
+hipcenter_mod_back_aic = step(hipcenter_mod, direction = "backward")
+```
+
+We start with the model `hipcenter ~ .`, which is otherwise known as `hipcenter ~ Age + Weight + HtShoes + Ht + Seated + Arm + Thigh + Leg`. `R` will then repeatedly attempt to delete a predictor until it stops, or reaches the model `hipcenter ~ 1`, which contains no predictors.
+
+At each "step", `R` reports the current model, its $\text{AIC}$, and the possible steps with their $\text{RSS}$ and more importantly $\text{AIC}$.
+
+In this example, at the first step, the current model is `hipcenter ~ Age + Weight + HtShoes + Ht + Seated + Arm + Thigh + Leg` which has an AIC of `283.62`. Note that when `R` is calculating this value, it is using `extractAIC()`, which uses the expression
+
+\[
+\text{AIC} = n\log\left(\frac{\text{RSS}}{n}\right) + 2p,
+\]
+
+which we quickly verify.
+
+```{r}
+extractAIC(hipcenter_mod) # returns both p and AIC
+n = length(resid(hipcenter_mod))
+(p = length(coef(hipcenter_mod)))
+n * log(mean(resid(hipcenter_mod) ^ 2)) + 2 * p
+```
+
+Returning to the first step, `R` then gives us a row which shows the effect of deleting each of the current predictors. The `-` signs at the beginning of each row indicates we are considering removing a predictor. There is also a row with `<none>` which is a row for keeping the current model. Notice that this row has the smallest $\text{RSS}$, as it is the largest model.
+
+We see that every row above `<none>` has a smaller $\text{AIC}$ than the row for `<none>` with the one at the top, `Ht`, giving the lowest $\text{AIC}$. Thus we remove `Ht` from the model, and continue the process.
+
+Notice, in the second step, we start with the model `hipcenter ~ Age + Weight + HtShoes + Seated + Arm + Thigh + Leg` and the variable `Ht` is no longer considered.
+
+We continue the process until we reach the model `hipcenter ~ Age + HtShoes + Leg`. At this step, the row for `<none>` tops the list, as removing any additional variable will not improve the $\text{AIC}$ This is the model which is stored in `hipcenter_mod_back_aic`.
+
+```{r}
+coef(hipcenter_mod_back_aic)
+```
+
+We could also search through the possible models in a backwards fashion using $\text{BIC}$. To do so, we again use the `step()` function, but now specify `k = log(n)`, where `n` stores the number of observations in the data.
+
+```{r}
+n = length(resid(hipcenter_mod))
+hipcenter_mod_back_bic = step(hipcenter_mod, direction = "backward", k = log(n))
+```
+
+The procedure is exactly the same, except at each step we look to improve the $\text{BIC}$, which `R` still labels $\text{AIC}$ in the output.
+
+The variable `hipcenter_mod_back_bic` stores the model chosen by this procedure.
+
+```{r}
+coef(hipcenter_mod_back_bic)
+```
+
+We note that this model is *smaller*, has fewer predictors, than the model chosen by $\text{AIC}$, which is what we would expect. Also note that while both models are different, neither uses both `Ht` and `HtShoes` which are extremely correlated.
+
+We can use information from the `summary()` function to compare their Adjusted $R^2$ values. Note that either selected model performs better than the original full model.
+
+```{r}
+summary(hipcenter_mod)$adj.r.squared
+summary(hipcenter_mod_back_aic)$adj.r.squared
+summary(hipcenter_mod_back_bic)$adj.r.squared
+```
+
+We can also calculate the LOOCV $\text{RMSE}$ for both selected models, as well as the full model.
+
+```{r}
+calc_loocv_rmse(hipcenter_mod)
+calc_loocv_rmse(hipcenter_mod_back_aic)
+calc_loocv_rmse(hipcenter_mod_back_bic)
+```
+
+We see that we would prefer the model chosen via $\text{BIC}$ if using LOOCV $\text{RMSE}$ as our metric.
+
+### Forward Search
+
+Forward selection is the exact opposite of backwards selection. Here we tell `R` to start with a model using no predictors, that is `hipcenter ~ 1`, then at each step `R` will attempt to add a predictor until it finds a good model or reaches `hipcenter ~ Age + Weight + HtShoes + Ht + Seated + Arm + Thigh + Leg`.
+
+```{r}
+hipcenter_mod_start = lm(hipcenter ~ 1, data = seatpos)
+hipcenter_mod_forw_aic = step(
+  hipcenter_mod_start, 
+  scope = hipcenter ~ Age + Weight + HtShoes + Ht + Seated + Arm + Thigh + Leg, 
+  direction = "forward")
+```
+
+Again, by default `R` uses $\text{AIC}$ as its quality metric when using the `step()` function. Also note that now the rows begin with a `+` which indicates addition of predictors to the current model from any step.
+
+```{r}
+hipcenter_mod_forw_bic = step(
+  hipcenter_mod_start, 
+  scope = hipcenter ~ Age + Weight + HtShoes + Ht + Seated + Arm + Thigh + Leg, 
+  direction = "forward", k = log(n))
+```
+
+We can make the same modification as last time to instead use $\text{BIC}$ with forward selection.
+
+```{r}
+summary(hipcenter_mod)$adj.r.squared
+summary(hipcenter_mod_forw_aic)$adj.r.squared
+summary(hipcenter_mod_forw_bic)$adj.r.squared
+```
+
+We can compare the two selected models' Adjusted $R^2$ as well as their LOOCV $\text{RMSE}$ The results are very similar to those using backwards selection, although the models are not exactly the same.
+
+```{r}
+calc_loocv_rmse(hipcenter_mod)
+calc_loocv_rmse(hipcenter_mod_forw_aic)
+calc_loocv_rmse(hipcenter_mod_forw_bic)
+```
+
+### Stepwise Search
+
+Stepwise search checks going both backwards and forwards at every step. It considers the addition of any variable not currently in the model, as well as the removal of any variable currently in the model.
+
+Here we perform stepwise search using $\text{AIC}$ as our metric. We start with the model `hipcenter ~ 1` and search up to `hipcenter ~ Age + Weight + HtShoes + Ht + Seated + Arm + Thigh + Leg`. Notice that at many of the steps, some row begin with `-`, while others begin with `+`.
+
+```{r}
+hipcenter_mod_both_aic = step(
+  hipcenter_mod_start, 
+  scope = hipcenter ~ Age + Weight + HtShoes + Ht + Seated + Arm + Thigh + Leg, 
+  direction = "both")
+```
+
+We could again instead use $\text{BIC}$ as our metric.
+
+```{r}
+hipcenter_mod_both_bic = step(
+  hipcenter_mod_start, 
+  scope = hipcenter ~ Age + Weight + HtShoes + Ht + Seated + Arm + Thigh + Leg, 
+  direction = "both", k = log(n))
+```
+
+Adjusted $R^2$ and LOOCV $\text{RMSE}$ comparisons are similar to backwards and forwards, which is not at all surprising, as some of the models selected are the same as before.
+
+```{r}
+summary(hipcenter_mod)$adj.r.squared
+summary(hipcenter_mod_both_aic)$adj.r.squared
+summary(hipcenter_mod_both_bic)$adj.r.squared
+```
+
+```{r}
+calc_loocv_rmse(hipcenter_mod)
+calc_loocv_rmse(hipcenter_mod_both_aic)
+calc_loocv_rmse(hipcenter_mod_both_bic)
+```
+
+### Exhaustive Search
+
+Backward, forward, and stepwise search are all useful, but do have an obvious issue. By not checking every possible model, sometimes they will miss the best possible model. With an extremely large number of predictors, sometimes this is necessary since checking every possible model would be rather time consuming, even with current computers.
+
+However, with a reasonably sized dataset, it isn't too difficult to check all possible models. To do so, we will use the `regsubsets()` function in the `R` package `leaps`.
+
+```{r}
+library(leaps)
+all_hipcenter_mod = summary(regsubsets(hipcenter ~ ., data = seatpos))
+```
+
+A few points about this line of code. First, note that we immediately use `summary()` and store those results. That is simply the intended use of `regsubsets()`. Second, inside of `regsubsets()` we specify the model `hipcenter ~ .`. This will be the largest model considered, that is the model using all first-order predictors, and `R` will check all possible subsets.
+
+We'll now look at the information stored in `all_hipcenter_mod`.
+
+```{r}
+all_hipcenter_mod$which
+```
+
+Using `$which` gives us the best model, according to $\text{RSS}$, for a model of each possible size, in this case ranging from one to eight predictors. For example the best model with four predictors ($p = 5$) would use `Age`, `HtShoes`, `Thigh`, and `Leg`.
+
+```{r}
+all_hipcenter_mod$rss
+```
+
+We can obtain the $\text{RSS}$ for each of these models using `$rss`. Notice that these are decreasing since the models range from small to large.
+
+Now that we have the $\text{RSS}$ for each of these models, it is rather easy to obtain $\text{AIC}$, $\text{BIC}$, and Adjusted $R^2$ since they are all a function of $\text{RSS}$ Also, since we have the models with the best $\text{RSS}$ for each size, they will result in the models with the best $\text{AIC}$, $\text{BIC}$, and Adjusted $R^2$ for each size. Then by picking from those, we can find the overall best $\text{AIC}$, $\text{BIC}$, and Adjusted $R^2$.
+
+Conveniently, Adjusted $R^2$ is automatically calculated.
+
+```{r}
+all_hipcenter_mod$adjr2
+```
+
+To find which model has the highest Adjusted $R^2$ we can use the `which.max()` function.
+
+```{r}
+(best_r2_ind = which.max(all_hipcenter_mod$adjr2))
+```
+
+We can then extract the predictors of that model.
+
+```{r}
+all_hipcenter_mod$which[best_r2_ind, ]
+```
+
+We'll now calculate $\text{AIC}$ and $\text{BIC}$ for each of the models with the best $\text{RSS}$. To do so, we will need both $n$ and the $p$ for the largest possible model.
+
+```{r}
+p = length(coef(hipcenter_mod))
+n = length(resid(hipcenter_mod))
+```
+
+We'll use the form of $\text{AIC}$ which leaves out the constant term that is equal across all models.
+
+\[
+\text{AIC} = n\log\left(\frac{\text{RSS}}{n}\right) + 2p.
+\]
+
+Since we have the $\text{RSS}$ of each model stored, this is easy to calculate.
+
+```{r}
+hipcenter_mod_aic = n * log(all_hipcenter_mod$rss / n) + 2 * (2:p)
+```
+
+We can then extract the predictors of the model with the best $\text{AIC}$.
+
+```{r}
+best_aic_ind = which.min(hipcenter_mod_aic)
+all_hipcenter_mod$which[best_aic_ind,]
+```
+
+Let's fit this model so we can compare to our previously chosen models using $\text{AIC}$ and search procedures.
+
+```{r}
+hipcenter_mod_best_aic = lm(hipcenter ~ Age + Ht + Leg, data = seatpos)
+```
+
+The `extractAIC()` function will calculate the $\text{AIC}$ defined above for a fitted model.
+
+```{r}
+extractAIC(hipcenter_mod_best_aic)
+extractAIC(hipcenter_mod_back_aic)
+extractAIC(hipcenter_mod_forw_aic)
+extractAIC(hipcenter_mod_both_aic)
+```
+
+We see that two of the models chosen by search procedures have the best possible $\text{AIC}$, as they are the same model. This is however never guaranteed. We see that the model chosen using backwards selection does not achieve the smallest possible $\text{AIC}$.
+
+```{r}
+plot(hipcenter_mod_aic ~ I(2:p), ylab = "AIC", xlab = "p, number of parameters", 
+     pch = 20, col = "dodgerblue", type = "b", cex = 2,
+     main = "AIC vs Model Complexity")
+```
+
+We could easily repeat this process for $\text{BIC}$.
+
+\[
+\text{BIC} = n\log\left(\frac{\text{RSS}}{n}\right) + \log(n)p.
+\]
+
+```{r}
+hipcenter_mod_bic = n * log(all_hipcenter_mod$rss / n) + log(n) * (2:p)
+```
+
+```{r}
+which.min(hipcenter_mod_bic)
+all_hipcenter_mod$which[1,]
+```
+
+```{r}
+hipcenter_mod_best_bic = lm(hipcenter ~ Ht, data = seatpos)
+```
+
+```{r}
+extractAIC(hipcenter_mod_best_bic, k = log(n))
+extractAIC(hipcenter_mod_back_bic, k = log(n))
+extractAIC(hipcenter_mod_forw_bic, k = log(n))
+extractAIC(hipcenter_mod_both_bic, k = log(n))
+```
+
+## Higher Order Terms
+
+So far we have only allowed first-order terms in our models. Let's return to the `autompg` dataset to explore higher-order terms.
+
+```{r}
+autompg = read.table(
+  "http://archive.ics.uci.edu/ml/machine-learning-databases/auto-mpg/auto-mpg.data",
+  quote = "\"",
+  comment.char = "",
+  stringsAsFactors = FALSE)
+colnames(autompg) = c("mpg", "cyl", "disp", "hp", "wt", "acc", 
+                      "year", "origin", "name")
+autompg = subset(autompg, autompg$hp != "?")
+autompg = subset(autompg, autompg$name != "plymouth reliant")
+rownames(autompg) = paste(autompg$cyl, "cylinder", autompg$year, autompg$name)
+autompg$hp = as.numeric(autompg$hp)
+autompg$domestic = as.numeric(autompg$origin == 1)
+autompg = autompg[autompg$cyl != 5,]
+autompg = autompg[autompg$cyl != 3,]
+autompg$cyl = as.factor(autompg$cyl)
+autompg$domestic = as.factor(autompg$domestic)
+autompg = subset(autompg, select = c("mpg", "cyl", "disp", "hp", 
+                                     "wt", "acc", "year", "domestic"))
+```
+
+```{r}
+str(autompg)
+```
+
+Recall that we have two factor variables, `cyl` and `domestic`. The `cyl` variable has three levels, while the `domestic` variable has only two. Thus the `cyl` variable will be coded using two dummy variables, while the `domestic` variable will only need one. We will pay attention to this later.
+
+```{r, fig.height=8, fig.width=8}
+pairs(autompg, col = "dodgerblue")
+```
+
+We'll use the `pairs()` plot to determine which variables may benefit from a quadratic relationship with the response. We'll also consider all possible two-way interactions. We won't consider any three-order or higher. For example, we won't consider the interaction between first-order terms and the added quadratic terms.
+
+So now, we'll fit this rather large model. We'll use a log-transformed response. Notice that `log(mpg) ~ . ^ 2` will automatically consider all first-order terms, as well as all two-way interactions. We use `I(var_name ^ 2)` to add quadratic terms for some variables. This generally works better than using `poly()` when performing variable selection.
+
+```{r}
+autompg_big_mod = lm(
+  log(mpg) ~ . ^ 2 + I(disp ^ 2) + I(hp ^ 2) + I(wt ^ 2) + I(acc ^ 2), 
+  data = autompg)
+```
+
+We think it is rather unlikely that we truly need all of these terms. There are quite a few!
+
+```{r}
+length(coef(autompg_big_mod))
+```
+
+We'll try backwards search with both $\text{AIC}$ and $\text{BIC}$ to attempt to find a smaller, more reasonable model.
+
+```{r}
+autompg_mod_back_aic = step(autompg_big_mod, direction = "backward", trace = 0)
+```
+
+Notice that we used `trace = 0` in the function call. This suppress the output for each step, and simply stores the chosen model. This is useful, as this code would otherwise create a large amount of output. If we had viewed the output, which you can try on your own by removing `trace = 0`, we would see that `R` only considers the `cyl` variable as a single variable, despite the fact that it is coded using two dummy variables. So removing `cyl` would actually remove two parameters from the resulting model.
+
+You should also notice that `R` respects hierarchy when attempting to remove variables. That is, for example, `R` will not consider removing `hp` if `hp:disp` or `I(hp ^ 2)` are currently in the model.
+
+We also use $\text{BIC}$.
+
+```{r}
+n = length(resid(autompg_big_mod))
+autompg_mod_back_bic = step(autompg_big_mod, direction = "backward", 
+                            k = log(n), trace = 0)
+```
+
+Looking at the coefficients of the two chosen models, we see they are still rather large.
+
+```{r}
+coef(autompg_mod_back_aic)
+coef(autompg_mod_back_bic)
+```
+
+However, they are much smaller than the original full model. Also notice that the resulting models respect hierarchy.
+
+```{r}
+length(coef(autompg_big_mod))
+length(coef(autompg_mod_back_aic))
+length(coef(autompg_mod_back_bic))
+```
+
+Calculating the LOOCV $\text{RMSE}$ for each, we see that the model chosen using $\text{BIC}$ performs the best. That means that it is both the best model for prediction, since it achieves the best LOOCV $\text{RMSE}$, but also the best model for explanation, as it is also the smallest.
+
+```{r}
+calc_loocv_rmse(autompg_big_mod)
+calc_loocv_rmse(autompg_mod_back_aic)
+calc_loocv_rmse(autompg_mod_back_bic)
+```
+
+## Explanation versus Prediction
+
+Throughout this chapter, we have attempted to find reasonably "small" models, which are good at **explaining** the relationship between the response and the predictors, that also have small errors which are thus good for making **predictions**.
+
+We'll further discuss the model `autompg_mod_back_bic` to better explain the difference between using models for *explaining* and *predicting*. This is the model fit to the `autompg` data that was chosen using Backwards Search and $\text{BIC}$, which obtained the lowest LOOCV $\text{RMSE}$ of the models we considered.
+
+```{r}
+autompg_mod_back_bic
+```
+
+Notice this is a somewhat "large" model, which uses `r length(coef(autompg_mod_back_bic))` parameters, including several interaction terms. Do we care that this is a "large" model? The answer is, **it depends**.
+
+### Explanation
+
+Suppose we would like to use this model for explanation. Perhaps we are a car manufacturer trying to engineer a fuel efficient vehicle. If this is the case, we are interested in both what predictor variables are useful for explaining the car's fuel efficiency, as well as how those variables effect fuel efficiency. By understanding this relationship, we can use this knowledge to our advantage when designing a car.
+
+To explain a relationship, we are interested in keeping models as small as possible, since smaller models are easy to interpret. The fewer predictors the less considerations we need to make in our design process. Also the fewer interactions and polynomial terms, the easier it is to interpret any one parameter, since the parameter interpretations are conditional on which parameters are in the model.
+
+Note that *linear* models are rather interpretable to begin with. Later in your data analysis careers, you will see more complicated models that may fit data better, but are much harder, if not impossible to interpret. These models aren't very useful for explaining a relationship.
+
+To find small and interpretable models, we would use selection criterion that *explicitly* penalize larger models, such as AIC and BIC. In this case we still obtained a somewhat large model, but much smaller than the model we used to start the selection process.
+
+#### Correlation and Causation
+
+A word of caution when using a model to *explain* a relationship. There are two terms often used to describe a relationship between two variables: *causation* and *correlation*. [Correlation](https://xkcd.com/552/){target="_blank"} is often also referred to as association.
+
+Just because two variable are correlated does not necessarily mean that one causes the other. For example, considering modeling `mpg` as only a function of `hp`.
+
+```{r}
+plot(mpg ~ hp, data = autompg, col = "dodgerblue", pch = 20, cex = 1.5)
+```
+
+Does an increase in horsepower cause a drop in fuel efficiency? Or, perhaps the causality is reversed and an increase in fuel efficiency cause a decrease in horsepower. Or, perhaps there is a third variable that explains both!
+
+The issue here is that we have **observational** data. With observational data, we can only detect associations. To speak with confidence about causality, we would need to run **experiments**.
+
+This is a concept that you should encounter often in your statistics education. For some further reading, and some related fallacies, see: [Wikipedia: Correlation does not imply causation](https://en.wikipedia.org/wiki/Correlation_does_not_imply_causation){target="_blank"}.
+
+### Prediction
+
+Suppose now instead of the manufacturer who would like to build a car, we are a consumer who wishes to purchase a new car. However this particular car is so new, it has not been rigorously tested, so we are unsure of what fuel efficiency to expect. (And, as skeptics, we don't trust what the manufacturer is telling us.)
+
+In this case, we would like to use the model to help *predict* the fuel efficiency of this car based on its attributes, which are the predictors of the model. The smaller the errors the model makes, the more confident we are in its prediction. Thus, to find models for prediction, we would use selection criterion that *implicitly* penalize larger models, such as LOOCV $\text{RMSE}$. So long as the model does not over-fit, we do not actually care how large the model becomes. Explaining the relationship between the variables is not our goal here, we simply want to know what kind of fuel efficiency we should expect!
+
+If we **only** care about prediction, we don't need to worry about correlation vs causation, and we don't need to worry about model assumptions. 
+
+If a variable is correlated with the response, it doesn't actually matter if it causes an effect on the response, it can still be useful for prediction. For example, in elementary school aged children their shoe size certainly doesn't *cause* them to read at a higher level, however we could very easily use shoe size to make a prediction about a child's reading ability. The larger their shoe size, the better they read. There's a lurking variable here though, their age! (Don't send your kids to school with size 14 shoes, it won't make them read better!)
+
+We also don't care about model assumptions. Least squares is least squares. For a specified model, it will find the values of the parameters which will minimize the squared error loss. Your results might be largely uninterpretable and useless for inference, but for prediction none of that matters.
+
+
+
+
+# Optional: Classification and regression trees (CART)
+
+```{r, echo=FALSE}
+img_path <- "img"
+```
+
+### The curse of dimensionality
+
+We described how methods such as LDA and QDA are not meant to be used with many predictors $p$ because the number of parameters that we need to estimate becomes too large. For example, with the digits example $p=784$, we would have over 600,000 parameters with LDA, and we would multiply that by the number of classes for QDA. Kernel methods such as kNN or local regression do not have model parameters to estimate. However, they also face a challenge when multiple predictors are used due to what is referred to as the _curse of dimensionality_. The _dimension_ here refers to the fact that when we have $p$ predictors, the distance between two observations is computed in $p$-dimensional space.
+
+A useful way of understanding the curse of dimensionality is by considering how large we have to make a span/neighborhood/window to include a given percentage of the data. Remember that with larger neighborhoods, our methods lose flexibility. 
+
+For example, suppose we have one continuous predictor with equally spaced points in the [0,1] interval and we want to create windows that include 1/10th of data. Then it's easy to see that our windows have to be of size 0.1:
+
+```{r curse-of-dim, echo=FALSE, out.width="50%", fig.height=1.5}
+rafalib::mypar()
+x <- seq(0,1,len=100)
+y <- rep(1, 100)
+plot(x,y, xlab="",ylab="", cex=0.25, yaxt="n", xaxt="n",type="n")
+lines(x[c(15,35)], y[c(15,35)], col="blue",lwd=3)
+points(x,y, cex = 0.25)
+points(x[25],y[25],col="blue", cex = 0.5, pch=4)
+text(x[c(15,35)], y[c(15,35)], c("[","]"))
+```
+
+Now, for two predictors, if we decide to keep the neighborhood just as small, 10% for each dimension, we include only 1 point. If we want to include 10% of the data, then we need to increase the size of each side of the square to $\sqrt{.10} \approx .316$:
+
+```{r curse-of-dim-2, echo=FALSE, fig.width=7, fig.height=3.5, out.width="50%",}
+rafalib::mypar(1,2)
+tmp <- expand.grid(1:10, 1:10)
+x <- tmp[,1]
+y <- tmp[,2]
+plot(x,y, xlab="",ylab="", cex=0.25, yaxt="n", xaxt="n",type="n")
+polygon(c(x[25]-0.5, x[25]-0.5, x[25]+0.5, x[25]+0.5),
+        c(y[25]-0.5, y[25]+0.5, y[25]+0.5, y[25]-0.5), col="blue")
+points(x,y, cex = 0.25)
+points(x[25],y[25], cex = 0.5, pch=4)
+
+plot(x,y, xlab="",ylab="", cex=0.25, yaxt="n", xaxt="n",type="n")
+polygon(c(x[25]-sqrt(10)/2, x[25]-sqrt(10)/2, x[25]+sqrt(10)/2, x[25]+sqrt(10)/2),
+        c(y[25]-sqrt(10)/2, y[25]+sqrt(10)/2, y[25]+sqrt(10)/2, y[25]-sqrt(10)/2),
+        col="blue")
+points(x,y, cex = 0.25)
+points(x[25],y[25], cex = 0.5, pch=4)
+```
+
+Using the same logic, if we want to include 10% of the data in a three-dimensional space, then the side of each cube is  $\sqrt[3]{.10} \approx 0.464$.
+In general, to include 10% of the data in a case with $p$ dimensions, we need an interval with each side of size $\sqrt[p]{.10}$ of the total. This proportion gets close to 1 quickly, and if the proportion is 1 it means we include all the data and are no longer smoothing.
+
+```{r curse-of-dim-4, message=FALSE, message=FALSE}
+library(tidyverse)
+p <- 1:100
+qplot(p, .1^(1/p), ylim = c(0,1))
+```
+
+By the time we reach 100 predictors, the neighborhood is no longer very local, as each side covers almost the entire dataset.
+
+Here we look at a set of elegant and versatile methods that adapt to higher dimensions and also allow these regions to take more complex shapes while still producing models that are interpretable. These are very popular, well-known and studied methods. We will concentrate on regression and decision trees and their extension to random forests.
+
+### CART motivation
+
+To motivate this section, we will use a new dataset 
+that includes the breakdown of the composition of olive oil into 8 fatty acids:
+
+```{r}
+library(tidyverse)
+library(dslabs)
+data("olive")
+names(olive)
+```
+
+For illustrative purposes, we will try to predict the region using the fatty acid composition values as predictors.
+
+```{r}
+table(olive$region)
+```
+
+We remove the `area` column because we won't use it as a predictor.
+
+```{r}
+olive <- select(olive, -area)
+```
+
+Let's very quickly try to predict the region using kNN:
+
+```{r olive-knn, warning=FALSE, message=FALSE}
+library(caret)
+fit <- train(region ~ .,  method = "knn", 
+             tuneGrid = data.frame(k = seq(1, 15, 2)), 
+             data = olive)
+ggplot(fit)
+```
+
+We see that using just one neighbor, we can predict relatively well. However, a bit of data exploration reveals that we should be able to do even better. For example, if we look at the distribution of each predictor stratified by region we see that eicosenoic is only present in Southern Italy and that linoleic separates Northern Italy from Sardinia.
+
+```{r olive-eda, fig.height=3, fig.width=6}
+olive %>% gather(fatty_acid, percentage, -region) %>%
+  ggplot(aes(region, percentage, fill = region)) +
+  geom_boxplot() +
+  facet_wrap(~fatty_acid, scales = "free", ncol = 4) +
+  theme(axis.text.x = element_blank(), legend.position="bottom")
+```
+
+This implies that we should be able to build an algorithm that predicts perfectly! We can see this clearly by plotting the values for eicosenoic and linoleic.
+
+```{r olive-two-predictors}
+olive %>% 
+  ggplot(aes(eicosenoic, linoleic, color = region)) + 
+  geom_point() +
+  geom_vline(xintercept = 0.065, lty = 2) + 
+  geom_segment(x = -0.2, y = 10.54, xend = 0.065, yend = 10.54, 
+               color = "black", lty = 2)
+```
+
+In Section \@ref(predictor-space) we define predictor spaces. The predictor space here consists of eight-dimensional points with values between 0 and 100. In the plot above, we show the space defined by the two predictors eicosenoic and linoleic, and, by eye, 
+we can construct a prediction rule that partitions the predictor space so that each partition contains only outcomes of a one category. This in turn can be used to define an algorithm with perfect accuracy. Specifically, we define the following decision rule. If eicosenoic is larger than 0.065, predict Southern Italy. If not, then if linoleic is larger than $10.535$, predict Sardinia, and if lower, predict Northern Italy. We can draw this decision tree like this:
+
+```{r olive-tree, echo=FALSE, warning=FALSE, message=FALSE, fig.height=4.5, out.width="50%"}
+library(caret)
+library(rpart)
+rafalib::mypar()
+train_rpart <- train(region ~ ., method = "rpart", data = olive)
+
+plot(train_rpart$finalModel, margin = 0.1)
+text(train_rpart$finalModel, cex = 0.75)
+```
+
+Decision trees like this are often used in practice. For example, to decide on a person's risk of poor outcome after having a heart attack, doctors use the following:
+
+```{r, echo=FALSE, out.width="50%"}
+# source https://www.researchgate.net/profile/Douglas_Walton/publication/228297479/figure/fig1/AS:301828123185152@1448972840090/Decision-Tree-for-Heart-Attack-Victim-adapted-from-Gigerenzer-et-al-1999-4.png
+knitr::include_graphics(file.path(img_path,"Decision-Tree-for-Heart-Attack-Victim-adapted-from-Gigerenzer-et-al-1999-4.png"))
+```
+
+(Source: Walton 2010 Informal Logic, Vol. 30, No. 2, pp. 159-184^[https://papers.ssrn.com/sol3/Delivery.cfm/SSRN_ID1759289_code1486039.pdf?abstractid=1759289&mirid=1&type=2].)
+
+A tree is basically a flow chart of yes or no questions. The general idea of the methods we are describing is to define an algorithm that uses data to create these trees with predictions at the ends, referred to as _nodes_.
+Regression and decision trees operate by predicting an outcome variable $Y$ by partitioning the predictors.
+
+
+### Regression trees
+
+When the outcome is continuous, we call the method a _regression_ tree. To introduce regression trees, we will use the 2008 poll data used in previous sections to describe the basic idea of how we build these algorithms. As with other machine learning algorithms, we will try to estimate the conditional expectation $f(x) = \mbox{E}(Y | X = x)$ with $Y$ the poll margin and $x$ the day. 
+
+```{r polls-2008-again}
+data("polls_2008")
+qplot(day, margin, data = polls_2008)
+```
+
+The general idea here is to build a decision tree and, at the end of each _node_, obtain a predictor $\hat{y}$. A mathematical way to describe this is to say that we are partitioning the predictor space into $J$ non-overlapping regions, $R_1, R_2, \ldots, R_J$, and then for any predictor $x$ that falls within region $R_j$, estimate $f(x)$ with the average of the training observations $y_i$ for which the associated predictor $x_i$ is also in $R_j$.
+
+But how do we decide on the partition  $R_1, R_2, \ldots, R_J$ and how do we choose $J$? Here is where the algorithm gets a bit complicated.
+
+Regression trees create partitions recursively. We start the algorithm with one partition, the entire predictor space. In our simple first example, this space is the interval [-155, 1]. But after the first step we will have two partitions. After the second step we will split one of these partitions into two and will have three partitions, then four, then five, and so on. We describe how we pick the partition to further partition, and when to stop, later.
+
+Once we select a partition $\mathbf{x}$ to split in order to create the new partitions, we find a predictor $j$ and value $s$ that define two new partitions, which we will call $R_1(j,s)$ and $R_2(j,s)$, that split our observations in the current partition by asking if $x_j$ is bigger than $s$:
+
+$$
+R_1(j,s) = \{\mathbf{x} \mid x_j < s\} \mbox{  and  } R_2(j,s) = \{\mathbf{x} \mid x_j \geq s\}
+$$
+
+In our current example we only have one predictor, so we will always choose $j=1$, but in general this will not be the case. Now, after we define the new partitions $R_1$ and $R_2$, and we decide to stop the partitioning, we compute predictors by taking the average of all the observations $y$ for which the associated $\mathbf{x}$ is in $R_1$ and $R_2$. We refer to these two as $\hat{y}_{R_1}$ and $\hat{y}_{R_2}$ respectively. 
+
+But how do we pick $j$ and $s$? Basically we find the pair that minimizes the residual sum of square (RSS):
+$$
+\sum_{i:\, x_i \in R_1(j,s)} (y_i - \hat{y}_{R_1})^2 +
+\sum_{i:\, x_i \in R_2(j,s)} (y_i - \hat{y}_{R_2})^2
+$$
+
+
+This is then applied recursively to the new regions $R_1$ and $R_2$. We describe how we stop later, but once we are done partitioning the predictor space into regions, in each region a prediction is made using the observations in that region. 
+
+Let's take a look at what this algorithm does on the 2008 presidential election poll data. We will use the `rpart` function in the __rpart__ package.
+
+```{r}
+library(rpart)
+fit <- rpart(margin ~ ., data = polls_2008)
+```
+
+Here, there is only one predictor. Thus we do not have to decide which predictor $j$ to split by, we simply have to decide what value $s$ we use to split. We can visually see where the splits were made:
+
+
+```{r, eval=FALSE}
+plot(fit, margin = 0.1)
+text(fit, cex = 0.75)
+```
+
+```{r polls-2008-tree, fig.height=5, out.width="60%", echo=FALSE}
+rafalib::mypar()
+plot(fit, margin = 0.1)
+text(fit, cex = 0.75)
+```
+
+The first split is made on day 39.5. One of those regions is then split at day 86.5. The two resulting new partitions are split on days 49.5 and 117.5, respectively, and so on. We end up with 8 partitions. The final estimate $\hat{f}(x)$ looks like this:
+
+```{r polls-2008-tree-fit}
+polls_2008 %>% 
+  mutate(y_hat = predict(fit)) %>% 
+  ggplot() +
+  geom_point(aes(day, margin)) +
+  geom_step(aes(day, y_hat), col="red")
+```
+
+Note that the algorithm stopped partitioning at 8. Now we explain how this decision is made. 
+
+First we need to define the term _complexity parameter_ (cp).  Every time we split and define two new partitions, our training set RSS decreases. This is because with more partitions, our model has more flexibility to adapt to the training data. In fact, if you split until every point is its own partition, then RSS goes all the way down to 0 since the average of one value is that same value. To avoid this, the algorithm sets a minimum for how much the RSS must improve for another partition to be added. This parameter is referred to as the _complexity parameter_ (cp). The RSS must improve by a factor of cp for the new partition to be added. Large values of cp will therefore force the algorithm to stop earlier which results in fewer nodes. 
+
+However, cp is not the only parameter used to decide if we should partition a current partition or not. Another common parameter is the minimum number of observations required in a partition before partitioning it further. The argument used in the `rpart` function is `minsplit` and the default is 20. The `rpart` implementation of regression trees also permits users to determine a minimum number of observations in each node. The argument is `minbucket` and defaults to `round(minsplit/3)`. 
+
+As expected, if we set `cp = 0` and `minsplit = 2`, then our prediction is as flexible as possible and our predictor is our original data:
+
+```{r polls-2008-tree-over-fit}
+fit <- rpart(margin ~ ., data = polls_2008, 
+             control = rpart.control(cp = 0, minsplit = 2))
+polls_2008 %>% 
+  mutate(y_hat = predict(fit)) %>% 
+  ggplot() +
+  geom_point(aes(day, margin)) +
+  geom_step(aes(day, y_hat), col="red")
+```
+
+Intuitively we know that this is not a good approach as it will generally result in over-training. These `cp`, `minsplit`, and `minbucket`, three parameters can be used to control the variability of the final predictors. The larger these values are the more data is averaged to compute a predictor and thus reduce variability. The drawback is that it restricts flexibility. 
+
+So how do we pick these parameters? We can use cross validation, described in Chapter \@ref(cross-validation), just like with any tuning parameter. Here is an example of using cross validation to chose cp.
+
+```{r polls-2008-tree-train}
+library(caret)
+train_rpart <- train(margin ~ ., 
+                     method = "rpart",
+                     tuneGrid = data.frame(cp = seq(0, 0.05, len = 25)),
+                     data = polls_2008)
+ggplot(train_rpart)
+```
+
+To see the resulting tree, we access the `finalModel` and plot it:
+
+
+```{r, eval=FALSE}
+plot(train_rpart$finalModel, margin = 0.1)
+text(train_rpart$finalModel, cex = 0.75)
+```
+
+```{r polls-2008-final-model, fig.height=5, out.width="80%", echo=FALSE}
+rafalib::mypar()
+plot(train_rpart$finalModel, margin = 0.1)
+text(train_rpart$finalModel, cex = 0.75)
+```
+
+And because we only have one predictor, we can actually plot $\hat{f}(x)$:
+
+```{r polls-2008-final-fit}
+polls_2008 %>% 
+  mutate(y_hat = predict(train_rpart)) %>% 
+  ggplot() +
+  geom_point(aes(day, margin)) +
+  geom_step(aes(day, y_hat), col="red")
+```
+
+Note that if we already have a tree and want to apply a higher cp value, we can use the `prune` function. We call this _pruning_ a tree because we are snipping off partitions that do not meet a `cp` criterion. We previously created a tree that used a `cp = 0` and saved it to `fit`. We can prune it like this:
+
+```{r polls-2008-prune}
+pruned_fit <- prune(fit, cp = 0.01)
+```
+
+
+### Classification (decision) trees
+
+Classification trees, or decision trees, are used in prediction problems where the outcome is categorical. We use the same partitioning principle with some differences to account for the fact that we are now working with a categorical outcome. 
+
+The first difference is that we form predictions by calculating which class is the most common among the training set observations within the partition, rather than taking the average in each partition (as we can't take the average of categories).
+
+The second is that we can no longer use RSS to choose the partition. While we could use the naive approach of looking for partitions that minimize training error, better performing approaches use more sophisticated metrics. Two of the more popular ones are the _Gini Index_ and _Entropy_.   
+
+In a perfect scenario, the outcomes in each of our partitions are all of the same category since this will permit perfect accuracy. The _Gini Index_ is going to be 0 in this scenario, and become larger the more we deviate from this scenario. To define the Gini Index, we define $\hat{p}_{j,k}$ as the proportion of observations in partition $j$ that are of class $k$. The Gini Index is defined as 
+
+$$
+\mbox{Gini}(j) = \sum_{k=1}^K \hat{p}_{j,k}(1-\hat{p}_{j,k})
+$$
+
+If you study the formula carefully you will see that it is in fact 0 in the perfect scenario described above. 
+
+_Entropy_ is a very similar quantity, defined as
+
+$$
+\mbox{entropy}(j) = -\sum_{k=1}^K \hat{p}_{j,k}\log(\hat{p}_{j,k}), \mbox{ with } 0 \times \log(0) \mbox{ defined as }0
+$$
+
+Let us look at how a classification tree performs on the digits example we examined before:
+
+```{r, echo=FALSE}
+library(dslabs)
+data("mnist_27")
+```
+
+```{r, echo=FALSE}
+plot_cond_prob <- function(p_hat=NULL){
+  tmp <- mnist_27$true_p
+  if(!is.null(p_hat)){
+    tmp <- mutate(tmp, p=p_hat)
+  }
+  tmp %>% ggplot(aes(x_1, x_2, z=p, fill=p)) +
+  geom_raster(show.legend = FALSE) +
+  scale_fill_gradientn(colors=c("#F8766D","white","#00BFC4")) +
+  stat_contour(breaks=c(0.5),color="black")
+}
+```
+
+We can use this code to run the algorithm and plot the resulting tree:
+```{r mnist-27-tree}
+train_rpart <- train(y ~ .,
+                     method = "rpart",
+                     tuneGrid = data.frame(cp = seq(0.0, 0.1, len = 25)),
+                     data = mnist_27$train)
+plot(train_rpart)
+```
+
+The accuracy achieved by this approach is better than what we got with regression, but is not as good as what we achieved with kernel methods:
+
+```{r}
+y_hat <- predict(train_rpart, mnist_27$test)
+confusionMatrix(y_hat, mnist_27$test$y)$overall["Accuracy"]
+```
+
+The plot of the estimated conditional probability shows us the limitations of classification trees:
+
+```{r rf-cond-prob, echo=FALSE, out.width="100%", warning=FALSE, message=FALSE}
+library(gridExtra)
+p1 <- plot_cond_prob() + ggtitle("True conditional probability")
+
+p2 <- plot_cond_prob(predict(train_rpart, newdata = mnist_27$true_p, type = "prob")[,2]) +
+  ggtitle("Decision Tree")
+
+grid.arrange(p2, p1, nrow=1)
+```
+
+Note that with decision trees, it is difficult to make the boundaries smooth since each partition creates a discontinuity. 
+
+Classification trees have certain advantages that make them very useful. They are highly interpretable, even more so than linear models. They are easy to visualize (if small enough).  Finally, they can model human decision processes and don't require use of dummy predictors for categorical variables. On the other hand, the approach via recursive partitioning can easily over-train and is therefore a bit harder to train than, for example, linear regression or kNN. Furthermore, in terms of accuracy, it is rarely the best performing method since it is not very flexible and is highly unstable to changes in training data. Random forests, explained next, improve on several of these shortcomings.
+
+## Random forests
+
+Random forests are a **very popular** machine learning approach that addresses the shortcomings of decision trees using a clever idea. The goal is to improve prediction performance and reduce instability by _averaging_ multiple decision trees (a forest of trees constructed with randomness). It has two features that help accomplish this.
+
+The first step is _bootstrap aggregation_ or _bagging_. The general idea is to generate many predictors, each using regression or classification trees, and then forming a final prediction based on the average prediction of all these trees. To assure that the individual trees are not the same, we use the bootstrap to induce randomness. These two features combined explain the name: the bootstrap makes the individual trees **randomly** different, and the combination of trees is the **forest**. The specific steps are as follows.
+
+1\. Build $B$ decision trees using the training set. We refer to the fitted models as $T_1, T_2, \dots, T_B$. We later explain how we ensure they are different.
+
+2\. For every observation in the test set, form a prediction $\hat{y}_j$ using tree $T_j$.
+
+3\. For continuous outcomes, form a final prediction with the average $\hat{y} = \frac{1}{B} \sum_{j=1}^B \hat{y}_j$. For categorical data classification, predict $\hat{y}$ with majority vote (most frequent class among $\hat{y}_1, \dots, \hat{y}_T$).
+     
+So how do we get different decision trees from a single training set? For this, we use randomness in two ways which we explain in the steps below. Let $N$ be the number of observations in the training set. To create $T_j, \, j=1,\ldots,B$ from the training set we do the following:
+
+1\. Create a bootstrap training set by sampling $N$ observations from the training set **with replacement**. This is the first way to induce randomness. 
+    
+2\. A large number of features is typical in machine learning challenges. Often, many features can be informative but including them all in the model may result in overfitting. The second way random forests induce randomness is by randomly selecting features to be included in the building of each tree. A different random subset is selected for each tree. This reduces correlation between trees in the forest, thereby improving prediction accuracy. 
+
+To illustrate how the first steps can result in smoother estimates we will demonstrate by fitting a random forest to 
+the 2008 polls data.  We will use the `randomForest` function in the __randomForest__ package:
+
+```{r polls-2008-rf, message=FALSE, warning=FALSE}
+library(randomForest)
+fit <- randomForest(margin~., data = polls_2008) 
+```
+
+Note that if we apply the function `plot` to the resulting object, stored in `fit`, we see how the error rate of our algorithm changes as we add trees. 
+
+```{r, eval=FALSE}
+rafalib::mypar()
+plot(fit)
+```
+
+```{r more-trees-better-fit, echo=FALSE}
+rafalib::mypar()
+plot(fit)
+```
+
+We can see that in this case, the accuracy improves as we add more trees until about 30 trees where accuracy stabilizes.
+
+The resulting estimate for this random forest can be seen like this:
+
+```{r polls-2008-rf-fit}
+polls_2008 %>%
+  mutate(y_hat = predict(fit, newdata = polls_2008)) %>% 
+  ggplot() +
+  geom_point(aes(day, margin)) +
+  geom_line(aes(day, y_hat), col="red")
+```
+
+Notice that the random forest estimate is much smoother than what we achieved with the regression tree in the previous section. This is possible because the average of many step functions can be smooth. We can see this by visually examining how the estimate changes as we add more trees. In the following figure you see each of the bootstrap samples for several values of $b$ and for each one we see the tree that is fitted in grey, the previous trees that were fitted in lighter grey, and the result of averaging all the trees estimated up to that point.
+
+```{r rf-animation, echo=FALSE, out.width="100%"}
+library(rafalib)
+set.seed(1)
+ntrees <- 50
+XLIM <- range(polls_2008$day)
+YLIM <- range(polls_2008$margin)
+
+if(!file.exists(file.path(img_path,"rf.gif"))){
+  sum <- rep(0,nrow(polls_2008))
+  res <- vector("list", ntrees)
+  animation::saveGIF({
+    for(i in 0:ntrees){
+      mypar(1,1)
+      if(i==0){
+        with(polls_2008, plot(day, margin, pch = 1, main = "Data", xlim=XLIM,
+                              ylim=YLIM,
+                              xlab = "Days", ylab="Obama - McCain"))
+      } else{
+        ind <- sort(sample(1:nrow(polls_2008), replace = TRUE))
+        tmp <- polls_2008[ind,]
+        fit <- rpart(margin~day, data = tmp)
+        pred <- predict(fit, newdata = tmp)
+        res[[i]] <- tibble(day = tmp$day, margin=pred)
+        pred <- predict(fit, newdata = polls_2008)
+        sum <- sum+pred
+        avg <- sum/i
+        with(tmp, plot(day,margin, pch=1, xlim=XLIM, ylim=YLIM, type="n",
+                       xlab = "Days", ylab="Obama - McCain",
+                       main=ifelse(i==1, paste(i, "tree"),paste(i, "trees"))))
+        for(j in 1:i){
+          with(res[[j]], lines(day, margin, type="s", col="grey", lty=2))
+        }
+        with(tmp, points(day,margin, pch=1))
+        with(res[[i]], lines(day, margin, type="s",col="azure4",lwd=2))
+        lines(polls_2008$day, avg, lwd=3, col="blue")
+      }
+    }
+    for(i in 1:5){
+      mypar(1,1)
+      with(polls_2008, plot(day, margin, pch = 1, main="Final", xlim=XLIM, ylim=YLIM,
+                            xlab = "Days", ylab="Obama - McCain"))
+      lines(polls_2008$day, avg, lwd=3, col="blue")
+    }
+  }, movie.name = "ml/img/rf.gif", ani.loop=0, ani.delay =50)
+}  
+
+if(knitr::is_html_output()){
+  knitr::include_graphics(file.path(img_path,"rf.gif"))
+} else {
+  sum <- rep(0,nrow(polls_2008))
+  res <- vector("list", ntrees)
+
+  mypar(2,3)
+  show <- c(1, 5, 25, 50) 
+  for(i in 0:ntrees){
+      if(i==0){
+        with(polls_2008, plot(day, margin, pch = 1, main = "Data", xlim=XLIM,
+                              ylim=YLIM,
+                              xlab = "Days", ylab="Obama - McCain"))
+      } else{
+        ind <- sort(sample(1:nrow(polls_2008), replace = TRUE))
+        tmp <- polls_2008[ind,]
+        fit <- rpart(margin~day, data = tmp)
+        pred <- predict(fit, newdata = tmp)
+        res[[i]] <- tibble(day = tmp$day, margin=pred)
+        pred <- predict(fit, newdata = polls_2008)
+        sum <- sum+pred
+        avg <- sum/i
+        if(i %in% show){
+          with(tmp, plot(day,margin, pch=1, xlim=XLIM, ylim=YLIM, type="n",
+                         xlab = "Days", ylab="Obama - McCain",
+                         main=ifelse(i==1, paste(i, "tree"),paste(i, "trees"))))
+          for(j in 1:i){
+            with(res[[j]], lines(day, margin, type="s", col="grey", lty=2))
+          }
+          with(tmp, points(day,margin, pch=1))
+          with(res[[i]], lines(day, margin, type="s",col="azure4",lwd=2))
+          lines(polls_2008$day, avg, lwd=3, col="blue")
+        }
+      }
+  }
+  with(polls_2008, plot(day, margin, pch = 1, main="Final", xlim=XLIM, ylim=YLIM,
+                        xlab = "Days", ylab="Obama - McCain"))
+  lines(polls_2008$day, avg, lwd=3, col="blue")
+}
+```
+
+
+Here is the random forest fit for our digits example based on two predictors:
+
+```{r mnits-27-rf-fit}
+library(randomForest)
+train_rf <- randomForest(y ~ ., data=mnist_27$train)
+
+confusionMatrix(predict(train_rf, mnist_27$test),
+                mnist_27$test$y)$overall["Accuracy"]
+```
+
+Here is what the conditional probabilities look like:
+
+```{r cond-prob-rf, echo = FALSE, out.width="100%"}
+p1 <- plot_cond_prob() + ggtitle("True conditional probability")
+
+p2 <- plot_cond_prob(predict(train_rf, newdata = mnist_27$true_p, type = "prob")[,2]) +
+  ggtitle("Random Forest")
+
+grid.arrange(p2, p1, nrow=1)
+```
+
+Visualizing the estimate shows that, although we obtain high accuracy, it appears that there is room for improvement by making the estimate smoother. This could be achieved by changing the parameter that controls the minimum number of data points in the nodes of the tree. The larger this minimum, the smoother the final estimate will be. We can train the parameters of the random forest. Below, we use the __caret__ package to optimize over the minimum node size. Because, this is not one of the parameters that the __caret__ package optimizes by default we will write our own code:
+
+```{r acc-versus-nodesize, cache=TRUE}
+nodesize <- seq(1, 51, 10)
+acc <- sapply(nodesize, function(ns){
+  train(y ~ ., method = "rf", data = mnist_27$train,
+               tuneGrid = data.frame(mtry = 2),
+               nodesize = ns)$results$Accuracy
+})
+qplot(nodesize, acc)
+```
+
+We can now fit the random forest with the optimized minimun node size to the entire training data and evaluate performance on the test data.
+
+```{r}
+train_rf_2 <- randomForest(y ~ ., data=mnist_27$train,
+                           nodesize = nodesize[which.max(acc)])
+
+confusionMatrix(predict(train_rf_2, mnist_27$test),
+                mnist_27$test$y)$overall["Accuracy"]
+```
+
+The selected model improves accuracy and provides a smoother estimate.
+
+```{r cond-prob-final-rf, echo=FALSE, out.width="100%"}
+p1 <- plot_cond_prob() + ggtitle("True conditional probability")
+
+p2 <- plot_cond_prob(predict(train_rf_2, newdata = mnist_27$true_p, type="prob")[,2]) +
+  ggtitle("Random Forest")
+
+grid.arrange(p2, p1, nrow=1)
+```
+
+
+Note that we can avoid writing our own code by using other random forest implementations as described in the __caret__ manual^[http://topepo.github.io/caret/available-models.html].
+
+
+Random forest performs better in all the examples we have considered. However, a disadvantage of random forests is that we lose interpretability. An approach that helps with interpretability is to examine _variable importance_.
+To define _variable importance_ we count how often a predictor is used in the individual trees. You can learn more about _variable importance_ in an advanced machine learning book^[https://web.stanford.edu/~hastie/Papers/ESLII.pdf]. The __caret__ package includes the function `varImp` that extracts variable importance from any model in which the calculation is implemented. We give an example on how we use variable importance in the next section.
+
+
+## Exercises
+
+1\. Create a simple dataset where the outcome grows 0.75 units on average for every increase in a predictor: 
+
+```{r, eval=FALSE}
+n <- 1000
+sigma <- 0.25
+x <- rnorm(n, 0, 1)
+y <- 0.75 * x + rnorm(n, 0, sigma)
+dat <- data.frame(x = x, y = y)
+```
+
+Use `rpart` to fit a regression tree and save the result to `fit`.
+
+
+2\. Plot the final tree so that you can see where the partitions occurred.
+
+
+3\. Make a scatterplot of `y` versus `x` along with the predicted values based on the fit.
+
+
+4\. Now model with a random forest instead of a regression tree using `randomForest` from the __randomForest__ package, and remake the scatterplot with the prediction line.
+
+
+5\. Use the function `plot` to see if the random forest has converged or if we need more trees.
+
+
+6\. It seems that the default values for the random forest result in an estimate that is too flexible (not smooth). Re-run the random forest but this time with `nodesize` set at 50 and `maxnodes` set at 25. Remake the plot.
+
+7\. We see that this yields smoother results. Let's use the `train` function to help us pick these values. From the __caret__ manual^[https://topepo.github.io/caret/available-models.html] we see that we can't tune the `maxnodes` parameter or the `nodesize` argument with `randomForest`, so we will use the __Rborist__ package and tune the `minNode` argument. Use the `train` function to try values `minNode <- seq(5, 250, 25)`. See which value minimizes the estimated RMSE.
+
+
+8\. Make a scatterplot along with the prediction from the best fitted model.
+
+
+9\. Use the `rpart` function to fit a classification tree to the `tissue_gene_expression` dataset. Use the `train` function to estimate the accuracy. Try out `cp` values of `seq(0, 0.05, 0.01)`. Plot the accuracy to report the results of the best model.
+
+
+10\. Study the confusion matrix for the best fitting classification tree. What do you observe happening for placenta?
+
+
+11\. Notice that placentas are called endometrium more often than placenta. Note also that the number of placentas is just six, and that, by default, `rpart` requires 20 observations before splitting a node. Thus it is not possible with these parameters to have a node in which placentas are the majority. Rerun the above analysis but this time permit `rpart` to split any node by using the argument `control = rpart.control(minsplit = 0)`. Does the accuracy increase? Look at the confusion matrix again.
+
+
+
+12\. Plot the tree from the best fitting model obtained in exercise 11.
+
+
+13\. We can see that with just six genes, we are able to predict the tissue type. Now let's see if we can do even better with a random forest. Use the `train` function and the `rf` method to train a random forest. Try out values of `mtry` ranging from, at least, `seq(50, 200, 25)`. What `mtry` value maximizes accuracy? To permit small `nodesize` to grow as we did with the classification trees, use the following argument: `nodesize = 1`.  This will take several seconds to run. If you want to test it out, try using smaller values with `ntree`. Set the seed to 1990.
+
+
+14\. Use the function `varImp` on the output of `train` and save it to an object called `imp`. 
+
+
+15\. The `rpart` model we ran above produced a tree that used just six predictors. Extracting the predictor names is not straightforward, but can be done. If the output of the call to train was `fit_rpart`, we can extract the names like this:
+
+```{r, eval=FALSE}
+ind <- !(fit_rpart$finalModel$frame$var == "<leaf>")
+tree_terms <- 
+  fit_rpart$finalModel$frame$var[ind] %>%
+  unique() %>%
+  as.character()
+tree_terms
+```
+
+What is the variable importance in the random forest call for these predictors? Where do they rank?
+
+
+16\. Advanced: Extract the top 50 predictors based on importance, take a subset of `x` with just these predictors and apply the function `heatmap` to see how these genes behave across the tissues. We will introduce the `heatmap` function in Chapter \@ref(clustering).
+
+
+
+
+__Acknowledgments__ All the material for this lab was taken from the Data Science Book,, by Rafael Irizarry.

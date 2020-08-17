@@ -1,0 +1,81 @@
+---
+title: 'Lab 24: In-Class'
+author: "Claire Donnat"
+date: "8/20/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Classification
+
+We load the following datsets including characteristics of emails
+and spams:
+
+* 48 continuous real [0,100] attributes of type 
+
+`word_freq_WORD = percentage of words in the e-mail that match WORD.
+
+* 6 continuous real [0,100] attributes of type 
+
+`char_freq_CHAR` = percentage of characters in the e-mail that match CHAR,
+
+* 1 continuous real [1,...] attribute of type 
+`capital_run_length_average`  = average length of uninterrupted sequences of capital letters
+
+* 1 continuous integer [1,...] attribute of type 
+
+`capital_run_length_longest` = length of longest uninterrupted sequence of capital letters
+
+* 1 continuous integer [1,...] attribute of type 
+
+`capital_run_length_total` = sum of length of uninterrupted sequences of capital letters = 
+ = total number of capital letters in the e-mail
+
+* 1 nominal {0,1} class attribute of type 
+
+`spam` = denotes whether the e-mail was considered spam (1) or not (0), 
+
+```{r}
+url.info <- "https://archive.ics.uci.edu/ml/machine-learning-databases/spambase/spambase.names"
+spam.info <- read.table(url.info, comment.char = "|", skip = 32, stringsAsFactors = FALSE)
+attributes <- gsub(":", "", spam.info[[1]])
+symbols <- c("semicolon", "left.parenthesis", "left.sq.bracket", "exclamation", 
+             "dollar", "hashtag")
+attributes[49: 54] <- paste0("char_freq_", symbols)
+```
+
+
+```{r}
+url.data <- "https://archive.ics.uci.edu/ml/machine-learning-databases/spambase/spambase.data"
+spam <- read.csv(url.data, header = FALSE, stringsAsFactors = FALSE)
+colnames(spam) <- c(attributes, "spam")
+spam <- spam %>%
+  mutate(spam  = factor(spam, levels = c(0, 1), labels = c("email", "spam")))
+```
+
+a. Check if the dataset contains balance classes spam vs email. To
+do this count the cases of spam and email, and make a barplot for
+the frequencies.
+
+b. Divide the data into train and test set with a 60%-40% split. Remember 
+to record the seed you used for randomization.
+
+c. Use logistic regression involving all the predictors to train a model
+for classifying emails. Which features seem significant?
+Evaluate and report your model's accuracy on the test set.
+
+d. Use random forest to train a model on the same train set. Report which
+variables have high importance scores. Then, evaluate the RF model's 
+accuracy on the test set.
+
+
+
+
+## Exercise: 
+
+
+
+

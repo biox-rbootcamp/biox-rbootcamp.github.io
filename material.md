@@ -27,10 +27,10 @@ layout: cme195
 | 19 | M | Unsupervised Learning | Lecture: Multivariate analysis|[Slides](https://web.stanford.edu/class/bios221/PCA_SVD_Slides.html#(1))| |    
 | 20 | W | | [Lecture: Clustering](https://drive.google.com/file/d/1ekIRX3Fi_TWMnwJhTeW4RrXslfot_sVE/view?usp=sharing) | [Lab 20: Clustering](./biox-rbootcamp.github.io/assets/lectures/unsupervised_learning/clustering_lab.html) | [Lab 20 [Rmd]](./biox-rbootcamp.github.io/assets/lectures/unsupervised_learning/clustering_lab.Rmd) [sce416b Data](./biox-rbootcamp.github.io/assets/lectures/unsupervised_learning/sce416b.RData)|    
 | 21 | Th |  | In class on Clustering| [Lab 21 In class](./biox-rbootcamp.github.io/assets/lectures/unsupervised_learning/Unsupervised_learning_incass.html) | [Lab 21 Rmd](./biox-rbootcamp.github.io/assets/lectures/unsupervised_learning/Unsupervised_learning_incass.Rmd) |    
-| 22 | M | Machine Learning | Lecture: Introduction to Machine Learning | [Lab 22: Machine Learning](./biox-rbootcamp.github.io/assets/lectures/Lab9_ML/Lab9_ML.html)| [Lab 22 Rmd](./biox-rbootcamp.github.io/assets/lectures/Lab9_ML/Lab9_ML.Rmd)|    
-| 23 | W | | [Lecture: Random Forest]()| [Lab 23: Random Forest]() |  |    
+| 22 | M | Machine Learning | Lecture: Introduction to Machine Learning | [Lab 22: Machine Learning](./biox-rbootcamp.github.io/assets/lectures/Lab9_ML/Lab9_ML.html)| [Lab 22 Rmd](./biox-rbootcamp.github.io/assets/lectures/Lab9_ML/Lab9_ML.Rmd) [Link to the slides](https://www.dropbox.com/s/ambu7s8g8uutb4q/Lec12-ML-sph-2020.pdf?dl=0)|    
+| 23 | W | | [Lecture: Model selection and trees]()| [Lab: Model selection and trees](./biox-rbootcamp.github.io/assets/lectures/ML/Lab22.html)|  [Lab 23 Rmd](./biox-rbootcamp.github.io/assets/lectures/ML/Lab22.Rmd)| 
 | 24 | Th | | [In-class Exercise]() | [Lab 24]() |  |
-
+s
 
 ## [](#tut) Introductory Tutorials
 
