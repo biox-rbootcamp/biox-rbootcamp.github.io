@@ -289,9 +289,7 @@ coef(hipcenter_mod)
 
 Let's return to the `seatpos` data from the `faraway` package. Now, let's consider only models with first order terms, thus no interactions and no polynomials. There are *eight* predictors in this model. So if we consider all possible models, ranging from using 0 predictors, to all eight predictors, there are 
 
-\[
-\sum_{k = 0}^{p - 1} {{p - 1} \choose {k}} = 2 ^ {p - 1} = 2 ^ 8 = 256
-\]
+$$\sum_{k = 0}^{p - 1} {p - 1 \choose k} = 2^{p - 1} = 2 ^ 8 = 256$$
 
 possible models.
 
