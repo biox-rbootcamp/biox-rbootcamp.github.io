@@ -2,10 +2,7 @@
 title: 'Lab 24: In-Class'
 author: "Claire Donnat"
 date: "8/20/2020"
-output: 
-  html_document:
-    toc: true
-    toc_float: true
+output: html_document
 ---
 
 ```{r setup, include=FALSE}
@@ -64,22 +61,51 @@ a. Check if the dataset contains balance classes spam vs email. To
 do this count the cases of spam and email, and make a barplot for
 the frequencies.
 
+```{r}
+print(spam %>%
+  group_by(spam)%>%
+  tally() )
 
+ggplot(spam, aes(x=spam, fill=spam))+
+  geom_bar()+
+  theme_bw()
+
+```
 
 b. Divide the data into train and test set with a 60%-40% split. Remember 
 to record the seed you used for randomization.
 
+```{r}
+set.seed(1234)
+train_index = sample(1:nrow(spam), floor(0.60 *nrow(spam)))
+test_index = setdiff(1:nrow(spam), train_index)
+
+```
 
 c. Use logistic regression involving all the predictors to train a model
 for classifying emails. Which features seem significant?
 Evaluate and report your model's accuracy on the test set.
 
-
+```{r}
+summary( log.reg <- glm(spam ~ ., data=spam[train_index,], family=binomial))
+preds  = (predict(log.reg, spam[test_index,]) >0) * 1
+print(accuracy <- mean(preds == 1*(spam$spam[test_index] == 1)))
+```
 
 d. Use random forest to train a model on the same train set. Report which
 variables have high importance scores. Then, evaluate the RF model's 
 accuracy on the test set.
 
+```{r}
+#import the package
+library(randomForest)
+# Perform training:
+rf_classifier = randomForest(spam ~ ., data=spam[train_index,], ntree=100, mtry=2, importance=TRUE)
+print(rf_classifier)
+preds  = predict(rf_classifier, spam[test_index,]) 
+print(mean(preds == spam$spam[test_index]))
+
+```
 
 
 # Exercise 2: Random Forest
@@ -102,14 +128,33 @@ a. Using `pairs()` function plot the relationship between every variable pairs.
 You can color the points by the city the observation corresponds to; set the color argument 
 in `pairs()` as follows: `col = houses$in_sf + 3L` 
 
+```{r, fig.width=8, fig.height=7}
+city.colors <- houses$in_sf + 3L
+pairs(houses[, -1], col = city.colors, pch = 16)
+```
 
 b. Split the data into (70%-30%) train and test set.
 How many observations are in your train and test sets?
+
+
+```{r}
+set.seed(123)
+train.idx <- sample(nrow(houses), 0.7 * nrow(houses))
+train <- houses[train.idx, ]
+test <- houses[-train.idx, ]
+dim(train)
+dim(test)
+```
 
 c. Train a random forest on the train set, using all the variables in the model,
 to classify houses into the ones from San Francisco and from New York.
 Remember to remove 'in_sf', as it is the same variable as 'city'. 
 
+```{r}
+library(randomForest)
+houses.rf <- randomForest(city ~ . -in_sf, data = train, importance = TRUE, proximity = TRUE)
+houses.rf
+```
 
 # Exercise 3: Logistic Regression
 
@@ -128,23 +173,58 @@ a. First, divide your dataset into a train and test set. Randomly sample
 6000 observations and include them in the train set, and the remaining use
 as a test set.
 
+```{r}
+train.idx <- sample(1:nrow(Default), 6000, replace = FALSE)
+train <- Default[train.idx, ]
+test <- Default[-train.idx, ]
+```
+
 b. Fit a logistic regression including all the features to predict
 whether a customer defaulted or not.
 
+```{r}
+fit.logit <- glm(default ~ student + balance + income, data = train, 
+                 family = "binomial")
+summary(fit.logit)
+```
 
 c. Note if any variables seem not significant. Then, adjust your model
 accordingly (by removing them).
 
+```{r}
+fit.logit <- glm(default ~ student + balance, data = train, 
+                 family = "binomial")
+summary(fit.logit)
+```
 
 d. Compute the predicted probabilities of 'default' for the observations
 in the test set. Then evaluate the model accuracy.
 
+```{r}
+pred.prob.default <- predict(fit.logit, test, type = "response")
+pred.default <- factor(pred.prob.default > 0.5, levels = c(FALSE, TRUE),
+                       labels = c( "No", "Yes"))
+(tab <- table(pred = pred.default, true = test$default))
+(accuracy <- sum(diag(tab))/nrow(test))
+```
 
-e. For the test set, generate a scatterplot of 'balance' vs 'default' 
+
+d. For the test set, generate a scatterplot of 'balance' vs 'default' 
 with points colored by 'student' factor. Then, overlay a line plot 
 of the predicted probability of default as computed in the previous question.
 You should plot two lines for student and non student separately by setting 
 the 'color = student'.
+
+
+```{r}
+train$default.numeric <- as.numeric(train$default) - 1
+test$default.numeric <- as.numeric(test$default) - 1
+
+ggplot(test, aes(x = balance, color = student)) +
+  geom_point(aes(y = default.numeric)) + 
+  geom_line(aes(y = pred.prob.default), lwd = 1)
+```
+
 
 
 
@@ -172,12 +252,26 @@ mpg
 
 a. Subset the `mpg` dataset to inlude only cars from  year 2008.
 
+```{r}
+mpg2008 <- mpg %>% 
+  filter(year == 2008)
+```
 
 b. Test whether cars from 2008 have mean the highway miles per gallon, `hwy`, 
 equal to 30 mpg.
 
+```{r}
+t.test(mpg2008$hwy, mu = 30, alternative = "two.sided")
+```
+
 c. Test whether cars from 2008 with 4 cylinders have mean `hwy` equal to 30 mpg.
 
+```{r}
+mpg2008_4cyl <- mpg %>% 
+  filter(year == 2008, cyl == 4)
+
+t.test(mpg2008_4cyl$hwy, mu = 30, alternative = "two.sided")
+```
 
 ## Part 2: Two-sample test
 
@@ -185,10 +279,31 @@ a. Test if the mean `hwy` for automatic is **less than** that for manual cars
 **in 2008**. Generate a boxplot with jittered points for `hwy` for each 
 transmission group.
 
+```{r}
+t.test(data = mpg2008, hwy ~ transmission, alternative = "less")
+# or
+# t.test(x = mpg2008 %>% filter(transmission == "auto") %>% pull(hwy),
+#        y = mpg2008 %>% filter(transmission == "manual") %>% pull(hwy), 
+#        alternative = "less")
+```
+
+```{r}
+ggplot(mpg2008, aes(x = transmission, y = hwy)) +
+  geom_boxplot() + geom_jitter(height = 0, width = 0.2)
+```
+
 b. Test if the mean `hwy` for cars from 1999 and is greater than that for
 cars from 2008. Generate a boxplot with jittered points
 for `hwy` for each year group.
 
+```{r}
+t.test(data = mpg, hwy ~ year, alternative = "greater")
+```
+
+```{r}
+ggplot(mpg, aes(x = factor(year), y = hwy)) +
+  geom_boxplot() + geom_jitter(height = 0, width = 0.2)
+```
 
 
 
