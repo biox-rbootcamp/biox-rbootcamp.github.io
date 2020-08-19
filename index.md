@@ -10,10 +10,7 @@ No prior knowledge of R or of statistics is required. This is not a graded class
 
 ## [](#announcements) Announcements
 
-**Session 20 (Wednesday, August 11th):** 
-
-* Watch the video lectures for the session 
-* Complete Lab 20 **prior** to discussion
+Tomorrow will be the **last** lab session! We will be doing an in-class exercise to review the concepts we have learned. 
 
 ## [](#logistics) Logistics
 
