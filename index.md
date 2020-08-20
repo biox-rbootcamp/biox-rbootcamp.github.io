@@ -10,7 +10,7 @@ No prior knowledge of R or of statistics is required. This is not a graded class
 
 ## [](#announcements) Announcements
 
-Tomorrow will be the **last** lab session! We will be doing an in-class exercise to review the concepts we have learned. 
+
 
 ## [](#logistics) Logistics
 

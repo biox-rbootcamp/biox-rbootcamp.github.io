@@ -29,7 +29,7 @@ layout: cme195
 | 21 | Th |  | In class on Clustering| [Lab 21 In class](./biox-rbootcamp.github.io/assets/lectures/unsupervised_learning/Unsupervised_learning_incass.html) [[Solution]](./biox-rbootcamp.github.io/assets/lectures/unsupervised_learning/Unsupervised_learning_inclass_solutions.nb.html) | [Lab 21 Rmd](./biox-rbootcamp.github.io/assets/lectures/unsupervised_learning/Unsupervised_learning_incass.Rmd) |    
 | 22 | M | Machine Learning | Lecture: Introduction to Machine Learning | [Lab 22: Machine Learning](./biox-rbootcamp.github.io/assets/lectures/Lab9_ML/Lab9_ML.html) [[Solution]]((./biox-rbootcamp.github.io/assets/lectures/Lab9_ML/Lab9_ML_solutions.html))| [Lab 22 Rmd](./biox-rbootcamp.github.io/assets/lectures/Lab9_ML/Lab9_ML.Rmd) [Link to the slides](https://www.dropbox.com/s/ambu7s8g8uutb4q/Lec12-ML-sph-2020.pdf?dl=0) |
 | 23 | W | | Lecture: Model selection and trees| [Lab: Model selection and trees](./biox-rbootcamp.github.io/assets/lectures/ML/Lab22.html) | [Lab 23 Rmd](./biox-rbootcamp.github.io/assets/lectures/ML/Lab22.Rmd)|
-| 24 | Th | | [In-class Exercise]() | [Lab 24](./biox-rbootcamp.github.io/assets/lectures/ML/Lab24.html) | [Lab 24 Rmd](./biox-rbootcamp.github.io/assets/lectures/ML/Lab24.Rmd) |
+| 24 | Th | | [In-class Exercise]() | [Lab 24](./biox-rbootcamp.github.io/assets/lectures/ML/Lab24.html) [[Solution]](./biox-rbootcamp.github.io/assets/lectures/ML/Lab24_solutions.html)| [Lab 24 Rmd](./biox-rbootcamp.github.io/assets/lectures/ML/Lab24.Rmd) |
 
 
 ## [](#tut) Introductory Tutorials
